@@ -65,4 +65,58 @@ class ControllerTest extends TestCase
         $updateResponse->assertStatus(200)
             ->assertJsonPath('data.status', 'completed');
     }
+
+    public function test_order_store_success_and_validation(): void
+    {
+        $tv = Tv::create([
+            'name' => 'Meja Order Test',
+            'type' => 'ps4',
+            'price_per_hour' => 10000,
+            'status' => 'playing',
+        ]);
+
+        $kasir = User::create([
+            'name' => 'Kasir Order Test',
+            'email' => 'kasirorder@rental.com',
+            'role' => 'kasir',
+            'password' => bcrypt('password'),
+        ]);
+
+        $session = PlaySession::create([
+            'tv_id' => $tv->id,
+            'user_id' => $kasir->id,
+            'billing_type' => 'postpaid',
+            'start_time' => now(),
+            'status' => 'active',
+        ]);
+
+        $product = \App\Models\Product::create([
+            'name' => 'Indomie Goreng',
+            'price' => 7000,
+            'stock' => 10,
+        ]);
+
+        // Success Order
+        $response = $this->postJson("/api/play-sessions/{$session->id}/orders", [
+            'product_id' => $product->id,
+            'quantity' => 2,
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('message', 'Pesanan F&B berhasil ditambahkan ke sesi bermain.');
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'stock' => 8,
+        ]);
+
+        // Out of stock attempt (Exception caught, returning 422)
+        $failedResponse = $this->postJson("/api/play-sessions/{$session->id}/orders", [
+            'product_id' => $product->id,
+            'quantity' => 100,
+        ]);
+
+        $failedResponse->assertStatus(422);
+    }
 }
+
