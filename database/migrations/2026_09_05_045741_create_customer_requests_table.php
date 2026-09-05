@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('customer_requests', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('tv_id')->constrained('tvs')->cascadeOnDelete();
+            
+            $table->enum('type', ['add_time', 'order_food']);
+            $table->json('payload');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }

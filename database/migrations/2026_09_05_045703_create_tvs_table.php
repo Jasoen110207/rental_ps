@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('tvs', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->enum('type', ['ps3', 'ps4', 'ps5', 'sim_racing', 'nintendo_switch']);
+            $table->integer('price_per_hour');
+            $table->enum('status', ['available', 'playing', 'maintenance'])->default('available');
+            $table->boolean('is_buzzer_on')->default(false);
+            $table->string('iot_endpoint')->nullable();
             $table->timestamps();
         });
     }

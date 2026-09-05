@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('session_orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('play_session_id')->constrained('play_sessions')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained('products')->restrictOnDelete();
+
+            $table->integer('quantity');
+            $table->integer('subtotal');
             $table->timestamps();
         });
     }

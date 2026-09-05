@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('play_sessions', function (Blueprint $table) {
             $table->id();
+            // Foreign keys
+            $table->foreignId('tv_id')->constrained('tvs')->restrictOnDelete();
+            $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
+            
+            $table->enum('billing_type', ['prepaid', 'postpaid']);
+            $table->dateTime('start_time');
+            $table->dateTime('end_time')->nullable();
+            $table->enum('status', ['active', 'completed'])->default('active');
+            $table->integer('total_amount')->default(0);
             $table->timestamps();
         });
     }
