@@ -29,8 +29,8 @@ Pastikan sistem Anda sudah terinstal **PHP >= 8.3**, **Composer**, **Node.js & N
 
 **1. Clone Repository & Install Dependencies**
 ```bash
-git clone https://github.com/username-anda/repo-rental-ps.git
-cd repo-rental-ps
+git clone https://github.com/Jasoen110207/rental_ps.git
+cd rental_ps
 composer install
 npm install
 ```
