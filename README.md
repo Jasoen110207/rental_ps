@@ -19,13 +19,13 @@ Sistem *Point of Sale* (POS) dan *monitoring* waktu cerdas yang dirancang khusus
 
 * **Backend:** Laravel 13 (PHP 8.3+)
 * **Frontend:** Laravel Blade, Tailwind CSS, Alpine.js
-* **Database:** MySQL / PostgreSQL
+* **Database:** MySQL
 * **Real-time Engine:** Laravel Reverb & Event Broadcasting
 * **Asset Bundler:** Vite
 
 ## 🚀 Panduan Instalasi (Development)
 
-Pastikan sistem Anda sudah terinstal **PHP >= 8.2**, **Composer**, **Node.js & NPM**, serta **Database Server** (MySQL/PostgreSQL).
+Pastikan sistem Anda sudah terinstal **PHP >= 8.3**, **Composer**, **Node.js & NPM**, serta **Database Server** (MySQL).
 
 **1. Clone Repository & Install Dependencies**
 ```bash
