@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\Tv;
-use App\Models\Product;
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+    return redirect()->route('kasir.dashboard');
+});
+
 Route::prefix('customer')->name('customer.')->group(function () {
     Route::get('/order', function () {
         return view('customer.order');
