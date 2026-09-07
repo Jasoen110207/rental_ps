@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TambahBang - F&amp;B Menu &amp; POS Hub</title>
+<!-- Material Symbols Outlined font -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Space Grotesk, Space Mono, Chivo -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;700&amp;family=Space+Grotesk:wght@500;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration JSON Verbatim -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-container": "#5c2400",
+            "surface-container": "#eaedff",
+            "on-secondary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "outline-variant": "#c3c6d7",
+            "surface-tint": "#0053db",
+            "primary": "#004ac6",
+            "outline": "#737686",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-error": "#ffffff",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#bdffdb",
+            "tertiary-fixed-dim": "#4edea3",
+            "on-secondary-fixed": "#341100",
+            "secondary": "#9d4300",
+            "error": "#ba1a1a",
+            "surface-variant": "#dae2fd",
+            "tertiary-container": "#007d55",
+            "on-error-container": "#93000a",
+            "on-primary-fixed": "#00174b",
+            "error-container": "#ffdad6",
+            "secondary-fixed-dim": "#ffb690",
+            "surface-bright": "#faf8ff",
+            "inverse-surface": "#283044",
+            "inverse-primary": "#b4c5ff",
+            "tertiary-fixed": "#6ffbbe",
+            "surface-container-highest": "#dae2fd",
+            "background": "#faf8ff",
+            "on-primary-container": "#eeefff",
+            "on-tertiary-fixed": "#002113",
+            "on-secondary-fixed-variant": "#783200",
+            "surface": "#faf8ff",
+            "secondary-fixed": "#ffdbca",
+            "inverse-on-surface": "#eef0ff",
+            "surface-container-low": "#f2f3ff",
+            "primary-container": "#2563eb",
+            "on-surface-variant": "#434655",
+            "secondary-container": "#fd761a",
+            "tertiary": "#006242",
+            "on-background": "#131b2e",
+            "surface-dim": "#d2d9f4",
+            "on-surface": "#131b2e",
+            "primary-fixed": "#dbe1ff",
+            "surface-container-high": "#e2e7ff",
+            "primary-fixed-dim": "#b4c5ff",
+            "on-primary-fixed-variant": "#003ea8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "unit-4": "1rem",
+            "unit-12": "3rem",
+            "unit-1": "0.25rem",
+            "unit-2": "0.5rem",
+            "unit-3": "0.75rem",
+            "unit-5": "1.25rem",
+            "unit-10": "2.5rem",
+            "margin-mobile": "1rem",
+            "margin-desktop": "2rem",
+            "unit-6": "1.5rem",
+            "gutter": "1.5rem",
+            "unit-8": "2rem"
+          },
+          "fontFamily": {
+            "headline-xl-mobile": [
+              "Space Grotesk"
+            ],
+            "headline-md": [
+              "Space Grotesk"
+            ],
+            "timer-display-mobile": [
+              "Space Mono"
+            ],
+            "label-lg": [
+              "Space Mono"
+            ],
+            "headline-lg": [
+              "Space Grotesk"
+            ],
+            "body-lg": [
+              "Chivo"
+            ],
+            "headline-sm": [
+              "Space Grotesk"
+            ],
+            "headline-xl": [
+              "Space Grotesk"
+            ],
+            "body-md": [
+              "Chivo"
+            ],
+            "timer-display": [
+              "Space Mono"
+            ],
+            "label-sm": [
+              "Space Mono"
+            ],
+            "label-md": [
+              "Space Mono"
+            ],
+            "body-sm": [
+              "Chivo"
+            ]
+          },
+          "fontSize": {
+            "headline-xl-mobile": [
+              "30px",
+              {
+                "lineHeight": "36px",
+                "letterSpacing": "-0.02em",
+                "fontWeight": "700"
+              }
+            ],
+            "headline-md": [
+              "22px",
+              {
+                "lineHeight": "28px",
+                "fontWeight": "700"
+              }
+            ],
+            "timer-display-mobile": [
+              "36px",
+              {
+                "lineHeight": "40px",
+                "letterSpacing": "-0.03em",
+                "fontWeight": "700"
+              }
+            ],
+            "label-lg": [
+              "14px",
+              {
+                "lineHeight": "18px",
+                "letterSpacing": "0.05em",
+                "fontWeight": "700"
+              }
+            ],
+            "headline-lg": [
+              "28px",
+              {
+                "lineHeight": "34px",
+                "letterSpacing": "-0.02em",
+                "fontWeight": "700"
+              }
+            ],
+            "body-lg": [
+              "18px",
+              {
+                "lineHeight": "26px",
+                "fontWeight": "500"
+              }
+            ],
+            "headline-sm": [
+              "18px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "700"
+              }
+            ],
+            "headline-xl": [
+              "40px",
+              {
+                "lineHeight": "48px",
+                "letterSpacing": "-0.03em",
+                "fontWeight": "700"
+              }
+            ],
+            "body-md": [
+              "15px",
+              {
+                "lineHeight": "22px",
+                "fontWeight": "400"
+              }
+            ],
+            "timer-display": [
+              "56px",
+              {
+                "lineHeight": "60px",
+                "letterSpacing": "-0.04em",
+                "fontWeight": "700"
+              }
+            ],
+            "label-sm": [
+              "10px",
+              {
+                "lineHeight": "14px",
+                "letterSpacing": "0.06em",
+                "fontWeight": "700"
+              }
+            ],
+            "label-md": [
+              "12px",
+              {
+                "lineHeight": "16px",
+                "letterSpacing": "0.04em",
+                "fontWeight": "700"
+              }
+            ],
+            "body-sm": [
+              "13px",
+              {
+                "lineHeight": "18px",
+                "fontWeight": "400"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* Neo-Brutalist Mechanical Interaction */
+    .brutal-btn-press:active {
+      transform: translate(3px, 3px);
+      box-shadow: 0px 0px 0px #0F172A !important;
+    }
+    
+    .dashed-receipt-divider {
+      border-bottom: 2px dashed #0F172A;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased select-none min-h-screen overflow-hidden">
+<!-- ========================================================================= -->
+<!-- SIDE NAVIGATION (From Shared Components JSON)                             -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-0 h-screen w-64 flex flex-col justify-between p-4 z-40 bg-surface-container-lowest border-r-2 border-on-surface shadow-[4px_0px_0px_#131b2e]">
+<!-- Brand Header -->
+<div>
+<div class="flex items-center gap-3 p-2 mb-6 border-b-2 border-on-surface pb-4">
+<div class="w-10 h-10 bg-primary border-2 border-on-surface flex items-center justify-center text-on-primary shadow-[2px_2px_0px_#131b2e]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sports_esports</span>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-extrabold uppercase tracking-tight text-on-surface">TAMBAHBANG</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">PS Rental &amp; POS Hub</p>
+</div>
+</div>
+<!-- Navigation Tabs: Active Tab is 'F&B Menu' -->
+<nav class="space-y-1.5">
+<!-- 1. Dashboard -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- 2. Rental / POS -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined">sports_esports</span>
+<span>Rental / POS</span>
+</a>
+<!-- 3. Requests -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined">notifications_active</span>
+<span>Requests</span>
+<span class="ml-auto bg-secondary-container text-on-secondary-container px-1.5 py-0.5 text-label-sm font-label-sm border border-on-surface">3</span>
+</a>
+<!-- 4. F&B Menu (ACTIVE: Intent Match to F&B Catalog) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-primary text-on-primary font-label-md text-label-md border-2 border-on-surface shadow-[2px_2px_0px_#131b2e]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="font-bold">F&amp;B Menu</span>
+<span class="ml-auto w-2 h-2 bg-tertiary-fixed border border-on-surface rounded-full animate-ping"></span>
+</a>
+<!-- 5. Transactions -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>Transactions</span>
+</a>
+<!-- 6. Shifts -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined">schedule</span>
+<span>Shifts</span>
+</a>
+<!-- 7. Units -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined">tv</span>
+<span>Units</span>
+</a>
+<!-- 8. Settings -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- CTA & Footer Shift Indicator -->
+<div class="space-y-3">
+<button class="w-full py-3 bg-secondary-container text-on-secondary font-headline-sm text-headline-sm uppercase border-2 border-on-surface shadow-[3px_3px_0px_#131b2e] brutal-btn-press flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">add_circle</span>
+<span>NEW RENTAL +</span>
+</button>
+<div class="p-2.5 bg-surface-container-low border-2 border-on-surface flex items-center gap-2 shadow-[2px_2px_0px_#131b2e]">
+<span class="material-symbols-outlined text-primary">account_circle</span>
+<div class="overflow-hidden">
+<p class="text-label-sm font-label-sm truncate font-bold text-on-surface">Shift: Kasir Siang #02 (Online)</p>
+<p class="text-label-sm font-label-sm text-tertiary font-bold flex items-center gap-1">
+<span class="inline-block w-1.5 h-1.5 bg-tertiary rounded-full"></span> WS CONNECTED
+          </p>
+</div>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- TOP NAVIGATION (From Shared Components JSON)                              -->
+<!-- ========================================================================= -->
+<header class="fixed top-0 left-0 right-0 h-16 pl-68 pr-6 flex items-center justify-between z-30 bg-surface-container-lowest border-b-2 border-on-surface shadow-[0px_4px_0px_#131b2e] ml-64">
+<!-- Operational Title & Quick Status -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 bg-primary text-on-primary text-label-sm font-label-sm border border-on-surface shadow-[1px_1px_0px_#131b2e]">POS HUB</span>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface tracking-tight">TambahBang Operational Matrix</h2>
+</div>
+<div class="hidden xl:flex items-center gap-2 px-3 py-1 bg-surface-container border border-on-surface">
+<span class="material-symbols-outlined text-sm text-primary">wifi_tethering</span>
+<span class="text-label-sm font-label-sm font-bold text-primary">WS CONNECTED</span>
+<span class="text-on-surface-variant text-label-sm">|</span>
+<span class="text-label-sm font-label-sm text-on-surface font-bold">STATIONS 8/12 ACTIVE</span>
+</div>
+</div>
+<!-- Actions & Cashier Profile Trailing -->
+<div class="flex items-center gap-3">
+<!-- Search Trigger Icon for Operational Global -->
+<button class="p-2 bg-surface border-2 border-on-surface hover:bg-surface-container transition-all active:translate-x-0.5 active:translate-y-0.5 shadow-[2px_2px_0px_#131b2e]">
+<span class="material-symbols-outlined text-on-surface">swap_horiz</span>
+</button>
+<button class="relative p-2 bg-surface border-2 border-on-surface hover:bg-surface-container transition-all active:translate-x-0.5 active:translate-y-0.5 shadow-[2px_2px_0px_#131b2e]">
+<span class="material-symbols-outlined text-on-surface">notifications</span>
+<span class="absolute -top-1 -right-1 w-3 h-3 bg-secondary-container border border-on-surface rounded-full"></span>
+</button>
+<!-- Active Shift Badge -->
+<div class="flex items-center gap-2 px-3 py-1.5 bg-tertiary text-on-tertiary border-2 border-on-surface shadow-[2px_2px_0px_#131b2e]">
+<span class="material-symbols-outlined text-base">badge</span>
+<span class="text-label-sm font-label-sm font-bold tracking-wider">SHIFT ACTIVE: KASIR #02</span>
+</div>
+<!-- Avatar Token -->
+<div class="w-9 h-9 bg-surface-variant border-2 border-on-surface flex items-center justify-center shadow-[2px_2px_0px_#131b2e]">
+<span class="material-symbols-outlined text-on-surface">videogame_asset</span>
+</div>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- MAIN VIEW CANVAS: Left 65% Catalog + Right 35% Order & Billing Ledger     -->
+<!-- ========================================================================= -->
+<main class="ml-64 pt-16 h-screen flex overflow-hidden">
+<!-- LEFT 65% SECTION: Product Catalog Grid -->
+<section class="w-[65%] h-full flex flex-col border-r-2 border-on-surface bg-surface-container-low overflow-y-auto">
+<!-- Sticky Filter & Search Control Panel -->
+<div class="sticky top-0 z-20 bg-surface-container-lowest p-unit-5 border-b-2 border-on-surface space-y-3 shadow-[0px_3px_0px_#131b2e]">
+<!-- Search Bar with Arcade Tactical Styling -->
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface font-bold">search</span>
+<input class="w-full pl-11 pr-24 py-2.5 bg-surface text-on-surface font-body-md text-body-md border-2 border-on-surface shadow-[inset_2px_2px_0px_rgba(15,23,42,0.1)] focus:border-primary focus:outline-none focus:ring-0 focus:shadow-[3px_3px_0px_#004ac6] transition-all" placeholder="Cari nama mie, kopi, snack..." type="text"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 bg-surface-container border border-on-surface px-2 py-0.5 text-label-sm font-label-sm text-on-surface-variant font-bold">
+            CTRL + F
+          </span>
+</div>
+<!-- Category Pills Row -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+<!-- Active Pill -->
+<button class="flex-shrink-0 px-4 py-1.5 bg-on-surface text-surface-container-lowest border-2 border-on-surface text-label-md font-label-md font-bold shadow-[2px_2px_0px_#fd761a] transition-transform active:translate-x-0.5 active:translate-y-0.5">
+            Semua Menu (24)
+          </button>
+<!-- Inactive Pill 1 -->
+<button class="flex-shrink-0 px-4 py-1.5 bg-surface-container-lowest text-on-surface border-2 border-on-surface text-label-md font-label-md hover:bg-surface-container hover:shadow-[2px_2px_0px_#131b2e] transition-all">
+            Makanan Berat (8)
+          </button>
+<!-- Inactive Pill 2 -->
+<button class="flex-shrink-0 px-4 py-1.5 bg-surface-container-lowest text-on-surface border-2 border-on-surface text-label-md font-label-md hover:bg-surface-container hover:shadow-[2px_2px_0px_#131b2e] transition-all">
+            Minuman Segar (10)
+          </button>
+<!-- Inactive Pill 3 -->
+<button class="flex-shrink-0 px-4 py-1.5 bg-surface-container-lowest text-on-surface border-2 border-on-surface text-label-md font-label-md hover:bg-surface-container hover:shadow-[2px_2px_0px_#131b2e] transition-all">
+            Snack / Cemilan (6)
+          </button>
+</div>
+</div>
+<!-- Product Cards Matrix (Neo-brutalist Bento Grid) -->
+<div class="p-unit-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-unit-4">
+<!-- CARD 1: Mie Instan + Telur Kornet -->
+<div class="bg-surface-container-lowest border-2 border-on-surface shadow-[4px_4px_0px_#131b2e] flex flex-col justify-between p-3.5 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform group">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed border border-on-surface text-label-sm font-label-sm font-bold">
+                Tersedia / Stok 15
+              </span>
+<span class="material-symbols-outlined text-secondary font-bold">ramen_dining</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface leading-tight mb-1">Mie Instan + Telur Kornet</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Rebus / Goreng + Kornet Sapi</p>
+</div>
+<div class="mt-4 pt-3 border-t-2 border-dashed border-outline-variant flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-primary font-bold">Rp 15.000</span>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-headline-sm text-headline-sm text-xs uppercase border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] brutal-btn-press hover:bg-primary-container">
+              + TAMBAH
+            </button>
+</div>
+</div>
+<!-- CARD 2: Nasi Goreng Spesial PS -->
+<div class="bg-surface-container-lowest border-2 border-on-surface shadow-[4px_4px_0px_#131b2e] flex flex-col justify-between p-3.5 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform group">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed border border-on-surface text-label-sm font-label-sm font-bold">
+                Tersedia / Stok 12
+              </span>
+<span class="material-symbols-outlined text-secondary font-bold">dinner_dining</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface leading-tight mb-1">Nasi Goreng Spesial PS</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Ayam Suwir + Kerupuk &amp; Telur</p>
+</div>
+<div class="mt-4 pt-3 border-t-2 border-dashed border-outline-variant flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-primary font-bold">Rp 20.000</span>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-headline-sm text-headline-sm text-xs uppercase border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] brutal-btn-press hover:bg-primary-container">
+              + TAMBAH
+            </button>
+</div>
+</div>
+<!-- CARD 3: Kopi Susu Gula Aren -->
+<div class="bg-surface-container-lowest border-2 border-on-surface shadow-[4px_4px_0px_#131b2e] flex flex-col justify-between p-3.5 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform group">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed border border-on-surface text-label-sm font-label-sm font-bold">
+                Tersedia / Stok 20
+              </span>
+<span class="material-symbols-outlined text-primary font-bold">coffee</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface leading-tight mb-1">Kopi Susu Gula Aren</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Espresso Blend + Fresh Milk</p>
+</div>
+<div class="mt-4 pt-3 border-t-2 border-dashed border-outline-variant flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-primary font-bold">Rp 12.000</span>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-headline-sm text-headline-sm text-xs uppercase border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] brutal-btn-press hover:bg-primary-container">
+              + TAMBAH
+            </button>
+</div>
+</div>
+<!-- CARD 4: Es Teh Manis Jumbo -->
+<div class="bg-surface-container-lowest border-2 border-on-surface shadow-[4px_4px_0px_#131b2e] flex flex-col justify-between p-3.5 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform group">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed border border-on-surface text-label-sm font-label-sm font-bold">
+                Tersedia / Stok 50
+              </span>
+<span class="material-symbols-outlined text-primary font-bold">local_drink</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface leading-tight mb-1">Es Teh Manis Jumbo</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Cangkir Jumbo 500ml Es Dingin</p>
+</div>
+<div class="mt-4 pt-3 border-t-2 border-dashed border-outline-variant flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-primary font-bold">Rp 6.000</span>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-headline-sm text-headline-sm text-xs uppercase border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] brutal-btn-press hover:bg-primary-container">
+              + TAMBAH
+            </button>
+</div>
+</div>
+<!-- CARD 5: Snack Keripik Pedas -->
+<div class="bg-surface-container-lowest border-2 border-on-surface shadow-[4px_4px_0px_#131b2e] flex flex-col justify-between p-3.5 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform group">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed border border-on-surface text-label-sm font-label-sm font-bold">
+                Sisa 5 Pcs
+              </span>
+<span class="material-symbols-outlined text-secondary-container font-bold">lunch_dining</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface leading-tight mb-1">Snack Keripik Pedas</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Keripik Singkong Level 5 Pedas</p>
+</div>
+<div class="mt-4 pt-3 border-t-2 border-dashed border-outline-variant flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-primary font-bold">Rp 8.000</span>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-headline-sm text-headline-sm text-xs uppercase border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] brutal-btn-press hover:bg-primary-container">
+              + TAMBAH
+            </button>
+</div>
+</div>
+<!-- CARD 6: Kentang Goreng French Fries -->
+<div class="bg-surface-container-lowest border-2 border-on-surface shadow-[4px_4px_0px_#131b2e] flex flex-col justify-between p-3.5 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform group">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed border border-on-surface text-label-sm font-label-sm font-bold">
+                Tersedia / Stok 18
+              </span>
+<span class="material-symbols-outlined text-secondary font-bold">fastfood</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface leading-tight mb-1">Kentang Goreng French Fries</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Saus BBQ + Mayonaise</p>
+</div>
+<div class="mt-4 pt-3 border-t-2 border-dashed border-outline-variant flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-primary font-bold">Rp 14.000</span>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-headline-sm text-headline-sm text-xs uppercase border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] brutal-btn-press hover:bg-primary-container">
+              + TAMBAH
+            </button>
+</div>
+</div>
+<!-- CARD 7: Coca Cola Dingin -->
+<div class="bg-surface-container-lowest border-2 border-on-surface shadow-[4px_4px_0px_#131b2e] flex flex-col justify-between p-3.5 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform group">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed border border-on-surface text-label-sm font-label-sm font-bold">
+                Tersedia / Stok 24
+              </span>
+<span class="material-symbols-outlined text-error font-bold">sports_bar</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface leading-tight mb-1">Coca Cola Dingin</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Can 330ml Chilled Fridge</p>
+</div>
+<div class="mt-4 pt-3 border-t-2 border-dashed border-outline-variant flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-primary font-bold">Rp 8.000</span>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-headline-sm text-headline-sm text-xs uppercase border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] brutal-btn-press hover:bg-primary-container">
+              + TAMBAH
+            </button>
+</div>
+</div>
+<!-- CARD 8: Air Mineral Dingin -->
+<div class="bg-surface-container-lowest border-2 border-on-surface shadow-[4px_4px_0px_#131b2e] flex flex-col justify-between p-3.5 hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform group">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed border border-on-surface text-label-sm font-label-sm font-bold">
+                Tersedia / Stok 40
+              </span>
+<span class="material-symbols-outlined text-primary font-bold">water_drop</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface leading-tight mb-1">Air Mineral Dingin</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Botol 600ml Segar &amp; Sejuk</p>
+</div>
+<div class="mt-4 pt-3 border-t-2 border-dashed border-outline-variant flex items-center justify-between">
+<span class="text-label-lg font-label-lg text-primary font-bold">Rp 5.000</span>
+<button class="px-3 py-1.5 bg-primary text-on-primary font-headline-sm text-headline-sm text-xs uppercase border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] brutal-btn-press hover:bg-primary-container">
+              + TAMBAH
+            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT 35% SECTION: Order & Billing Assignment Panel -->
+<section class="w-[35%] h-full bg-surface-container-lowest flex flex-col justify-between shadow-[-4px_0px_0px_#131b2e]">
+<!-- Panel Header & Target Station Dropdown Selector -->
+<div class="p-unit-5 border-b-2 border-on-surface bg-surface-container-low">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">point_of_sale</span>
+<span class="text-headline-sm font-headline-sm font-bold tracking-tight">ORDER BILLING DOCK</span>
+</div>
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary font-label-sm text-label-sm font-bold border border-on-surface">
+            ORDER #084
+          </span>
+</div>
+<!-- Target Selector Dropdown -->
+<div class="space-y-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant font-bold block uppercase">
+            Pilih Meja / Unit PS (Target Tagihan)
+          </label>
+<div class="relative">
+<select class="w-full pl-3 pr-10 py-2.5 bg-surface text-on-surface font-label-md text-label-md font-bold border-2 border-on-surface shadow-[3px_3px_0px_#131b2e] focus:outline-none focus:border-primary appearance-none cursor-pointer">
+<option selected="" value="ps03">🎮 PS 03 - Sesi Aktif (BAY #03 PS5 VIP)</option>
+<option value="ps01">🎮 PS 01 - Sesi Aktif (PS4 Regular)</option>
+<option value="ps02">🎮 PS 02 - Sesi Aktif (PS5 Regular)</option>
+<option value="ps04">🎮 PS 04 - Sesi Aktif (PS5 VIP Room)</option>
+<option value="takeaway">🥡 Kasir Non-Rental / Takeaway Langsung</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface font-bold">
+              arrow_drop_down
+            </span>
+</div>
+</div>
+<!-- Current Session Quick Info Card -->
+<div class="mt-3 p-2.5 bg-surface border-2 border-on-surface flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-tertiary-fixed-dim rounded-full border border-on-surface animate-pulse"></span>
+<span class="text-label-sm font-label-sm font-bold text-on-surface">User: Budi (Billing: Open)</span>
+</div>
+<span class="text-label-sm font-label-sm text-primary font-bold">Sisa Waktu: 01:24:12</span>
+</div>
+</div>
+<!-- Cart Itemized List (Receipt Arcade Ledger Style) -->
+<div class="flex-1 p-unit-5 overflow-y-auto space-y-3">
+<div class="flex items-center justify-between pb-1 border-b border-outline-variant">
+<span class="text-label-sm font-label-sm text-on-surface-variant font-bold uppercase">Item F&amp;B Dipesan</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant font-bold">2 Item</span>
+</div>
+<!-- Item 1 in Cart: Mie Instan + Telur Kornet -->
+<div class="p-3 bg-surface border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] flex flex-col gap-2">
+<div class="flex items-start justify-between">
+<div>
+<h4 class="text-label-md font-label-md font-bold text-on-surface">Mie Instan + Telur Kornet</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant">@ Rp 15.000 (Catatan: Pedas)</p>
+</div>
+<span class="text-label-md font-label-md font-bold text-primary">Rp 15.000</span>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-dashed border-outline-variant">
+<button class="text-error text-label-sm font-label-sm flex items-center gap-0.5 hover:underline">
+<span class="material-symbols-outlined text-sm">delete</span> Hapus
+            </button>
+<!-- Quantity Stepper -->
+<div class="flex items-center border-2 border-on-surface bg-surface-container-lowest">
+<button class="w-7 h-7 flex items-center justify-center font-bold text-on-surface hover:bg-surface-container active:bg-outline-variant">-</button>
+<span class="w-8 text-center text-label-md font-label-md font-bold text-on-surface border-x-2 border-on-surface bg-surface">1</span>
+<button class="w-7 h-7 flex items-center justify-center font-bold text-on-surface hover:bg-surface-container active:bg-outline-variant">+</button>
+</div>
+</div>
+</div>
+<!-- Item 2 in Cart: Nasi Goreng Spesial PS -->
+<div class="p-3 bg-surface border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] flex flex-col gap-2">
+<div class="flex items-start justify-between">
+<div>
+<h4 class="text-label-md font-label-md font-bold text-on-surface">Nasi Goreng Spesial PS</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant">@ Rp 18.000 (Promo Game Combo)</p>
+</div>
+<span class="text-label-md font-label-md font-bold text-primary">Rp 18.000</span>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-dashed border-outline-variant">
+<button class="text-error text-label-sm font-label-sm flex items-center gap-0.5 hover:underline">
+<span class="material-symbols-outlined text-sm">delete</span> Hapus
+            </button>
+<!-- Quantity Stepper -->
+<div class="flex items-center border-2 border-on-surface bg-surface-container-lowest">
+<button class="w-7 h-7 flex items-center justify-center font-bold text-on-surface hover:bg-surface-container active:bg-outline-variant">-</button>
+<span class="w-8 text-center text-label-md font-label-md font-bold text-on-surface border-x-2 border-on-surface bg-surface">1</span>
+<button class="w-7 h-7 flex items-center justify-center font-bold text-on-surface hover:bg-surface-container active:bg-outline-variant">+</button>
+</div>
+</div>
+</div>
+<!-- Order Note Inset -->
+<div class="p-2 bg-surface-container-low border border-on-surface">
+<p class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm">edit_note</span> CATATAN DAPUR:
+          </p>
+<p class="text-body-sm font-body-sm italic text-on-surface">"Mie jangan terlalu lembek, antar barengan ke meja PS 03."</p>
+</div>
+</div>
+<!-- Panel Ledger Footer & Action CTAs -->
+<div class="p-unit-5 border-t-2 border-on-surface bg-surface-container-low space-y-3">
+<!-- Subtotal Breakdown -->
+<div class="p-3 bg-surface-container-lowest border-2 border-on-surface shadow-[2px_2px_0px_#131b2e] space-y-1.5">
+<div class="flex justify-between text-label-md font-label-md text-on-surface-variant">
+<span>Subtotal Item (2 pcs)</span>
+<span>Rp 33.000</span>
+</div>
+<div class="flex justify-between text-label-md font-label-md text-on-surface-variant">
+<span>Biaya Layanan / POS</span>
+<span class="text-tertiary font-bold">Rp 0 (GRATIS)</span>
+</div>
+<div class="dashed-receipt-divider my-2"></div>
+<div class="flex justify-between items-center text-headline-sm font-headline-sm text-on-surface">
+<span class="font-extrabold uppercase">Subtotal F&amp;B:</span>
+<span class="font-bold text-primary text-headline-md font-headline-md">Rp 33.000</span>
+</div>
+</div>
+<!-- CTA Buttons Row -->
+<div class="space-y-2">
+<!-- Primary CTA: Assign to PS 03 Station Ledger -->
+<button class="w-full py-3.5 bg-primary-container text-on-primary font-headline-sm text-headline-sm uppercase tracking-wide border-2 border-on-surface shadow-[4px_4px_0px_#131b2e] brutal-btn-press hover:bg-primary flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">post_add</span>
+<span>MASUKKAN KE TAGIHAN UNIT PS 03</span>
+</button>
+<!-- Secondary CTA: Pay Cash Direct -->
+<button class="w-full py-2.5 bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm text-sm uppercase tracking-wide border-2 border-on-surface shadow-[3px_3px_0px_#131b2e] brutal-btn-press hover:bg-surface-container flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-tertiary">payments</span>
+<span>BAYAR LANGSUNG TUNAI (NON-RENTAL)</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Interactive Tactile Notification Toast (Simulated POS Audio/Feedback) -->
+<div class="fixed bottom-4 left-72 z-50 bg-on-surface text-surface px-4 py-2 border-2 border-on-surface shadow-[3px_3px_0px_#fd761a] flex items-center gap-3">
+<span class="w-2.5 h-2.5 bg-tertiary-fixed rounded-full animate-pulse"></span>
+<span class="text-label-sm font-label-sm font-bold tracking-wider">POS READY // STOK SYNCHRONIZED</span>
+</div>
+</body></html>

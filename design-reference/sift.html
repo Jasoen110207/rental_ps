@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TambahBang — Manajemen Shift Kasir</title>
+<!-- Google Fonts: Space Grotesk, Space Mono, Chivo -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;700&amp;family=Space+Grotesk:wght@500;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-container": "#5c2400",
+            "surface-container": "#eaedff",
+            "on-secondary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "outline-variant": "#c3c6d7",
+            "surface-tint": "#0053db",
+            "primary": "#004ac6",
+            "outline": "#737686",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-error": "#ffffff",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#bdffdb",
+            "tertiary-fixed-dim": "#4edea3",
+            "on-secondary-fixed": "#341100",
+            "secondary": "#9d4300",
+            "error": "#ba1a1a",
+            "surface-variant": "#dae2fd",
+            "tertiary-container": "#007d55",
+            "on-error-container": "#93000a",
+            "on-primary-fixed": "#00174b",
+            "error-container": "#ffdad6",
+            "secondary-fixed-dim": "#ffb690",
+            "surface-bright": "#faf8ff",
+            "inverse-surface": "#283044",
+            "inverse-primary": "#b4c5ff",
+            "tertiary-fixed": "#6ffbbe",
+            "surface-container-highest": "#dae2fd",
+            "background": "#faf8ff",
+            "on-primary-container": "#eeefff",
+            "on-tertiary-fixed": "#002113",
+            "on-secondary-fixed-variant": "#783200",
+            "surface": "#faf8ff",
+            "secondary-fixed": "#ffdbca",
+            "inverse-on-surface": "#eef0ff",
+            "surface-container-low": "#f2f3ff",
+            "primary-container": "#2563eb",
+            "on-surface-variant": "#434655",
+            "secondary-container": "#fd761a",
+            "tertiary": "#006242",
+            "on-background": "#131b2e",
+            "surface-dim": "#d2d9f4",
+            "on-surface": "#131b2e",
+            "primary-fixed": "#dbe1ff",
+            "surface-container-high": "#e2e7ff",
+            "primary-fixed-dim": "#b4c5ff",
+            "on-primary-fixed-variant": "#003ea8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "unit-4": "1rem",
+            "unit-12": "3rem",
+            "unit-1": "0.25rem",
+            "unit-2": "0.5rem",
+            "unit-3": "0.75rem",
+            "unit-5": "1.25rem",
+            "unit-10": "2.5rem",
+            "margin-mobile": "1rem",
+            "margin-desktop": "2rem",
+            "unit-6": "1.5rem",
+            "gutter": "1.5rem",
+            "unit-8": "2rem"
+          },
+          "fontFamily": {
+            "headline-xl-mobile": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "timer-display-mobile": ["Space Mono"],
+            "label-lg": ["Space Mono"],
+            "headline-lg": ["Space Grotesk"],
+            "body-lg": ["Chivo"],
+            "headline-sm": ["Space Grotesk"],
+            "headline-xl": ["Space Grotesk"],
+            "body-md": ["Chivo"],
+            "timer-display": ["Space Mono"],
+            "label-sm": ["Space Mono"],
+            "label-md": ["Space Mono"],
+            "body-sm": ["Chivo"]
+          },
+          "fontSize": {
+            "headline-xl-mobile": ["30px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "headline-md": ["22px", {"lineHeight": "28px", "fontWeight": "700"}],
+            "timer-display-mobile": ["36px", {"lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+            "label-lg": ["14px", {"lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+            "headline-lg": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "500"}],
+            "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+            "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+            "body-md": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+            "timer-display": ["56px", {"lineHeight": "60px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+            "label-sm": ["10px", {"lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "700"}],
+            "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "700"}],
+            "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Neo-Brutalist utility classes */
+    .neo-border {
+      border: 2.5px solid #131b2e;
+    }
+    .neo-border-thick {
+      border: 3px solid #131b2e;
+    }
+    .neo-shadow-sm {
+      box-shadow: 2px 2px 0px #131b2e;
+    }
+    .neo-shadow-md {
+      box-shadow: 4px 4px 0px #131b2e;
+    }
+    .neo-shadow-lg {
+      box-shadow: 6px 6px 0px #131b2e;
+    }
+    .neo-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px #131b2e;
+    }
+    .receipt-edge {
+      background-size: 16px 16px;
+      border-bottom: 3px dashed #131b2e;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- ========================================================================= -->
+<!-- SHARED COMPONENT: SideNavBar (Strict implementation from JSON Blueprint) -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-0 h-screen w-64 flex flex-col justify-between p-4 z-40 bg-surface-container-lowest dark:bg-inverse-surface border-r-2 border-on-surface dark:border-outline shadow-[4px_0px_0px_#131b2e] dark:shadow-none">
+<!-- Top Branding & CTA -->
+<div class="flex flex-col gap-4">
+<!-- Hub Brand Header -->
+<div class="flex items-center gap-3 p-2 bg-surface-container-low neo-border neo-shadow-sm">
+<div class="w-10 h-10 bg-primary-container text-on-primary flex items-center justify-center neo-border font-headline-sm">
+<span class="material-symbols-outlined text-white text-2xl material-symbols-fill">sports_esports</span>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-extrabold uppercase tracking-tight text-on-surface dark:text-inverse-on-surface leading-none">TAMBAHBANG</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant dark:text-surface-variant font-bold">PS Rental &amp; POS Hub</p>
+</div>
+</div>
+<!-- Quick Action CTA -->
+<button class="w-full py-2.5 px-3 bg-secondary-container text-on-secondary font-headline-sm text-headline-sm neo-border neo-shadow-sm hover:bg-secondary active:translate-x-0.5 active:translate-y-0.5 transition-all text-center flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-xl">add_circle</span>
+<span>NEW RENTAL +</span>
+</button>
+<!-- Navigation Tabs (8 Items, Shifts matches actively) -->
+<nav class="flex flex-col gap-1.5 mt-2">
+<!-- 1. Dashboard -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface dark:text-inverse-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container dark:hover:bg-surface-container-high hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- 2. Rental / POS -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface dark:text-inverse-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container dark:hover:bg-surface-container-high hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-xl">sports_esports</span>
+<span>Rental / POS</span>
+</a>
+<!-- 3. Requests -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface dark:text-inverse-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container dark:hover:bg-surface-container-high hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-xl">notifications_active</span>
+<span>Requests</span>
+</a>
+<!-- 4. F&B Menu -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface dark:text-inverse-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container dark:hover:bg-surface-container-high hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-xl">restaurant</span>
+<span>F&amp;B Menu</span>
+</a>
+<!-- 5. Transactions -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface dark:text-inverse-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container dark:hover:bg-surface-container-high hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-xl">receipt_long</span>
+<span>Transactions</span>
+</a>
+<!-- 6. Shifts (ACTIVE TAB) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-primary dark:bg-primary-container text-on-primary dark:text-on-primary-container font-label-md text-label-md border-2 border-on-surface dark:border-outline shadow-[2px_2px_0px_#131b2e] translate-x-[2px] translate-y-[2px]" href="#">
+<span class="material-symbols-outlined text-xl material-symbols-fill">schedule</span>
+<span class="font-bold">Shifts</span>
+<span class="ml-auto w-2 h-2 rounded-full bg-secondary-container"></span>
+</a>
+<!-- 7. Units -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface dark:text-inverse-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container dark:hover:bg-surface-container-high hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-xl">tv</span>
+<span>Units</span>
+</a>
+<!-- 8. Settings -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface dark:text-inverse-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container dark:hover:bg-surface-container-high hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-xl">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Operator Status Pill -->
+<div class="pt-4 border-t-2 border-on-surface dark:border-outline">
+<div class="flex items-center gap-2.5 p-2 bg-surface-container neo-border">
+<span class="material-symbols-outlined text-primary text-xl">account_circle</span>
+<div class="overflow-hidden">
+<p class="font-label-sm text-label-sm text-on-surface font-bold truncate">Shift: Kasir Siang #02 (Online)</p>
+<span class="inline-block px-1.5 py-0.2 bg-tertiary text-on-tertiary font-label-sm text-[9px] uppercase font-bold neo-border">LOGGED IN</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- SHARED COMPONENT: TopNavBar (Strict implementation from JSON Blueprint)   -->
+<!-- ========================================================================= -->
+<header class="fixed top-0 left-0 right-0 h-16 pl-64 pr-6 flex items-center justify-between z-30 bg-surface-container-lowest dark:bg-inverse-surface border-b-2 border-on-surface dark:border-outline shadow-[0px_4px_0px_#131b2e] dark:shadow-none">
+<!-- Left: Subsystem Matrix Indicator -->
+<div class="flex items-center gap-4 pl-6">
+<div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 neo-border neo-shadow-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container animate-pulse"></span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">TambahBang Operational Matrix</span>
+</div>
+<div class="hidden xl:flex items-center gap-2 bg-surface-bright px-3 py-1.5 neo-border">
+<span class="font-label-sm text-label-sm font-bold text-on-surface-variant">MODUL:</span>
+<span class="font-label-sm text-label-sm font-bold bg-primary text-white px-1.5 py-0.5">KASIR HANDOVER v2.4</span>
+</div>
+</div>
+<!-- Right: Telemetry & Actions -->
+<div class="flex items-center gap-3">
+<!-- Real-time Shift Duration Ticker -->
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low neo-border neo-shadow-sm">
+<span class="material-symbols-outlined text-secondary text-lg">timer</span>
+<span class="font-label-sm text-label-sm font-bold text-on-surface">SHIFT RUNTIME:</span>
+<span class="font-label-md text-label-md font-bold text-primary tracking-wider" id="runtime-ticker">04:32:18</span>
+</div>
+<!-- Trailing Status Chips -->
+<div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-tertiary-fixed-dim text-on-tertiary-fixed neo-border font-label-sm text-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span>WS CONNECTED</span>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-3 py-1 neo-border font-label-sm text-label-sm font-bold text-on-surface">
+<span class="material-symbols-outlined text-base">person</span>
+<span>SHIFT ACTIVE: KASIR #02</span>
+</div>
+<!-- Icon Actions -->
+<div class="flex items-center gap-1 border-l-2 border-on-surface pl-3">
+<button class="p-1.5 bg-white neo-border neo-btn hover:bg-surface-container text-on-surface flex items-center justify-center" title="Notifications">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<button class="p-1.5 bg-white neo-border neo-btn hover:bg-surface-container text-on-surface flex items-center justify-center" title="Station Wi-Fi Tethering">
+<span class="material-symbols-outlined text-xl">wifi_tethering</span>
+</button>
+<button class="p-1.5 bg-white neo-border neo-btn hover:bg-surface-container text-on-surface flex items-center justify-center" title="Quick Cash Drawer Eject">
+<span class="material-symbols-outlined text-xl">swap_horiz</span>
+</button>
+</div>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE CANVAS (Shift Operations & Handover Console)              -->
+<!-- ========================================================================= -->
+<main class="ml-64 pt-20 p-6 flex-1 flex flex-col gap-6 max-w-[1600px] w-[calc(100%-16rem)]">
+<!-- BREADCRUMB & CONSOLE ALERT -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-2 font-label-md text-label-md">
+<span class="text-on-surface-variant">CONSOLE DECK</span>
+<span class="text-on-surface-variant font-bold">/</span>
+<span class="text-on-surface-variant">OPERASIONAL KASIR</span>
+<span class="text-on-surface-variant font-bold">/</span>
+<span class="bg-primary text-white px-2 py-0.5 font-bold neo-border">MANAJEMEN SHIFT &amp; HANDOVER</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label-sm text-label-sm text-on-surface-variant">TANGGAL OPERASIONAL:</span>
+<span class="font-label-md text-label-md font-bold bg-surface-container-low px-2 py-1 neo-border">SELASA, 24 OKTOBER 2023</span>
+</div>
+</div>
+<!-- SECTION 1: HERO ACTIVE SHIFT CONTROL POD -->
+<section class="bg-surface-container-lowest neo-border-thick neo-shadow-lg flex flex-col overflow-hidden">
+<!-- Pod Header Strip -->
+<div class="bg-on-surface text-white px-6 py-3 flex flex-wrap items-center justify-between gap-3 border-b-2 border-on-surface">
+<div class="flex items-center gap-3">
+<span class="w-3.5 h-3.5 rounded-full bg-secondary-container animate-ping"></span>
+<h2 class="font-headline-md text-headline-md tracking-tight uppercase">SHIFT SIANG #02 — KASIR RIAN HIDAYAT</h2>
+<span class="px-2.5 py-0.5 bg-tertiary text-on-tertiary font-label-sm text-label-sm font-bold neo-border">STATUS: AKTIF / BERJALAN</span>
+</div>
+<div class="flex items-center gap-4 text-white font-label-md text-label-md">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">login</span>
+<span>Jam Mulai: <strong class="text-primary-fixed">08:00 WIB</strong></span>
+</div>
+<div class="w-px h-4 bg-outline"></div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-secondary-container">timelapse</span>
+<span>Durasi Berjalan: <strong class="text-secondary-container font-headline-sm">4 Jam 32 Menit</strong></span>
+</div>
+</div>
+</div>
+<!-- Financial Metrics Bento Matrix -->
+<div class="p-6 bg-surface-bright grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+<!-- Metric 1: Saldo Kas Awal -->
+<div class="bg-white p-4 neo-border neo-shadow-md flex flex-col justify-between">
+<div class="flex items-center justify-between pb-2 border-b-2 border-outline-variant">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase">1. Saldo Kas Awal</span>
+<span class="material-symbols-outlined text-primary text-xl">payments</span>
+</div>
+<div class="py-3">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Modal Uang Kembalian</p>
+<p class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Rp 200.000</p>
+</div>
+<div class="pt-2 border-t border-dashed border-outline-variant flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Diserahterimakan dari:</span>
+<span class="font-bold text-on-surface">Kasir #01</span>
+</div>
+</div>
+<!-- Metric 2: Total Penerimaan Rental -->
+<div class="bg-white p-4 neo-border neo-shadow-md flex flex-col justify-between">
+<div class="flex items-center justify-between pb-2 border-b-2 border-outline-variant">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase">2. Penerimaan Rental PS</span>
+<span class="material-symbols-outlined text-primary text-xl material-symbols-fill">sports_esports</span>
+</div>
+<div class="py-3">
+<p class="font-label-sm text-label-sm text-on-surface-variant">24 Sesi Billing Terbayar</p>
+<p class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight">Rp 1.120.000</p>
+</div>
+<div class="pt-2 border-t border-dashed border-outline-variant flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Rata-rata/jam:</span>
+<span class="font-bold text-primary">Rp 247.000</span>
+</div>
+</div>
+<!-- Metric 3: Total Penerimaan F&B -->
+<div class="bg-white p-4 neo-border neo-shadow-md flex flex-col justify-between">
+<div class="flex items-center justify-between pb-2 border-b-2 border-outline-variant">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase">3. Penerimaan F&amp;B Lounge</span>
+<span class="material-symbols-outlined text-secondary text-xl">local_cafe</span>
+</div>
+<div class="py-3">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Mi Instan, Kopi, Minuman Dingin</p>
+<p class="font-headline-lg text-headline-lg text-secondary font-bold tracking-tight">Rp 365.000</p>
+</div>
+<div class="pt-2 border-t border-dashed border-outline-variant flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Total Item Terjual:</span>
+<span class="font-bold text-on-surface">38 Pcs</span>
+</div>
+</div>
+<!-- Metric 4: Expected Cash Drawer (Hero Metric Highlight) -->
+<div class="bg-surface-container-high p-4 neo-border-thick neo-shadow-md flex flex-col justify-between relative overflow-hidden">
+<div class="absolute -right-4 -bottom-4 text-on-surface/5 select-none pointer-events-none">
+<span class="material-symbols-outlined text-8xl">point_of_sale</span>
+</div>
+<div class="flex items-center justify-between pb-2 border-b-2 border-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-on-secondary-container text-xl">lock_clock</span>
+<span class="font-label-sm text-label-sm text-on-surface font-extrabold uppercase">KAS FISIK DI LACI</span>
+</div>
+<span class="bg-secondary-container text-white px-2 py-0.5 font-label-sm text-[10px] font-bold neo-border">EXPECTED CASH</span>
+</div>
+<div class="py-3 z-10">
+<p class="font-label-sm text-label-sm text-on-surface-variant font-bold">Total Wajib Fisik Laci Kasir:</p>
+<p class="font-headline-xl text-headline-xl text-on-surface font-extrabold tracking-tight leading-none mt-1">Rp 1.685.000</p>
+</div>
+<div class="pt-2 border-t-2 border-on-surface flex items-center justify-between text-on-surface font-label-sm text-label-sm z-10">
+<span>Rumus:</span>
+<span class="font-label-sm text-label-sm font-bold bg-white px-1.5 py-0.5 neo-border">Awal + Rental + F&amp;B</span>
+</div>
+</div>
+</div>
+<!-- Continuity Guarantee Callout Notice -->
+<div class="mx-6 mb-6 p-4 bg-surface-container-low neo-border flex items-start gap-4">
+<div class="w-9 h-9 bg-secondary-container text-white flex items-center justify-center neo-border flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-2xl">verified_user</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase">JAMINAN KONTINUITAS OPERASIONAL SEAMLESS</h3>
+<span class="px-2 py-0.2 bg-primary text-white font-label-sm text-[10px] font-bold uppercase">Zero-Downtime Handover</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+<strong>Catatan Sistem:</strong> Pergantian shift <span class="text-error font-bold underline decoration-2">TIDAK AKAN menghentikan sesi rental yang sedang aktif</span> pada konsol PlayStation. Seluruh timer konsol, billing terbuka, dan pesanan makanan bayar-nanti akan otomatis dialihkan secara utuh ke tanggung jawab shift berikutnya (Shift Sore #03).
+          </p>
+</div>
+</div>
+<!-- Action Command Bar -->
+<div class="px-6 py-4 bg-surface-container border-t-2 border-on-surface flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<button class="px-5 py-3 bg-white text-on-surface neo-border neo-shadow-sm font-label-md text-label-md font-bold flex items-center gap-2 neo-btn hover:bg-surface-bright">
+<span class="material-symbols-outlined text-xl">account_balance_wallet</span>
+<span>REKONSILIASI KAS &amp; CETAK X-REPORT</span>
+</button>
+<button class="px-5 py-3 bg-white text-on-surface neo-border neo-shadow-sm font-label-md text-label-md font-bold flex items-center gap-2 neo-btn hover:bg-surface-bright">
+<span class="material-symbols-outlined text-xl">inventory_2</span>
+<span>STOK FISIK F&amp;B AUDIT</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-3 bg-surface-container-high text-on-surface neo-border font-label-md text-label-md font-bold flex items-center gap-2 neo-btn hover:bg-white">
+<span class="material-symbols-outlined text-xl">emergency</span>
+<span>LAPOR SELISIH KAS (INCIDENT)</span>
+</button>
+<!-- Prominent Handover Orange Action -->
+<button class="px-7 py-3 bg-secondary-container text-white neo-border-thick neo-shadow-lg font-headline-sm text-headline-sm font-extrabold flex items-center gap-3 neo-btn hover:bg-secondary tracking-wide">
+<span class="material-symbols-outlined text-2xl material-symbols-fill">logout</span>
+<span>TUTUP &amp; AKHIRI SHIFT (HANDOVER)</span>
+</button>
+</div>
+</div>
+</section>
+<!-- SECTION 2 & 3 CONTAINER: TWO-COLUMN ASYMMETRIC GRID -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+<!-- SECTION 2: ACTIVE SESSIONS SNAPSHOT DURING SHIFT (5 COLUMNS) -->
+<div class="xl:col-span-5 bg-white neo-border-thick neo-shadow-md flex flex-col">
+<!-- Panel Header -->
+<div class="p-4 bg-surface-container-low border-b-2 border-on-surface flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 bg-tertiary-container rounded-full animate-ping"></span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase">ACTIVE SESSIONS SNAPSHOT</h3>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">5 Konsol Aktif Akan Dialihkan ke Shift #03</p>
+</div>
+<span class="px-2.5 py-1 bg-primary text-white font-label-sm text-label-sm font-bold neo-border">5/10 RUNNING</span>
+</div>
+<!-- Rental Bay Pod Snapshot Stack -->
+<div class="p-4 flex flex-col gap-3 flex-1 overflow-y-auto max-h-[460px]">
+<!-- Pod 1: PS 01 (PS5 VIP) -->
+<div class="p-3 bg-white neo-border neo-shadow-sm flex items-center justify-between hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-primary-container text-white flex flex-col items-center justify-center neo-border font-headline-sm">
+<span class="text-xs font-bold leading-none">PS</span>
+<span class="text-lg font-extrabold leading-none">01</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">BAY #01 PS5 VIP</span>
+<span class="bg-tertiary text-white px-1.5 py-0.2 font-label-sm text-[10px] font-bold neo-border">OPEN BILL</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Customer: <strong>Aldo &amp; Kawan (3 Stik)</strong></p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Sisa Waktu:</span>
+<span class="font-timer-display text-lg text-primary font-bold tracking-tight">01:45:10</span>
+<span class="text-[11px] block text-on-surface-variant font-label-sm font-bold">Billing: Rp 95.000 (Belum Bayar)</span>
+</div>
+</div>
+<!-- Pod 2: PS 02 (PS5 Reguler) -->
+<div class="p-3 bg-white neo-border neo-shadow-sm flex items-center justify-between hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-primary-container text-white flex flex-col items-center justify-center neo-border font-headline-sm">
+<span class="text-xs font-bold leading-none">PS</span>
+<span class="text-lg font-extrabold leading-none">02</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">BAY #02 PS5 REG</span>
+<span class="bg-secondary-container text-white px-1.5 py-0.2 font-label-sm text-[10px] font-bold neo-border">EXTENDED</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Customer: <strong>Dimas (FC 24)</strong></p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Sisa Waktu:</span>
+<span class="font-timer-display text-lg text-secondary font-bold tracking-tight">00:18:42</span>
+<span class="text-[11px] block text-on-surface-variant font-label-sm font-bold">Billing: Lunas (+F&amp;B Rp 20k)</span>
+</div>
+</div>
+<!-- Pod 3: PS 03 (PS5 Reguler) -->
+<div class="p-3 bg-white neo-border neo-shadow-sm flex items-center justify-between hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-primary text-white flex flex-col items-center justify-center neo-border font-headline-sm">
+<span class="text-xs font-bold leading-none">PS</span>
+<span class="text-lg font-extrabold leading-none">03</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">BAY #03 PS5 REG</span>
+<span class="bg-surface-container-highest text-on-surface px-1.5 py-0.2 font-label-sm text-[10px] font-bold neo-border">RUNNING</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Customer: <strong>Bagus (Tekken 8)</strong></p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Sisa Waktu:</span>
+<span class="font-timer-display text-lg text-on-surface font-bold tracking-tight">02:12:00</span>
+<span class="text-[11px] block text-on-surface-variant font-label-sm font-bold">Billing: Lunas (Paket 3 Jam)</span>
+</div>
+</div>
+<!-- Pod 4: PS 05 (PS4 Pro) -->
+<div class="p-3 bg-white neo-border neo-shadow-sm flex items-center justify-between hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-on-surface text-white flex flex-col items-center justify-center neo-border font-headline-sm">
+<span class="text-xs font-bold leading-none">PS</span>
+<span class="text-lg font-extrabold leading-none">05</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">BAY #05 PS4 PRO</span>
+<span class="bg-error text-white px-1.5 py-0.2 font-label-sm text-[10px] font-bold neo-border">&lt; 10M LEFT</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Customer: <strong>Eko &amp; Rama</strong></p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Sisa Waktu:</span>
+<span class="font-timer-display text-lg text-error font-bold tracking-tight">00:06:55</span>
+<span class="text-[11px] block text-on-surface-variant font-label-sm font-bold">Konfirmasi Tambah Jam?</span>
+</div>
+</div>
+<!-- Pod 5: PS 07 (PS4 Pro) -->
+<div class="p-3 bg-white neo-border neo-shadow-sm flex items-center justify-between hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-on-surface text-white flex flex-col items-center justify-center neo-border font-headline-sm">
+<span class="text-xs font-bold leading-none">PS</span>
+<span class="text-lg font-extrabold leading-none">07</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">BAY #07 PS4 PRO</span>
+<span class="bg-surface-container-highest text-on-surface px-1.5 py-0.2 font-label-sm text-[10px] font-bold neo-border">RUNNING</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Customer: <strong>Fajar (GTA V)</strong></p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Sisa Waktu:</span>
+<span class="font-timer-display text-lg text-on-surface font-bold tracking-tight">00:54:19</span>
+<span class="text-[11px] block text-on-surface-variant font-label-sm font-bold">Billing: Lunas (Kasir #02)</span>
+</div>
+</div>
+</div>
+<!-- Handover Unit Memo Footer -->
+<div class="p-3 bg-surface-container border-t-2 border-on-surface font-label-sm text-label-sm flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">info</span>
+<span>Total Nilai Pending Bill Konsol:</span>
+</div>
+<span class="font-bold text-on-surface font-label-md text-label-md bg-white px-2 py-0.5 neo-border">Rp 95.000</span>
+</div>
+</div>
+<!-- SECTION 3: SHIFT AUDIT LOG & HISTORY TABLE (7 COLUMNS) -->
+<div class="xl:col-span-7 bg-white neo-border-thick neo-shadow-md flex flex-col">
+<!-- Panel Header -->
+<div class="p-4 bg-surface-container-low border-b-2 border-on-surface flex flex-wrap items-center justify-between gap-3">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface uppercase">RIWAYAT SHIFT TERAKHIR &amp; AUDIT LOG</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Histori Verifikasi Supervisor &amp; Rekap Kasir Sebelumnya</p>
+</div>
+<!-- Filter Actions -->
+<div class="flex items-center gap-2">
+<button class="px-2.5 py-1 bg-white text-on-surface font-label-sm text-label-sm font-bold neo-border neo-btn">Filter: 7 Hari</button>
+<button class="px-2.5 py-1 bg-white text-on-surface font-label-sm text-label-sm font-bold neo-border neo-btn flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">download</span>
+<span>Export CSV</span>
+</button>
+</div>
+</div>
+<!-- Table View -->
+<div class="overflow-x-auto flex-1">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high border-b-2 border-on-surface font-label-sm text-label-sm text-on-surface uppercase tracking-wider">
+<th class="p-3">Shift &amp; Tanggal</th>
+<th class="p-3">Kasir Petugas</th>
+<th class="p-3">Jam Masuk - Keluar</th>
+<th class="p-3 text-center">Trx</th>
+<th class="p-3 text-right">Total Omset</th>
+<th class="p-3 text-center">Status Verifikasi</th>
+</tr>
+</thead>
+<tbody class="divide-y-2 divide-on-surface font-body-sm text-body-sm">
+<!-- Row 1: Shift Pagi Hari Ini -->
+<tr class="hover:bg-surface-bright">
+<td class="p-3 font-label-md text-label-md font-bold text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>Shift Pagi #01</span>
+</div>
+<span class="text-[10px] text-on-surface-variant block font-normal">24 Okt 2023</span>
+</td>
+<td class="p-3 font-medium text-on-surface">
+<div>Gilang Ramadhan</div>
+<span class="font-label-sm text-[10px] text-on-surface-variant">ID: KSR-008</span>
+</td>
+<td class="p-3 font-label-sm text-label-sm text-on-surface">
+<span class="bg-surface-container px-1.5 py-0.5 neo-border">00:00 - 08:00</span>
+<span class="block text-[10px] text-on-surface-variant mt-0.5">Durasi: 8 Jam</span>
+</td>
+<td class="p-3 text-center font-label-md text-label-md font-bold">19</td>
+<td class="p-3 text-right">
+<span class="font-label-md text-label-md font-bold text-primary">Rp 980.000</span>
+<span class="text-[10px] text-on-surface-variant block">Kas Pas (Diff: Rp 0)</span>
+</td>
+<td class="p-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-tertiary-fixed-dim text-on-tertiary-fixed font-label-sm text-label-sm font-bold neo-border">
+<span class="material-symbols-outlined text-xs">check_circle</span>
+<span>VERIFIED SPV</span>
+</span>
+</td>
+</tr>
+<!-- Row 2: Shift Malam Kemarin -->
+<tr class="hover:bg-surface-bright">
+<td class="p-3 font-label-md text-label-md font-bold text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-on-surface"></span>
+<span>Shift Malam #03</span>
+</div>
+<span class="text-[10px] text-on-surface-variant block font-normal">23 Okt 2023</span>
+</td>
+<td class="p-3 font-medium text-on-surface">
+<div>Yusuf Maulana</div>
+<span class="font-label-sm text-[10px] text-on-surface-variant">ID: KSR-004</span>
+</td>
+<td class="p-3 font-label-sm text-label-sm text-on-surface">
+<span class="bg-surface-container px-1.5 py-0.5 neo-border">16:00 - 00:00</span>
+<span class="block text-[10px] text-on-surface-variant mt-0.5">Durasi: 8 Jam</span>
+</td>
+<td class="p-3 text-center font-label-md text-label-md font-bold">42</td>
+<td class="p-3 text-right">
+<span class="font-label-md text-label-md font-bold text-primary">Rp 2.450.000</span>
+<span class="text-[10px] text-on-surface-variant block">Kas Pas (Diff: Rp 0)</span>
+</td>
+<td class="p-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-tertiary-fixed-dim text-on-tertiary-fixed font-label-sm text-label-sm font-bold neo-border">
+<span class="material-symbols-outlined text-xs">check_circle</span>
+<span>VERIFIED SPV</span>
+</span>
+</td>
+</tr>
+<!-- Row 3: Shift Siang Kemarin -->
+<tr class="hover:bg-surface-bright">
+<td class="p-3 font-label-md text-label-md font-bold text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span>Shift Siang #02</span>
+</div>
+<span class="text-[10px] text-on-surface-variant block font-normal">23 Okt 2023</span>
+</td>
+<td class="p-3 font-medium text-on-surface">
+<div>Rian Hidayat</div>
+<span class="font-label-sm text-[10px] text-on-surface-variant">ID: KSR-002</span>
+</td>
+<td class="p-3 font-label-sm text-label-sm text-on-surface">
+<span class="bg-surface-container px-1.5 py-0.5 neo-border">08:00 - 16:00</span>
+<span class="block text-[10px] text-on-surface-variant mt-0.5">Durasi: 8 Jam</span>
+</td>
+<td class="p-3 text-center font-label-md text-label-md font-bold">31</td>
+<td class="p-3 text-right">
+<span class="font-label-md text-label-md font-bold text-primary">Rp 1.830.000</span>
+<span class="text-[10px] text-secondary font-bold block">+Rp 5.000 (Selisih Lebih)</span>
+</td>
+<td class="p-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold neo-border">
+<span class="material-symbols-outlined text-xs">flag</span>
+<span>NOTE RESOLVED</span>
+</span>
+</td>
+</tr>
+<!-- Row 4: Shift Pagi Kemarin -->
+<tr class="hover:bg-surface-bright">
+<td class="p-3 font-label-md text-label-md font-bold text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span>Shift Pagi #01</span>
+</div>
+<span class="text-[10px] text-on-surface-variant block font-normal">23 Okt 2023</span>
+</td>
+<td class="p-3 font-medium text-on-surface">
+<div>Gilang Ramadhan</div>
+<span class="font-label-sm text-[10px] text-on-surface-variant">ID: KSR-008</span>
+</td>
+<td class="p-3 font-label-sm text-label-sm text-on-surface">
+<span class="bg-surface-container px-1.5 py-0.5 neo-border">00:00 - 08:00</span>
+<span class="block text-[10px] text-on-surface-variant mt-0.5">Durasi: 8 Jam</span>
+</td>
+<td class="p-3 text-center font-label-md text-label-md font-bold">14</td>
+<td class="p-3 text-right">
+<span class="font-label-md text-label-md font-bold text-primary">Rp 720.000</span>
+<span class="text-[10px] text-on-surface-variant block">Kas Pas (Diff: Rp 0)</span>
+</td>
+<td class="p-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-tertiary-fixed-dim text-on-tertiary-fixed font-label-sm text-label-sm font-bold neo-border">
+<span class="material-symbols-outlined text-xs">check_circle</span>
+<span>VERIFIED SPV</span>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer Pagination / Quick Audit Info -->
+<div class="p-3 bg-surface-container-low border-t-2 border-on-surface flex flex-wrap items-center justify-between text-on-surface font-label-sm text-label-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-primary">security</span>
+<span>Supervisor Jaga Hari Ini: <strong>Ferry Ananda (SPV-01)</strong></span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-2 py-0.5 bg-white neo-border font-bold">PREV</button>
+<span class="font-bold">Page 1 of 12</span>
+<button class="px-2 py-0.5 bg-white neo-border font-bold">NEXT</button>
+</div>
+</div>
+</div>
+</div>
+<!-- BOTTOM OPERATIONAL DISPATCH STRIP -->
+<div class="bg-on-surface text-white p-4 neo-border neo-shadow-sm flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary-container text-2xl">print</span>
+<div>
+<p class="font-label-sm text-label-sm font-bold text-white">POS HARDWARE STATUS: EPSON TM-T82X THERMAL PRINTER READY</p>
+<p class="font-body-sm text-body-sm text-outline-variant">Auto-cutter enabled, Cash Drawer kick-pulse connected via RJ11 (Pin 2).</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 bg-surface-container-highest text-on-surface font-label-sm text-label-sm font-bold neo-border neo-btn">TEST LACI KAS (KICK)</button>
+<button class="px-3 py-1.5 bg-primary text-white font-label-sm text-label-sm font-bold neo-border neo-btn">PRINT SUMMARY TEST</button>
+</div>
+</div>
+</main>
+<!-- ========================================================================= -->
+<!-- INLINE MICRO-INTERACTION SCRIPT FOR SHIFT RUNTIME CLOCK                   -->
+<!-- ========================================================================= -->
+<script>
+    // Live runtime increment simulation
+    let seconds = 18;
+    let minutes = 32;
+    let hours = 4;
+
+    const ticker = document.getElementById('runtime-ticker');
+    if (ticker) {
+      setInterval(() => {
+        seconds++;
+        if (seconds >= 60) {
+          seconds = 0;
+          minutes++;
+          if (minutes >= 60) {
+            minutes = 0;
+            hours++;
+          }
+        }
+        const formatted = 
+          String(hours).padStart(2, '0') + ':' + 
+          String(minutes).padStart(2, '0') + ':' + 
+          String(seconds).padStart(2, '0');
+        ticker.textContent = formatted;
+      }, 1000);
+    }
+  </script>
+</body></html>
