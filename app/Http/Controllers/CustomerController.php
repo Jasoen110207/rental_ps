@@ -70,7 +70,7 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|integer|min:1|max:20',
             'note' => 'nullable|string|max:255',
         ]);
 
@@ -96,6 +96,14 @@ class CustomerController extends Controller
             return back()->with('error', 'Pilih minimal satu menu!');
         }
 
+        // Tolak item yang stoknya tidak mencukupi (sinkron ke DB produk)
+        foreach ($orderItems as $oi) {
+            $product = Product::find($oi['product_id']);
+            if (! $product || $product->stock < $oi['quantity']) {
+                return back()->with('error', 'Stok "' . ($product->name ?? 'menu') . '" tidak mencukupi (sisa ' . ($product->stock ?? 0) . ').');
+            }
+        }
+
         CustomerRequest::create([
             'tv_id' => $tv->id,
             'type' => 'order_food',
@@ -108,6 +116,79 @@ class CustomerController extends Controller
         ]);
 
         return back()->with('success', 'Pesanan makanan & minuman berhasil dikirim ke kasir!');
+    }
+
+    /**
+     * Halaman order cepat (satu menu sekali klik) — dinamis per meja.
+     * Bisa diakses via /customer/order?tv_id=.. agar sinkron ke database.
+     */
+    public function order(Request $request)
+    {
+        $tv = null;
+        if ($request->filled('tv_id')) {
+            $tv = Tv::find($request->get('tv_id'));
+        }
+        if (! $tv) {
+            // Prioritas: meja yang sedang ada sesi aktif, lalu meja pertama
+            $activeTvId = PlaySession::where('status', 'active')->orderBy('start_time')->value('tv_id');
+            $tv = $activeTvId ? Tv::find($activeTvId) : Tv::orderBy('id')->firstOrFail();
+        }
+
+        $activeSession = PlaySession::with('sessionOrders.product')
+            ->where('tv_id', $tv->id)
+            ->where('status', 'active')
+            ->first();
+
+        $products = Product::where('is_available', true)
+            ->where('stock', '>', 0)
+            ->orderBy('category')
+            ->orderBy('name')
+            ->take(8)
+            ->get();
+
+        $requests = CustomerRequest::where('tv_id', $tv->id)
+            ->where('created_at', '>=', Carbon::now()->subHours(12))
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        $tvs = Tv::orderBy('id')->get();
+        $storeName = Setting::get('store_name', 'TambahBang Rental PS');
+
+        return view('customer.order', compact('tv', 'activeSession', 'products', 'requests', 'tvs', 'storeName'));
+    }
+
+    /**
+     * Panggil kasir ke meja (service call). Disetujui kasir tanpa mengubah tagihan.
+     */
+    public function callCashier(Request $request, $tvId)
+    {
+        $tv = Tv::findOrFail($tvId);
+
+        $validated = $request->validate([
+            'note' => 'nullable|string|max:255',
+        ]);
+
+        // Hindari spam: tolak jika masih ada service call pending < 2 menit terakhir
+        $recent = CustomerRequest::where('tv_id', $tv->id)
+            ->where('type', 'service_call')
+            ->where('status', 'pending')
+            ->where('created_at', '>=', Carbon::now()->subMinutes(2))
+            ->exists();
+        if ($recent) {
+            return back()->with('error', 'Kasir sudah dipanggil, mohon tunggu sebentar!');
+        }
+
+        CustomerRequest::create([
+            'tv_id' => $tv->id,
+            'type' => 'service_call',
+            'payload' => [
+                'note' => $validated['note'] ?? 'Pelanggan memanggil kasir ke meja.',
+            ],
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'Kasir sedang menuju ke meja ' . $tv->name . '!');
     }
 
     public function apiStatus($tvId)

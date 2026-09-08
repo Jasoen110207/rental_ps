@@ -1,414 +1,304 @@
 @extends('layouts.customer')
 
-@section('title', 'Order - TambahBang')
+@section('title', 'Order ' . $tv->name . ' - TambahBang')
 
 @section('content')
-<div class="flex flex-col">
+<div class="flex flex-col" id="order-page" data-tv-id="{{ $tv->id }}">
 
-    {{-- Unit bar (brand header sudah disediakan layouts.customer, jangan diduplikasi) --}}
+    {{-- Unit bar + pemilih meja --}}
     <header class="w-full flex flex-col gap-2.5 pb-3 mb-3 border-b-2 border-dashed border-on-surface">
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-tertiary-fixed neo-border-2 text-on-tertiary-fixed neo-shadow-sm self-start">
-            <span class="w-2.5 h-2.5 rounded-full bg-tertiary inline-block pulse-dot"></span>
-            <span class="font-label-sm text-[11px] font-black tracking-wider whitespace-nowrap">SESI AKTIF</span>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 {{ $activeSession ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-surface-container text-on-surface-variant' }} neo-border-2 neo-shadow-sm self-start">
+            <span class="w-2.5 h-2.5 rounded-full {{ $activeSession ? 'bg-tertiary' : 'bg-outline' }} inline-block pulse-dot"></span>
+            <span class="font-label-sm text-[11px] font-black tracking-wider whitespace-nowrap">{{ $activeSession ? 'SESI AKTIF' : 'MEJA KOSONG' }}</span>
         </div>
 
-            <div class="w-full bg-[#FFE500] neo-border-2 px-3 py-2 flex items-center justify-between neo-shadow-sm">
-                <div class="flex items-center gap-2 min-w-0">
-                    <span class="material-symbols-outlined text-on-surface text-lg shrink-0">tv</span>
-                    <span class="font-label-md text-xs sm:text-sm text-on-surface font-black tracking-wide truncate">
-                        UNIT: PS 03 (PS5 DISC)
-                    </span>
-                </div>
-                <div class="bg-on-surface text-surface-container-lowest font-label-sm text-[10px] px-2 py-0.5 font-extrabold shrink-0 border border-on-surface">
-                    VIP BAY A
-                </div>
-            </div>
-
-        </header>
-
-       
-        <section class="w-full bg-surface-container-lowest neo-border-3 neo-shadow-md p-3.5 mb-3.5 flex flex-col relative">
-
-            <div class="flex items-center justify-between pb-2.5 border-b-2 border-on-surface mb-3">
-                <div class="flex items-center gap-1.5 text-on-surface font-label-md text-xs font-bold tracking-wide">
-                    <span class="material-symbols-outlined text-base text-primary">timer</span>
-                    <span>SISA WAKTU BERMAIN</span>
-                </div>
-                <span class="font-label-sm text-[10px] bg-surface-container-high px-2 py-0.5 neo-border-2 font-bold tracking-wider uppercase">
-                    PREPAID
+        <div class="w-full bg-[#FFE500] neo-border-2 px-3 py-2 flex items-center justify-between neo-shadow-sm">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="material-symbols-outlined text-on-surface text-lg shrink-0">tv</span>
+                <span class="font-label-md text-xs sm:text-sm text-on-surface font-black tracking-wide truncate">
+                    UNIT: {{ $tv->name }} ({{ strtoupper($tv->type) }})
                 </span>
             </div>
+            <div class="bg-on-surface text-surface-container-lowest font-label-sm text-[10px] px-2 py-0.5 font-extrabold shrink-0 border border-on-surface">
+                Rp {{ number_format($tv->price_per_hour, 0, ',', '.') }}/JAM
+            </div>
+        </div>
 
+        <form method="GET" action="{{ route('customer.order') }}" class="flex items-center gap-2">
+            <label class="font-label-sm text-[10px] font-bold uppercase text-on-surface-variant">Pindah meja:</label>
+            <select name="tv_id" onchange="this.form.submit()" class="flex-1 px-2 py-1.5 bg-surface-container-lowest neo-border-2 font-label-sm text-xs font-bold">
+                @foreach ($tvs as $t)
+                    <option value="{{ $t->id }}" {{ $t->id === $tv->id ? 'selected' : '' }}>{{ $t->name }} — {{ $t->status === 'playing' ? 'Aktif' : ucfirst($t->status) }}</option>
+                @endforeach
+            </select>
+        </form>
+    </header>
+
+    {{-- Timer + billing real --}}
+    <section class="w-full bg-surface-container-lowest neo-border-3 neo-shadow-md p-3.5 mb-3.5 flex flex-col relative">
+        <div class="flex items-center justify-between pb-2.5 border-b-2 border-on-surface mb-3">
+            <div class="flex items-center gap-1.5 font-label-md text-xs font-bold tracking-wide">
+                <span class="material-symbols-outlined text-base text-primary">timer</span>
+                <span>{{ $activeSession ? ($activeSession->billing_type === 'prepaid' ? 'SISA WAKTU BERMAIN' : 'WAKTU BERJALAN') : 'STATUS MEJA' }}</span>
+            </div>
+            @if ($activeSession)
+                <span class="font-label-sm text-[10px] bg-surface-container-high px-2 py-0.5 neo-border-2 font-bold tracking-wider uppercase">{{ $activeSession->billing_type }}</span>
+            @endif
+        </div>
+
+        @if ($activeSession)
+            @php $isTimeUp = $activeSession->billing_type === 'prepaid' && $activeSession->end_time && $activeSession->end_time->isPast(); @endphp
             <div class="w-full bg-surface-container-low neo-border-2 p-3 text-center mb-3 neo-shadow-sm">
-                <div class="font-timer-display text-[40px] leading-tight sm:text-[46px] font-bold tracking-tight text-primary tabular-nums select-none" id="countdown-timer">
-                    01:15:33
+                <div class="font-timer-display text-[40px] leading-tight sm:text-[46px] font-bold tracking-tight tabular-nums select-none {{ $isTimeUp ? 'text-error' : 'text-primary' }}" id="order-countdown"
+                    data-type="{{ $activeSession->billing_type }}"
+                    data-start="{{ $activeSession->start_time->timestamp }}"
+                    data-end="{{ $activeSession->end_time ? $activeSession->end_time->timestamp : '' }}">
+                    --:--:--
                 </div>
                 <div class="flex items-center justify-center gap-1.5 mt-1.5 pt-1 border-t border-outline-variant/60">
                     <span class="inline-block w-2 h-2 rounded-full bg-primary animate-ping"></span>
-                    <span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">
-                        Auto-Syncing with Matrix
-                    </span>
+                    <span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Auto-Syncing with Matrix</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-3 gap-1 p-2 bg-surface neo-border-2 mb-3 font-label-sm text-center">
                 <div class="border-r-2 border-on-surface px-1">
-                    <span class="text-on-surface-variant text-[10px] block font-semibold uppercase">Paket</span>
-                    <span class="text-on-surface font-extrabold text-xs sm:text-sm">2 Jam</span>
+                    <span class="text-on-surface-variant text-[10px] block font-semibold uppercase">Mulai</span>
+                    <span class="text-on-surface font-extrabold text-xs sm:text-sm">{{ $activeSession->start_time->format('H:i') }}</span>
                 </div>
                 <div class="border-r-2 border-on-surface px-1">
-                    <span class="text-on-surface-variant text-[10px] block font-semibold uppercase">Mulai</span>
-                    <span class="text-on-surface font-extrabold text-xs sm:text-sm">13:00</span>
+                    <span class="text-on-surface-variant text-[10px] block font-semibold uppercase">Berakhir</span>
+                    <span class="text-primary font-extrabold text-xs sm:text-sm">{{ $activeSession->end_time ? $activeSession->end_time->format('H:i') : 'Loss' }}</span>
                 </div>
                 <div class="px-1">
-                    <span class="text-on-surface-variant text-[10px] block font-semibold uppercase">Berakhir</span>
-                    <span class="text-primary font-extrabold text-xs sm:text-sm">15:00</span>
+                    <span class="text-on-surface-variant text-[10px] block font-semibold uppercase">F&B</span>
+                    <span class="text-on-surface font-extrabold text-xs sm:text-sm">{{ $activeSession->sessionOrders->sum('quantity') }} item</span>
                 </div>
             </div>
 
-            {{-- Structured Billing Receipt Strip --}}
             <div class="bg-surface-container-high neo-border-2 p-3 flex flex-col gap-2 font-label-sm">
                 <div class="flex justify-between items-center text-xs text-on-surface-variant font-medium">
-                    <span>Rental PS5 (2 Jam)</span>
-                    <span class="font-bold text-on-surface">Rp 50.000</span>
+                    <span>Rental ({{ $tv->name }})</span>
+                    <span class="font-bold text-on-surface" id="order-rental-amount">Rp {{ number_format($activeSession->rental_amount, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between items-center text-xs text-on-surface-variant font-medium">
-                    <span>Pesanan F&amp;B (1 Item)</span>
-                    <span class="font-bold text-on-surface">Rp 12.000</span>
+                    <span>Pesanan F&B ({{ $activeSession->sessionOrders->count() }} menu)</span>
+                    <span class="font-bold text-on-surface" id="order-fnb-amount">Rp {{ number_format($activeSession->fnb_amount, 0, ',', '.') }}</span>
                 </div>
                 <div class="border-t-2 border-dashed border-on-surface pt-2 mt-0.5 flex justify-between items-baseline gap-2">
                     <div class="flex flex-col">
-                        <span class="font-headline-sm text-xs font-black uppercase tracking-wider text-on-surface">
-                            TOTAL TAGIHAN
-                        </span>
-                        <span class="text-[10px] text-on-surface-variant italic">
-                            Bayar di kasir saat checkout
-                        </span>
+                        <span class="font-headline-sm text-xs font-black uppercase tracking-wider">TOTAL TAGIHAN</span>
+                        <span class="text-[10px] text-on-surface-variant italic">Bayar di kasir saat checkout</span>
                     </div>
-                    <span class="font-timer-display text-2xl font-black text-primary tracking-tight tabular-nums">
-                        Rp 62.000
-                    </span>
+                    <span class="font-timer-display text-2xl font-black text-primary tracking-tight tabular-nums" id="order-grand-total">Rp {{ number_format($activeSession->total_amount, 0, ',', '.') }}</span>
                 </div>
             </div>
-
-        </section>
-
-    
-        <section class="w-full flex flex-col gap-2.5 mb-4">
-
-            {{-- Extend Button: High energy Orange --}}
-            <button
-                class="neo-btn w-full min-h-[50px] bg-secondary-container hover:bg-secondary text-surface-container-lowest px-4 py-3 neo-border-3 neo-shadow-md flex items-center justify-between font-headline-sm text-sm font-black tracking-tight"
-                onclick="handleAction('extend')">
-                <div class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-2xl shrink-0" style="font-variation-settings: 'FILL' 1;">bolt</span>
-                    <span class="uppercase">TAMBAH WAKTU / EXTEND</span>
-                </div>
-                <span class="material-symbols-outlined text-xl font-black">arrow_forward</span>
-            </button>
-
-            {{-- F&B Order Button: Royal Blue --}}
-            <button
-                class="neo-btn w-full min-h-[50px] bg-primary hover:bg-primary-container text-on-primary px-4 py-3 neo-border-3 neo-shadow-md flex items-center justify-between font-headline-sm text-sm font-black tracking-tight"
-                onclick="handleAction('menu')">
-                <div class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-2xl shrink-0" style="font-variation-settings: 'FILL' 1;">ramen_dining</span>
-                    <span class="uppercase">PESAN MAKANAN &amp; MINUMAN</span>
-                </div>
-                <span class="material-symbols-outlined text-xl font-black">add_shopping_cart</span>
-            </button>
-
-        </section>
-
-       
-        <section class="w-full mb-4">
-
-            <div class="flex items-center justify-between mb-2 px-0.5">
-                <h2 class="font-headline-sm text-sm font-extrabold tracking-tight flex items-center gap-1.5 uppercase text-on-surface">
-                    <span class="material-symbols-outlined text-primary text-lg">sync_saved_locally</span>
-                    STATUS PERMINTAAN ANDA
-                </h2>
-                <span class="font-label-sm text-[10px] bg-surface-container-high text-on-surface px-2 py-0.5 neo-border-2 font-black">
-                    2 AKTIF
-                </span>
+        @else
+            <div class="py-8 text-center bg-surface neo-border-2">
+                <span class="material-symbols-outlined text-4xl text-on-surface-variant">sports_esports</span>
+                <p class="font-bold text-sm uppercase mt-1">Meja Belum Aktif</p>
+                <p class="text-xs text-on-surface-variant mt-1">Pesan rental via kasir dulu, lalu semua fitur di bawah aktif.</p>
             </div>
+        @endif
+    </section>
 
-            <div class="flex flex-col gap-2.5">
+    {{-- Aksi cepat --}}
+    <section class="w-full flex flex-col gap-2.5 mb-4">
+        <button class="neo-btn w-full min-h-[50px] bg-secondary-container hover:bg-secondary text-surface-container-lowest px-4 py-3 neo-border-3 neo-shadow-md flex items-center justify-between font-headline-sm text-sm font-black tracking-tight"
+            onclick="document.getElementById('order-modal-extend').classList.remove('hidden');document.getElementById('order-modal-extend').classList.add('flex');">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-2xl shrink-0" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                <span class="uppercase">TAMBAH WAKTU / EXTEND</span>
+            </div>
+            <span class="material-symbols-outlined text-xl font-black">arrow_forward</span>
+        </button>
 
-                {{-- Request 1: Pending Extend Request --}}
+        <button class="neo-btn w-full min-h-[50px] bg-primary hover:bg-primary-container text-on-primary px-4 py-3 neo-border-3 neo-shadow-md flex items-center justify-between font-headline-sm text-sm font-black tracking-tight"
+            onclick="document.getElementById('quick-menu').scrollIntoView({behavior:'smooth'});">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-2xl shrink-0" style="font-variation-settings: 'FILL' 1;">ramen_dining</span>
+                <span class="uppercase">PESAN MAKANAN & MINUMAN</span>
+            </div>
+            <span class="material-symbols-outlined text-xl font-black">add_shopping_cart</span>
+        </button>
+    </section>
+
+    {{-- Status permintaan real --}}
+    <section class="w-full mb-4">
+        <div class="flex items-center justify-between mb-2 px-0.5">
+            <h2 class="font-headline-sm text-sm font-extrabold tracking-tight flex items-center gap-1.5 uppercase">
+                <span class="material-symbols-outlined text-primary text-lg">sync_saved_locally</span>
+                STATUS PERMINTAAN ANDA
+            </h2>
+            <span class="font-label-sm text-[10px] bg-surface-container-high px-2 py-0.5 neo-border-2 font-black" id="order-req-count">{{ $requests->where('status', 'pending')->count() }} AKTIF</span>
+        </div>
+        <div class="flex flex-col gap-2.5" id="order-requests">
+            @forelse ($requests as $req)
+                @php $isTime = $req->type === 'add_time'; $isService = $req->type === 'service_call'; $p = $req->payload ?? []; @endphp
                 <div class="bg-surface-container-lowest neo-border-2 p-3 neo-shadow-sm flex flex-col gap-1.5">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex items-center gap-2 min-w-0">
-                            <span class="material-symbols-outlined text-secondary text-xl shrink-0">more_time</span>
-                            <span class="font-headline-sm text-xs font-bold text-on-surface truncate">
-                                Tambah Waktu +30 Menit
+                            <span class="material-symbols-outlined text-xl shrink-0 {{ $isTime ? 'text-secondary' : ($isService ? 'text-tertiary' : 'text-primary') }}">{{ $isTime ? 'more_time' : ($isService ? 'support_agent' : 'restaurant') }}</span>
+                            <span class="font-headline-sm text-xs font-bold truncate">
+                                @if ($isTime)+{{ $p['duration_hours'] ?? 1 }} Jam (Rp {{ number_format($p['price'] ?? 0, 0, ',', '.') }})
+                                @elseif ($isService){{ $p['note'] ?? 'Panggil kasir' }}
+                                @else{{ collect($p['items'] ?? [])->map(fn($i) => $i['quantity'].'x '.$i['name'])->join(', ') ?: 'Pesanan F&B' }}
+                                @endif
                             </span>
                         </div>
-                        <div class="bg-[#FFF4D6] text-secondary neo-border-2 px-2 py-0.5 font-label-sm text-[10px] font-bold flex items-center gap-1 shrink-0">
-                            <span class="material-symbols-outlined text-xs animate-spin" style="animation-duration: 4s;">hourglass_top</span>
-                            <span class="whitespace-nowrap">MENUNGGU KASIR</span>
-                        </div>
+                        @if ($req->status === 'pending')
+                            <div class="bg-[#FFF4D6] text-secondary neo-border-2 px-2 py-0.5 font-label-sm text-[10px] font-bold whitespace-nowrap">MENUNGGU KASIR</div>
+                        @elseif ($req->status === 'approved')
+                            <div class="bg-tertiary-fixed text-on-tertiary-fixed neo-border-2 px-2 py-0.5 font-label-sm text-[10px] font-bold whitespace-nowrap">DISETUJUI</div>
+                        @else
+                            <div class="bg-error-container text-error neo-border-2 px-2 py-0.5 font-label-sm text-[10px] font-bold whitespace-nowrap">DITOLAK</div>
+                        @endif
                     </div>
-                    <p class="font-body-sm text-xs text-on-surface-variant pl-7 leading-normal">
-                        Kasir sedang mengonfirmasi request Anda. Unit timer akan otomatis bertambah saat disetujui.
-                    </p>
+                    <p class="font-body-sm text-xs text-on-surface-variant pl-7">{{ $req->created_at->format('H:i') }} • {{ $req->created_at->diffForHumans() }}</p>
                 </div>
+            @empty
+                <div class="bg-surface-container-lowest neo-border-2 p-4 text-center text-xs text-on-surface-variant font-bold">Belum ada permintaan dari meja ini.</div>
+            @endforelse
+        </div>
+    </section>
 
-                {{-- Request 2: Approved F&B Delivery --}}
-                <div class="bg-surface-container-lowest neo-border-2 p-3 neo-shadow-sm flex flex-col gap-1.5">
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <span class="material-symbols-outlined text-tertiary text-xl shrink-0" style="font-variation-settings: 'FILL' 1;">sports_bar</span>
-                            <span class="font-headline-sm text-xs font-bold text-on-surface truncate">
-                                2x Es Teh Manis Jumbo
-                            </span>
-                        </div>
-                        <div class="bg-tertiary-fixed text-on-tertiary-fixed neo-border-2 px-2 py-0.5 font-label-sm text-[10px] font-bold flex items-center gap-1 shrink-0">
-                            <span class="material-symbols-outlined text-xs font-black">check_circle</span>
-                            <span class="whitespace-nowrap">DISETUJUI (APPROVED)</span>
-                        </div>
-                    </div>
-                    <p class="font-body-sm text-xs text-on-surface-variant pl-7 leading-normal">
-                        Pesanan sudah siap dan sedang diantar oleh kru ke meja <strong class="text-on-surface">PS 03</strong>.
-                    </p>
-                </div>
-
+    {{-- Menu cepat real dari DB --}}
+    <section class="w-full bg-surface-container-lowest neo-border-3 neo-shadow-md p-3 mb-3.5" id="quick-menu">
+        <div class="flex items-center justify-between pb-2 border-b-2 border-on-surface mb-2.5">
+            <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-primary font-bold text-lg">restaurant_menu</span>
+                <h3 class="font-headline-sm text-xs sm:text-sm font-black tracking-tight uppercase">MENU CEPAT POPULER</h3>
             </div>
-
-        </section>
-
-        {{-- ===================== 5. F&B QUICK MENU PREVIEW (Grid 2 Kolom) ===================== --}}
-        <section class="w-full bg-surface-container-lowest neo-border-3 neo-shadow-md p-3 mb-3.5">
-
-            <div class="flex items-center justify-between pb-2 border-b-2 border-on-surface mb-2.5">
-                <div class="flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-primary font-bold text-lg">restaurant_menu</span>
-                    <h3 class="font-headline-sm text-xs sm:text-sm font-black tracking-tight uppercase">
-                        MENU CEPAT POPULER
-                    </h3>
-                </div>
-                <span class="font-label-sm text-[10px] bg-secondary-fixed text-on-secondary-fixed font-bold px-2 py-0.5 neo-border-2">
-                    STATION SNACKS
-                </span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2">
-
-                {{-- Item 1 --}}
+            <a href="{{ route('customer.index', $tv->id) }}" class="font-label-sm text-[10px] bg-secondary-fixed font-bold px-2 py-0.5 neo-border-2">KATALOG LENGKAP</a>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+            @forelse ($products as $p)
                 <div class="bg-surface-container-low neo-border-2 p-2.5 flex flex-col justify-between">
                     <div class="min-h-[42px]">
-                        <div class="font-headline-sm text-xs font-bold text-on-surface leading-snug line-clamp-2">
-                            Mie Instan + Telur Kornet
-                        </div>
-                        <div class="font-label-sm text-xs text-primary font-bold mt-1">Rp 15.000</div>
+                        <div class="font-headline-sm text-xs font-bold leading-snug line-clamp-2">{{ $p->name }}</div>
+                        <div class="font-label-sm text-xs text-primary font-bold mt-1">Rp {{ number_format($p->price, 0, ',', '.') }} • Stok {{ $p->stock }}</div>
                     </div>
-                    <button
-                        class="neo-btn mt-2.5 w-full bg-on-surface hover:bg-slate-800 text-surface-container-lowest font-label-sm text-[11px] font-bold py-1.5 px-2 neo-border-2 neo-shadow-sm flex items-center justify-center gap-1"
-                        onclick="orderQuick('Mie Instan Telur Kornet', 15000)">
-                        <span class="material-symbols-outlined text-xs">add</span> PESAN
-                    </button>
+                    <form method="POST" action="{{ route('customer.order-food', $tv->id) }}">
+                        @csrf
+                        <input type="hidden" name="items[0][product_id]" value="{{ $p->id }}">
+                        <input type="hidden" name="items[0][quantity]" value="1">
+                        <button class="neo-btn mt-2.5 w-full bg-on-surface text-surface-container-lowest font-label-sm text-[11px] font-bold py-1.5 px-2 neo-border-2 neo-shadow-sm flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined text-xs">add</span> PESAN
+                        </button>
+                    </form>
                 </div>
+            @empty
+                <p class="col-span-2 text-center text-xs text-on-surface-variant py-6 font-bold">Menu sedang kosong.</p>
+            @endforelse
+        </div>
+    </section>
 
-                {{-- Item 2 --}}
-                <div class="bg-surface-container-low neo-border-2 p-2.5 flex flex-col justify-between">
-                    <div class="min-h-[42px]">
-                        <div class="font-headline-sm text-xs font-bold text-on-surface leading-snug line-clamp-2">
-                            Kopi Susu Gula Aren
-                        </div>
-                        <div class="font-label-sm text-xs text-primary font-bold mt-1">Rp 12.000</div>
-                    </div>
-                    <button
-                        class="neo-btn mt-2.5 w-full bg-on-surface hover:bg-slate-800 text-surface-container-lowest font-label-sm text-[11px] font-bold py-1.5 px-2 neo-border-2 neo-shadow-sm flex items-center justify-center gap-1"
-                        onclick="orderQuick('Kopi Susu Aren', 12000)">
-                        <span class="material-symbols-outlined text-xs">add</span> PESAN
-                    </button>
-                </div>
+    <section class="w-full bg-[#FFFBEB] neo-border-2 p-3 mb-3.5 flex items-start gap-2.5 neo-shadow-sm">
+        <span class="material-symbols-outlined text-secondary font-bold text-xl shrink-0 mt-0.5">warning</span>
+        <div class="font-body-sm text-xs leading-relaxed">
+            <strong class="uppercase text-xs font-bold text-secondary">Peringatan:</strong>
+            Buzzer dan layar TV mati saat waktu habis. Perpanjang sebelum <span class="font-bold bg-[#FEE2E2] text-error px-1 py-0.5 neo-border-2">00:00:00</span> agar main tanpa jeda.
+        </div>
+    </section>
 
-                {{-- Item 3 --}}
-                <div class="bg-surface-container-low neo-border-2 p-2.5 flex flex-col justify-between">
-                    <div class="min-h-[42px]">
-                        <div class="font-headline-sm text-xs font-bold text-on-surface leading-snug line-clamp-2">
-                            Es Teh Manis Jumbo
-                        </div>
-                        <div class="font-label-sm text-xs text-primary font-bold mt-1">Rp 6.000</div>
-                    </div>
-                    <button
-                        class="neo-btn mt-2.5 w-full bg-on-surface hover:bg-slate-800 text-surface-container-lowest font-label-sm text-[11px] font-bold py-1.5 px-2 neo-border-2 neo-shadow-sm flex items-center justify-center gap-1"
-                        onclick="orderQuick('Es Teh Manis Jumbo', 6000)">
-                        <span class="material-symbols-outlined text-xs">add</span> PESAN
-                    </button>
-                </div>
-
-                {{-- Item 4 --}}
-                <div class="bg-surface-container-low neo-border-2 p-2.5 flex flex-col justify-between">
-                    <div class="min-h-[42px]">
-                        <div class="font-headline-sm text-xs font-bold text-on-surface leading-snug line-clamp-2">
-                            Snack Keripik Pedas
-                        </div>
-                        <div class="font-label-sm text-xs text-primary font-bold mt-1">Rp 8.000</div>
-                    </div>
-                    <button
-                        class="neo-btn mt-2.5 w-full bg-on-surface hover:bg-slate-800 text-surface-container-lowest font-label-sm text-[11px] font-bold py-1.5 px-2 neo-border-2 neo-shadow-sm flex items-center justify-center gap-1"
-                        onclick="orderQuick('Snack Keripik', 8000)">
-                        <span class="material-symbols-outlined text-xs">add</span> PESAN
-                    </button>
-                </div>
-
-            </div>
-
-        </section>
-
-        {{-- ===================== 6. OPERATIONAL ALERT NOTICE ===================== --}}
-        <section class="w-full bg-[#FFFBEB] neo-border-2 p-3 mb-3.5 flex items-start gap-2.5 neo-shadow-sm">
-            <span class="material-symbols-outlined text-secondary font-bold text-xl shrink-0 mt-0.5">warning</span>
-            <div class="font-body-sm text-xs text-on-surface leading-relaxed">
-                <strong class="font-headline-sm uppercase text-xs font-bold text-secondary">Peringatan:</strong>
-                Buzzer otomatis dan layar TV akan mati saat waktu habis. Perpanjang waktu sebelum timer mencapai
-                <span class="font-label-sm font-bold bg-[#FEE2E2] text-error px-1 py-0.5 neo-border-2">00:00:00</span>
-                untuk terus bermain tanpa jeda.
-            </div>
-        </section>
-
-        {{-- ===================== 7. FOOTER & EMERGENCY ACTION ===================== --}}
-        <footer class="w-full mt-auto flex flex-col gap-2.5 pt-1">
-            <button
-                class="neo-btn w-full min-h-[48px] bg-surface-container-lowest hover:bg-surface-container text-on-surface p-3 neo-border-2 neo-shadow-md flex items-center justify-center gap-2 font-headline-sm text-xs sm:text-sm font-extrabold tracking-tight uppercase"
-                onclick="callCashier()">
+    <footer class="w-full mt-auto flex flex-col gap-2.5 pt-1">
+        <form method="POST" action="{{ route('customer.call-cashier', $tv->id) }}">
+            @csrf
+            <button class="neo-btn w-full min-h-[48px] bg-surface-container-lowest p-3 neo-border-2 neo-shadow-md flex items-center justify-center gap-2 font-headline-sm text-xs sm:text-sm font-extrabold uppercase">
                 <span class="material-symbols-outlined text-primary text-xl">support_agent</span>
-                <span>PANGGIL KASIR KE MEJA PS 03</span>
+                <span>PANGGIL KASIR KE MEJA {{ $tv->name }}</span>
             </button>
-            <div class="text-center font-label-sm text-[10px] text-on-surface-variant flex items-center justify-center gap-1.5 py-1">
-                <span class="material-symbols-outlined text-xs">lock</span>
-                <span>KONEKSI ENKRIPSI SISTEM TAMBAHBANG MATRIX &bull; TANPA LOGIN</span>
-            </div>
-        </footer>
+        </form>
+        <div class="text-center font-label-sm text-[10px] text-on-surface-variant flex items-center justify-center gap-1.5 py-1">
+            <span class="material-symbols-outlined text-xs">lock</span>
+            <span>KONEKSI ENKRIPSI SISTEM TAMBAHBANG MATRIX • TANPA LOGIN</span>
+        </div>
+    </footer>
 
-        {{-- ===================== MODAL: EXTEND TIME ===================== --}}
-        <div class="fixed inset-0 bg-on-surface/60 z-50 hidden flex-col justify-end backdrop-blur-[1px]" id="modal-extend">
-            <div class="w-full max-w-md mx-auto bg-surface-container-lowest neo-border-3 border-b-0 p-4 neo-shadow-lg flex flex-col gap-3.5">
-
-                <div class="flex items-center justify-between border-b-2 border-on-surface pb-2.5">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-secondary-container text-2xl font-bold">bolt</span>
-                        <h3 class="font-headline-sm text-sm font-extrabold uppercase">TAMBAH WAKTU SEWA</h3>
-                    </div>
-                    <button
-                        class="neo-btn w-8 h-8 bg-surface-container neo-border-2 flex items-center justify-center font-bold"
-                        onclick="closeModal('modal-extend')">
-                        <span class="material-symbols-outlined text-lg">close</span>
-                    </button>
-                </div>
-
-                <p class="font-body-sm text-xs text-on-surface-variant leading-relaxed">
-                    Pilih durasi tambahan waktu bermain Anda. Tagihan akan otomatis dimasukkan ke kasir.
-                </p>
-
-                <div class="grid grid-cols-3 gap-2 font-label-md">
-                    <button
-                        class="neo-btn p-2.5 bg-surface neo-border-2 neo-shadow-sm flex flex-col items-center gap-1 hover:bg-surface-container-high"
-                        onclick="submitExtend('+30 Menit', 15000)">
-                        <span class="font-bold text-sm text-on-surface">+30m</span>
-                        <span class="text-[10px] text-on-surface-variant">Rp 15.000</span>
-                    </button>
-                    <button
-                        class="neo-btn p-2.5 bg-secondary-container text-surface-container-lowest neo-border-2 neo-shadow-sm flex flex-col items-center gap-1"
-                        onclick="submitExtend('+1 Jam', 25000)">
-                        <span class="font-bold text-sm">+1 Jam</span>
-                        <span class="text-[10px]">Rp 25.000</span>
-                    </button>
-                    <button
-                        class="neo-btn p-2.5 bg-surface neo-border-2 neo-shadow-sm flex flex-col items-center gap-1 hover:bg-surface-container-high"
-                        onclick="submitExtend('+2 Jam', 45000)">
-                        <span class="font-bold text-sm text-on-surface">+2 Jam</span>
-                        <span class="text-[10px] text-on-surface-variant">Rp 45.000</span>
-                    </button>
-                </div>
-
-                <button
-                    class="neo-btn w-full bg-surface-container neo-border-2 py-2.5 font-label-md text-xs font-bold text-on-surface mt-1"
-                    onclick="closeModal('modal-extend')">
-                    BATALKAN
+    {{-- Modal extend → POST real ke DB --}}
+    <div class="fixed inset-0 bg-on-surface/60 z-50 hidden flex-col justify-end backdrop-blur-[1px]" id="order-modal-extend">
+        <form method="POST" action="{{ route('customer.add-time', $tv->id) }}" class="w-full max-w-md mx-auto bg-surface-container-lowest neo-border-3 border-b-0 p-4 neo-shadow-lg flex flex-col gap-3.5">
+            @csrf
+            <div class="flex items-center justify-between border-b-2 border-on-surface pb-2.5">
+                <h3 class="font-headline-sm text-sm font-extrabold uppercase">TAMBAH WAKTU SEWA</h3>
+                <button type="button" class="w-8 h-8 bg-surface-container neo-border-2 flex items-center justify-center font-bold" onclick="document.getElementById('order-modal-extend').classList.add('hidden');document.getElementById('order-modal-extend').classList.remove('flex');">
+                    <span class="material-symbols-outlined text-lg">close</span>
                 </button>
-
             </div>
-        </div>
-
-        {{-- ===================== NOTIFICATION TOAST ===================== --}}
-        <div
-            class="fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-sm bg-on-surface text-surface-container-lowest neo-border-2 p-3 neo-shadow-lg z-50 hidden items-center gap-2 font-label-md text-xs"
-            id="toast">
-            <span class="material-symbols-outlined text-tertiary-fixed text-lg shrink-0" style="font-variation-settings: 'FILL' 1;">
-                check_circle
-            </span>
-            <span id="toast-msg">Permintaan terkirim ke kasir!</span>
-        </div>
-
+            <p class="text-xs text-on-surface-variant">Request dikirim ke kasir. Timer bertambah otomatis setelah disetujui.</p>
+            <div class="grid grid-cols-3 gap-2">
+                @php $rate = $tv->price_per_hour; @endphp
+                <button type="submit" name="duration_hours" value="0.5" class="p-2.5 bg-surface neo-border-2 neo-shadow-sm flex flex-col items-center gap-1"><span class="font-bold text-sm">+30m</span><span class="text-[10px] text-on-surface-variant">Rp {{ number_format($rate * 0.5, 0, ',', '.') }}</span></button>
+                <button type="submit" name="duration_hours" value="1" class="p-2.5 bg-secondary-container text-white neo-border-2 neo-shadow-sm flex flex-col items-center gap-1"><span class="font-bold text-sm">+1 Jam</span><span class="text-[10px]">Rp {{ number_format($rate, 0, ',', '.') }}</span></button>
+                <button type="submit" name="duration_hours" value="2" class="p-2.5 bg-surface neo-border-2 neo-shadow-sm flex flex-col items-center gap-1"><span class="font-bold text-sm">+2 Jam</span><span class="text-[10px] text-on-surface-variant">Rp {{ number_format($rate * 2, 0, ',', '.') }}</span></button>
+            </div>
+            <button type="button" class="w-full bg-surface-container neo-border-2 py-2.5 text-xs font-bold" onclick="document.getElementById('order-modal-extend').classList.add('hidden');document.getElementById('order-modal-extend').classList.remove('flex');">BATALKAN</button>
+        </form>
+    </div>
 </div>
-
 @endsection
 
 @push('scripts')
 <script>
-    let totalSeconds = (1 * 3600) + (24 * 60) + 28;
-    const timerElement = document.getElementById('countdown-timer');
+(function(){
+  const tvId = document.getElementById('order-page').dataset.tvId;
+  const timerEl = document.getElementById('order-countdown');
+  function fmt(s){ s = Math.max(0, s); return [s/3600, (s%3600)/60, s%60].map(v => String(Math.floor(v)).padStart(2,'0')).join(':'); }
+  function tick(){
+    if(!timerEl) return;
+    const now = Math.floor(Date.now()/1000);
+    const type = timerEl.dataset.type;
+    const start = parseInt(timerEl.dataset.start) || 0;
+    const end = parseInt(timerEl.dataset.end) || 0;
+    if(type === 'prepaid' && end > 0){ timerEl.textContent = fmt(end - now); if(end - now <= 0) timerEl.classList.add('text-error'); }
+    else if(type === 'postpaid' && start > 0){ timerEl.textContent = fmt(now - start); }
+  }
+  tick(); setInterval(tick, 1000);
 
-    function updateTimer() {
-        if (!timerElement) return;
-        if (totalSeconds <= 0) {
-            timerElement.textContent = "00:00:00";
-            timerElement.classList.add("text-error");
-            return;
+  async function pollOrder(){
+    try{
+      const res = await fetch(`/customer/${tvId}/status`);
+      if(!res.ok) return;
+      const data = await res.json();
+      if(data.session){
+        if(timerEl){
+          timerEl.dataset.type = data.session.billing_type;
+          if(data.session.billing_type === 'prepaid' && data.session.end_time){
+            const [h, m] = data.session.end_time.split(':').map(Number);
+            const d = new Date(); d.setHours(h, m, 0, 0);
+            let ts = Math.floor(d.getTime()/1000);
+            if(ts*1000 < Date.now() - 12*3600*1000) ts += 86400;
+            timerEl.dataset.end = ts;
+          }
         }
-        totalSeconds--;
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-
-        timerElement.textContent =
-            String(hours).padStart(2, '0') + ":" +
-            String(minutes).padStart(2, '0') + ":" +
-            String(seconds).padStart(2, '0');
-    }
-
-    setInterval(updateTimer, 1000);
-
-    function handleAction(type) {
-        if (type === 'extend') {
-            document.getElementById('modal-extend').classList.remove('hidden');
-            document.getElementById('modal-extend').classList.add('flex');
-        } else if (type === 'menu') {
-            showToast("Membuka katalog F&B lengkap...");
+        const set = (id, v) => { const el = document.getElementById(id); if(el) el.innerText = v; };
+        set('order-rental-amount', 'Rp ' + data.session.rental_amount.toLocaleString('id-ID'));
+        set('order-fnb-amount', 'Rp ' + data.session.fnb_amount.toLocaleString('id-ID'));
+        set('order-grand-total', 'Rp ' + data.session.total_amount.toLocaleString('id-ID'));
+      }
+      const box = document.getElementById('order-requests');
+      const count = document.getElementById('order-req-count');
+      if(box && data.requests){
+        const pend = data.requests.filter(r => r.status === 'pending').length;
+        if(count) count.innerText = pend + ' AKTIF';
+        if(data.requests.length){
+          box.innerHTML = data.requests.slice(0, 5).map(req => {
+            const isTime = req.type === 'add_time', isService = req.type === 'service_call';
+            const title = isTime ? `+${req.payload.duration_hours || 1} Jam (Rp ${(req.payload.price || 0).toLocaleString('id-ID')})`
+              : (isService ? (req.payload.note || 'Panggil kasir') : (req.payload.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ') || 'Pesanan F&B');
+            const badge = req.status === 'pending' ? '<div class="bg-[#FFF4D6] text-secondary neo-border-2 px-2 py-0.5 font-label-sm text-[10px] font-bold whitespace-nowrap">MENUNGGU KASIR</div>'
+              : (req.status === 'approved' ? '<div class="bg-tertiary-fixed text-on-tertiary-fixed neo-border-2 px-2 py-0.5 font-label-sm text-[10px] font-bold whitespace-nowrap">DISETUJUI</div>'
+              : '<div class="bg-error-container text-error neo-border-2 px-2 py-0.5 font-label-sm text-[10px] font-bold whitespace-nowrap">DITOLAK</div>');
+            return `<div class="bg-surface-container-lowest neo-border-2 p-3 neo-shadow-sm flex flex-col gap-1.5">
+              <div class="flex items-start justify-between gap-2">
+                <span class="font-headline-sm text-xs font-bold truncate">${title}</span>${badge}
+              </div><p class="text-xs text-on-surface-variant">${req.time}</p></div>`;
+          }).join('');
         }
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
-        document.getElementById(id).classList.remove('flex');
-    }
-
-    function submitExtend(duration, price) {
-        closeModal('modal-extend');
-        showToast(`Request ${duration} (Rp ${price.toLocaleString('id-ID')}) dikirim ke kasir!`);
-    }
-
-    function orderQuick(item, price) {
-        showToast(`Pesanan 1x ${item} berhasil dikirim!`);
-    }
-
-    function callCashier() {
-        showToast("Buzzer Meja PS 03 berbunyi di kasir. Mohon tunggu!");
-    }
-
-    function showToast(message) {
-        const toast = document.getElementById('toast');
-        const msg = document.getElementById('toast-msg');
-        msg.textContent = message;
-        toast.classList.remove('hidden');
-        toast.classList.add('flex');
-        setTimeout(() => {
-            toast.classList.add('hidden');
-            toast.classList.remove('flex');
-        }, 3000);
-    }
+      }
+    }catch(e){ console.log('order sync error', e); }
+  }
+  setInterval(pollOrder, 3000);
+})();
 </script>
 @endpush

@@ -124,17 +124,18 @@
           $isPending = $req->status === 'pending';
           $isApproved = $req->status === 'approved';
           $isTime = $req->type === 'add_time';
+          $isService = $req->type === 'service_call';
           $payload = $req->payload;
         @endphp
 
         <div class="p-3.5 bg-surface-container-lowest border-2 border-on-surface neo-shadow-sm flex items-start justify-between gap-2">
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 mb-1">
-              <span class="material-symbols-outlined text-base {{ $isTime ? 'text-secondary' : 'text-primary' }}">
-                {{ $isTime ? 'more_time' : 'restaurant' }}
+              <span class="material-symbols-outlined text-base {{ $isTime ? 'text-secondary' : ($isService ? 'text-tertiary' : 'text-primary') }}">
+                {{ $isTime ? 'more_time' : ($isService ? 'support_agent' : 'restaurant') }}
               </span>
               <span class="font-headline-sm text-xs font-bold uppercase">
-                {{ $isTime ? 'Tambah Waktu' : 'Pesanan F&B' }}
+                {{ $isTime ? 'Tambah Waktu' : ($isService ? 'Panggil Kasir' : 'Pesanan F&B') }}
               </span>
               <span class="text-[10px] font-label-sm text-on-surface-variant font-bold">• {{ $req->created_at->format('H:i') }}</span>
             </div>
@@ -142,6 +143,10 @@
             @if ($isTime)
               <p class="text-xs font-body-md text-on-surface">
                 +{{ $payload['duration_hours'] ?? 1 }} Jam (Rp {{ number_format($payload['price'] ?? 0, 0, ',', '.') }})
+              </p>
+            @elseif ($isService)
+              <p class="text-xs font-body-md text-on-surface">
+                {{ $payload['note'] ?? 'Kasir dipanggil ke meja.' }}
               </p>
             @else
               <p class="text-xs font-body-md text-on-surface line-clamp-1">
@@ -414,28 +419,31 @@
         let html = '';
         data.requests.forEach(req => {
           const isTime = req.type === 'add_time';
+          const isService = req.type === 'service_call';
           const isPending = req.status === 'pending';
           const isApproved = req.status === 'approved';
 
-          let statusBadge = isPending 
+          let statusBadge = isPending
             ? '<span class="px-2 py-1 bg-secondary-container text-on-secondary font-headline-sm text-[10px] font-black uppercase border border-on-surface animate-pulse">MENUNGGU KASIR</span>'
-            : (isApproved 
+            : (isApproved
               ? '<span class="px-2 py-1 bg-emerald-100 text-emerald-900 font-headline-sm text-[10px] font-black uppercase border border-on-surface">✓ DISETUJUI</span>'
               : '<span class="px-2 py-1 bg-red-100 text-red-900 font-headline-sm text-[10px] font-black uppercase border border-on-surface">✗ DITOLAK</span>');
 
-          let details = isTime 
+          let details = isTime
             ? `+${req.payload.duration_hours || 1} Jam (Rp ${(req.payload.price || 0).toLocaleString('id-ID')})`
-            : (req.payload.items ? req.payload.items.map(i => `${i.quantity}x ${i.name}`).join(', ') : 'Pesanan F&B');
+            : (isService
+              ? (req.payload.note || 'Kasir dipanggil ke meja.')
+              : (req.payload.items ? req.payload.items.map(i => `${i.quantity}x ${i.name}`).join(', ') : 'Pesanan F&B'));
 
           html += `
             <div class="p-3.5 bg-surface-container-lowest border-2 border-on-surface neo-shadow-sm flex items-start justify-between gap-2">
               <div class="min-w-0">
                 <div class="flex items-center gap-1.5 mb-1">
-                  <span class="material-symbols-outlined text-base ${isTime ? 'text-secondary' : 'text-primary'}">
-                    ${isTime ? 'more_time' : 'restaurant'}
+                  <span class="material-symbols-outlined text-base ${isTime ? 'text-secondary' : (isService ? 'text-tertiary' : 'text-primary')}">
+                    ${isTime ? 'more_time' : (isService ? 'support_agent' : 'restaurant')}
                   </span>
                   <span class="font-headline-sm text-xs font-bold uppercase">
-                    ${isTime ? 'Tambah Waktu' : 'Pesanan F&B'}
+                    ${isTime ? 'Tambah Waktu' : (isService ? 'Panggil Kasir' : 'Pesanan F&B')}
                   </span>
                   <span class="text-[10px] font-label-sm text-on-surface-variant font-bold">• ${req.time}</span>
                 </div>

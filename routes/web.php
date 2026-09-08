@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KasirController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\RequestCenterController;
@@ -33,12 +34,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Public Customer Routes (Accessed via QR Code - No Login Required)
 Route::prefix('customer')->name('customer.')->group(function () {
-    Route::get('/order', function () {
-        return view('customer.order');
-    })->name('order');
+    Route::get('/order', [CustomerController::class, 'order'])->name('order');
     Route::get('/{tv_id}', [CustomerController::class, 'index'])->name('index');
     Route::post('/{tv_id}/add-time', [CustomerController::class, 'requestAddTime'])->name('add-time');
     Route::post('/{tv_id}/order-food', [CustomerController::class, 'requestFood'])->name('order-food');
+    Route::post('/{tv_id}/call-cashier', [CustomerController::class, 'callCashier'])->name('call-cashier');
     Route::get('/{tv_id}/status', [CustomerController::class, 'apiStatus'])->name('status');
 });
 // QR short url alias
@@ -93,30 +93,34 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 });
 
-// Simple Kasir view routes (legacy / mockup)
-Route::prefix('kasir')->name('kasir.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('kasir.dashboard');
-    })->name('dashboard');
-    Route::get('/pos', function () {
-        return view('kasir.pos');
-    })->name('pos');
-    Route::get('/menu', function () {
-        return view('kasir.menu');
-    })->name('menu');
-    Route::get('/request', function () {
-        return view('kasir.request');
-    })->name('request');
-    Route::get('/setting', function () {
-        return view('kasir.setting');
-    })->name('setting');
-    Route::get('/sift', function () {
-        return view('kasir.sift');
-    })->name('sift');
-    Route::get('/transaksi', function () {
-        return view('kasir.transaksi');
-    })->name('transaksi');
-    Route::get('/unit', function () {
-        return view('kasir.unit');
-    })->name('unit');
+// Kasir routes — tersambung ke database via KasirController
+Route::middleware('auth')->prefix('kasir')->name('kasir.')->group(function () {
+    Route::get('/dashboard', [KasirController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/api-status', [KasirController::class, 'apiStatus'])->name('dashboard.api-status');
+
+    Route::get('/pos', [KasirController::class, 'pos'])->name('pos');
+    Route::get('/menu', [KasirController::class, 'menu'])->name('menu');
+    Route::post('/pos/order', [KasirController::class, 'storeOrder'])->name('pos.order');
+
+    Route::get('/request', [KasirController::class, 'requests'])->name('request');
+    Route::post('/request/{id}/approve', [KasirController::class, 'approveRequest'])->name('request.approve');
+    Route::post('/request/{id}/reject', [KasirController::class, 'rejectRequest'])->name('request.reject');
+
+    Route::get('/transaksi', [KasirController::class, 'transaksi'])->name('transaksi');
+    Route::get('/sift', [KasirController::class, 'sift'])->name('sift');
+    Route::post('/shifts/start', [KasirController::class, 'startShift'])->name('shifts.start');
+    Route::post('/shifts/{id}/end', [KasirController::class, 'endShift'])->name('shifts.end');
+
+    Route::get('/unit', [KasirController::class, 'unit'])->name('unit');
+    Route::post('/unit/{id}/toggle', [KasirController::class, 'toggleUnit'])->name('unit.toggle');
+
+    Route::get('/setting', [KasirController::class, 'setting'])->name('setting');
+    Route::post('/setting', [KasirController::class, 'updateSetting'])->name('setting.update');
+
+    // Aksi rental kasir
+    Route::post('/rental/start', [KasirController::class, 'startRental'])->name('rental.start');
+    Route::post('/rental/{sessionId}/extend', [KasirController::class, 'extendRental'])->name('rental.extend');
+    Route::post('/rental/{sessionId}/add-fnb', [KasirController::class, 'addFnb'])->name('rental.add-fnb');
+    Route::post('/rental/{sessionId}/checkout', [KasirController::class, 'checkout'])->name('rental.checkout');
+    Route::post('/rental/{tvId}/toggle-buzzer', [KasirController::class, 'toggleBuzzer'])->name('rental.toggle-buzzer');
 });
