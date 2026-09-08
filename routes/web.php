@@ -13,6 +13,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
     })->name('order');
 });
 
+
 Route::prefix('kasir')->name('kasir.')->group(function () {
 
     Route::get('/dashboard', function () {
