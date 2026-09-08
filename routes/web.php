@@ -46,16 +46,11 @@ Route::get('/scan/{tv_id}', function ($tv_id) {
     return redirect()->route('customer.index', ['tv_id' => $tv_id]);
 });
 
-<<<<<<< HEAD
 // Protected Cashier / Admin Routes
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Operational Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/api-status', [DashboardController::class, 'apiStatus'])->name('dashboard.api-status');
-=======
-
-Route::prefix('kasir')->name('kasir.')->group(function () {
->>>>>>> 2dc800a29d9a93c8d54db15ce1cb5adce4412d51
 
     // Rental / Session Controls
     Route::post('/rental/start', [RentalController::class, 'start'])->name('rental.start');
