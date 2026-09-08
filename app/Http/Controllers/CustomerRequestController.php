@@ -2,38 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CustomerRequestResource;
 use App\Models\CustomerRequest;
+use App\Models\Tv;
+use App\Services\CustomerRequestService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CustomerRequestController extends Controller
 {
+    public function __construct(
+        protected CustomerRequestService $customerRequestService
+    ) {}
+
     /**
-     * Menyimpan permintaan pelanggan dari QR code di meja.
+     * Menyimpan permintaan pelanggan dari QR code di meja (Publik Endpoint).
      */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'tv_id' => 'required|exists:tvs,id',
+            'tv_id' => 'required|integer|exists:tvs,id',
             'type' => 'required|in:add_time,order_food,service_call',
-            'payload' => 'nullable|array',
+            'payload' => 'required|array',
+            'payload.product_id' => 'required_if:type,order_food|nullable|integer|exists:products,id',
+            'payload.quantity' => 'required_if:type,order_food|nullable|integer|min:1',
+            'payload.duration_minutes' => 'required_if:type,add_time|nullable|integer|min:30',
         ]);
 
-        $customerRequest = CustomerRequest::create([
-            'tv_id' => $validated['tv_id'],
-            'type' => $validated['type'],
-            'payload' => $validated['payload'] ?? [],
-            'status' => 'pending',
-        ]);
+        $tv = Tv::findOrFail($validated['tv_id']);
 
-        return response()->json([
-            'message' => 'Permintaan berhasil dikirim ke kasir.',
-            'data' => $customerRequest->load('tv'),
-        ], 201);
+        try {
+            $customerRequest = $this->customerRequestService->createRequest(
+                $tv,
+                $validated['type'],
+                $validated['payload']
+            );
+
+            return response()->json([
+                'message' => 'Request berhasil dikirim. Mohon tunggu konfirmasi kasir.',
+                'data' => new CustomerRequestResource($customerRequest->load('tv')),
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
     /**
-     * Menampilkan daftar permintaan pelanggan berstatus pending untuk kasir.
+     * Menampilkan daftar permintaan pelanggan berstatus pending untuk kasir (Protected Endpoint).
      */
     public function index(): JsonResponse
     {
@@ -43,12 +61,54 @@ class CustomerRequestController extends Controller
             ->get();
 
         return response()->json([
-            'data' => $requests,
+            'data' => CustomerRequestResource::collection($requests),
         ]);
     }
 
     /**
-     * Memproses (approve/reject) permintaan pelanggan oleh kasir.
+     * Menyetujui permintaan pelanggan (Protected Endpoint).
+     */
+    public function approve(int $id): JsonResponse
+    {
+        $customerRequest = CustomerRequest::findOrFail($id);
+
+        try {
+            $approved = $this->customerRequestService->approveRequest($customerRequest);
+
+            return response()->json([
+                'message' => 'Request berhasil di-approve.',
+                'data' => new CustomerRequestResource($approved),
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Menolak permintaan pelanggan (Protected Endpoint).
+     */
+    public function reject(int $id): JsonResponse
+    {
+        $customerRequest = CustomerRequest::findOrFail($id);
+
+        try {
+            $rejected = $this->customerRequestService->rejectRequest($customerRequest);
+
+            return response()->json([
+                'message' => 'Request berhasil di-reject.',
+                'data' => new CustomerRequestResource($rejected),
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Update status request opsional/legacy.
      */
     public function update(Request $request, CustomerRequest $customerRequest): JsonResponse
     {
@@ -56,13 +116,10 @@ class CustomerRequestController extends Controller
             'status' => 'required|in:approved,rejected',
         ]);
 
-        $customerRequest->update([
-            'status' => $validated['status'],
-        ]);
+        if ($validated['status'] === 'approved') {
+            return $this->approve($customerRequest->id);
+        }
 
-        return response()->json([
-            'message' => 'Status permintaan berhasil diperbarui.',
-            'data' => $customerRequest->fresh('tv'),
-        ]);
+        return $this->reject($customerRequest->id);
     }
 }

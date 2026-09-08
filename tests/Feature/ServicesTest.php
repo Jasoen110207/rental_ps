@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\PlaySession;
 use App\Models\Product;
 use App\Models\Tv;
 use App\Models\User;
@@ -25,7 +24,7 @@ class ServicesTest extends TestCase
             'status' => 'available',
         ]);
 
-        $service = new PlaySessionService();
+        $service = new PlaySessionService;
 
         // 1. Start Session
         $session = $service->startSession($tv, $user, 'postpaid');
@@ -58,10 +57,10 @@ class ServicesTest extends TestCase
             'stock' => 20,
         ]);
 
-        $playService = new PlaySessionService();
-        $orderService = new OrderService();
+        $playService = new PlaySessionService;
+        $orderService = new OrderService;
 
-        $session = $playService->startSession($tv, $user, 'prepaid');
+        $session = $playService->startSession($tv, $user, 'prepaid', 60);
 
         // Add food
         $order = $orderService->addFoodToSession($session, $product, 2);

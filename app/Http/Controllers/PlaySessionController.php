@@ -7,6 +7,7 @@ use App\Models\PlaySession;
 use App\Models\Tv;
 use App\Services\OrderService;
 use App\Services\PlaySessionService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,13 +27,15 @@ class PlaySessionController extends Controller
         $validated = $request->validate([
             'tv_id' => 'required|exists:tvs,id',
             'billing_type' => 'required|in:prepaid,postpaid',
+            'duration_minutes' => 'required_if:billing_type,prepaid|nullable|integer|min:30',
         ]);
 
         $tv = Tv::findOrFail($validated['tv_id']);
-        $kasir = $request->user() ?? \App\Models\User::where('role', 'kasir')->first() ?? \App\Models\User::first();
+        $kasir = $request->user();
 
         try {
-            $session = $this->playSessionService->startSession($tv, $kasir, $validated['billing_type']);
+            $duration = isset($validated['duration_minutes']) ? (int) $validated['duration_minutes'] : null;
+            $session = $this->playSessionService->startSession($tv, $kasir, $validated['billing_type'], $duration);
 
             return response()->json([
                 'message' => 'Sesi bermain berhasil dimulai.',
@@ -62,5 +65,29 @@ class PlaySessionController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    /**
+     * Detail sesi bermain beserta status sisa waktu.
+     */
+    public function show(int $id): JsonResponse
+    {
+        $session = PlaySession::with(['tv', 'user', 'sessionOrders.product'])->findOrFail($id);
+
+        $extra = [];
+
+        if ($session->billing_type === 'prepaid' && $session->status === 'active') {
+            $duration = $session->duration_minutes ?? 0;
+            $endTime = $session->end_time ?? Carbon::parse($session->start_time)->addMinutes($duration);
+            $remainingMinutes = max(0, (int) Carbon::now()->diffInMinutes($endTime, false));
+
+            $extra['remaining_minutes'] = $remainingMinutes;
+            $extra['is_expired'] = Carbon::now()->greaterThanOrEqualTo($endTime);
+        }
+
+        return response()->json([
+            'data' => new PlaySessionResource($session),
+            'time_info' => $extra,
+        ]);
     }
 }

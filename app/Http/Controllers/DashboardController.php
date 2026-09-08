@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TvResource;
 use App\Models\CustomerRequest;
-use App\Models\PlaySession;
 use App\Models\Product;
 use App\Models\Shift;
 use App\Models\Tv;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $tvs = Tv::with(['playSessions' => function ($query) {
             $query->where('status', 'active')->with('sessionOrders.product');
@@ -21,13 +20,17 @@ class DashboardController extends Controller
             $query->where('status', 'pending');
         }])->orderBy('id')->get();
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return TvResource::collection($tvs);
+        }
+
         $now = Carbon::now();
 
         // Calculate summary counters
         $totalUnits = $tvs->count();
         $availableUnits = $tvs->where('status', 'available')->count();
         $playingUnits = $tvs->where('status', 'playing')->count();
-        
+
         $almostFinishedUnits = 0;
         $timeUpUnits = 0;
 

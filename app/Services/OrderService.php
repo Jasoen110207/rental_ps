@@ -13,16 +13,12 @@ class OrderService
     /**
      * Menambahkan pesanan makanan/minuman ke dalam sesi bermain yang sedang aktif.
      *
-     * @param PlaySession $session
-     * @param Product $product
-     * @param int $quantity
-     * @return SessionOrder
      * @throws Exception
      */
     public function addFoodToSession(PlaySession $session, Product $product, int $quantity): SessionOrder
     {
         if ($session->status !== 'active') {
-            throw new Exception("Tidak dapat menambah pesanan ke sesi yang sudah selesai.");
+            throw new Exception('Tidak dapat menambah pesanan ke sesi yang sudah selesai.');
         }
 
         if ($product->stock < $quantity) {

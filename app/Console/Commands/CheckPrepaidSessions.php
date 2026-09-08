@@ -32,44 +32,58 @@ class CheckPrepaidSessions extends Command
     {
         $now = Carbon::now();
 
-        // Ambil sesi prepaid yang aktif dan memiliki end_time yang sudah lewat dari sekarang
-        $expiredSessions = PlaySession::with('tv')
+        $activePrepaidSessions = PlaySession::with('tv')
             ->where('status', 'active')
             ->where('billing_type', 'prepaid')
-            ->whereNotNull('end_time')
-            ->where('end_time', '<=', $now)
             ->get();
 
-        $count = 0;
+        $endedCount = 0;
+        $warnedCount = 0;
 
-        foreach ($expiredSessions as $session) {
-            try {
-                // 1. Akhiri sesi bermain secara otomatis via service
-                $playSessionService->endSession($session);
+        foreach ($activePrepaidSessions as $session) {
+            $endTime = $session->end_time
+                ?? ($session->duration_minutes ? Carbon::parse($session->start_time)->addMinutes($session->duration_minutes) : null);
 
-                // 2. Aktifkan buzzer pada TV sebagai indikator UI/suara di frontend
-                $session->tv->update(['is_buzzer_on' => true]);
+            if (! $endTime) {
+                continue;
+            }
 
-                // 3. Simulasi webhook hardware/IoT jika endpoint diset
-                if ($session->tv->iot_endpoint) {
-                    try {
-                        Http::timeout(3)->post($session->tv->iot_endpoint, [
-                            'action' => 'turn_off_relay',
-                            'tv_id' => $session->tv_id,
-                            'session_id' => $session->id,
-                        ]);
-                    } catch (\Throwable $e) {
-                        Log::warning("Gagal mengirim webhook IoT untuk TV ID {$session->tv_id}: " . $e->getMessage());
-                    }
+            $remainingMinutes = (int) $now->diffInMinutes($endTime, false);
+
+            if ($remainingMinutes <= 5 && $remainingMinutes > 0) {
+                if (! $session->tv->is_buzzer_on) {
+                    $session->tv->update(['is_buzzer_on' => true]);
+                    $warnedCount++;
+                    $this->info("⚠️ TV '{$session->tv->name}': Sisa waktu {$remainingMinutes} menit. Buzzer diaktifkan.");
                 }
+            }
 
-                $count++;
-            } catch (\Throwable $e) {
-                Log::error("Error menghentikan sesi prepaid ID {$session->id}: " . $e->getMessage());
+            if ($remainingMinutes <= 0) {
+                try {
+                    $playSessionService->endSession($session);
+                    $session->tv->update(['is_buzzer_on' => true]);
+
+                    if ($session->tv->iot_endpoint) {
+                        try {
+                            Http::timeout(3)->post($session->tv->iot_endpoint, [
+                                'action' => 'turn_off_relay',
+                                'tv_id' => $session->tv_id,
+                                'session_id' => $session->id,
+                            ]);
+                        } catch (\Throwable $e) {
+                            Log::warning("Gagal mengirim webhook IoT untuk TV ID {$session->tv_id}: ".$e->getMessage());
+                        }
+                    }
+
+                    $endedCount++;
+                    $this->info("⏹️ TV '{$session->tv->name}': Waktu habis. Sesi otomatis dihentikan.");
+                } catch (\Throwable $e) {
+                    Log::error("Error menghentikan sesi prepaid ID {$session->id}: ".$e->getMessage());
+                }
             }
         }
 
-        $this->info("Berhasil memproses {$count} sesi prepaid yang habis.");
+        $this->info("Pengecekan selesai. Warned: {$warnedCount}, Ended: {$endedCount}");
 
         return Command::SUCCESS;
     }
