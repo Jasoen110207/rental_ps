@@ -759,7 +759,7 @@
           }
         });
         if (hasAlarm) {
-          playBeep(900, 'sawtooth', 0.25);
+          playAlarmBeep();
         }
 
         // Update Notification Slide-Over Drawer

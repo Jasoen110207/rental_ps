@@ -481,7 +481,7 @@ async function pollKasirStatus(){
     }
     let alarm = false;
     data.tvs.forEach(tv => { if(tv.is_buzzer_on) alarm = true; });
-    if(alarm) playBeep(900, 'sawtooth', 0.25);
+    if(alarm) playAlarmBeep();
   }catch(e){ console.log('poll error', e); }
 }
 pollKasirStatus();

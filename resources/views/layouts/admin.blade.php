@@ -369,6 +369,31 @@
       }
     }
 
+    function playAlarmBeep() {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const now = audioCtx.currentTime;
+        for (let i = 0; i < 6; i++) {
+          const t = now + i * 0.11;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.value = 900;
+          gain.gain.setValueAtTime(0.12, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.08);
+        }
+      } catch (e) {
+        console.log('Audio playback blocked or unavailable', e);
+      }
+    }
+
     function toggleAudioAlerts() {
       soundEnabled = !soundEnabled;
       const icon = document.getElementById('audio-icon');
