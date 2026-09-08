@@ -314,9 +314,9 @@
   </div>
 
   <!-- NOTIFICATION SLIDE-OVER DRAWER -->
-  <div id="notification-drawer" class="fixed inset-0 z-50 pointer-events-none transition-all opacity-0">
-    <div onclick="toggleNotificationDrawer()" class="fixed inset-0 bg-on-surface/40 pointer-events-auto backdrop-blur-xs"></div>
-    <div class="fixed right-0 top-0 h-screen w-96 bg-surface-container-lowest border-l-2 border-on-surface p-6 overflow-y-auto pointer-events-auto flex flex-col justify-between neo-shadow-lg transform translate-x-full transition-transform duration-200" id="drawer-panel">
+  <div id="notification-drawer" class="fixed inset-0 z-50 hidden">
+    <div onclick="toggleNotificationDrawer()" class="fixed inset-0 bg-on-surface/40 backdrop-blur-xs"></div>
+    <div class="fixed right-0 top-0 h-screen w-96 bg-surface-container-lowest border-l-2 border-on-surface p-6 overflow-y-auto flex flex-col justify-between neo-shadow-lg transform translate-x-full transition-transform duration-200" id="drawer-panel">
       <div>
         <div class="flex items-center justify-between pb-4 border-b-2 border-on-surface mb-4">
           <div class="flex items-center gap-2">
@@ -386,14 +386,27 @@
     function toggleNotificationDrawer() {
       const drawer = document.getElementById('notification-drawer');
       const panel = document.getElementById('drawer-panel');
-      if (drawer.classList.contains('opacity-0')) {
-        drawer.classList.remove('opacity-0', 'pointer-events-none');
-        panel.classList.remove('translate-x-full');
+      if (!drawer || !panel) return;
+      if (drawer.classList.contains('hidden')) {
+        // Open: tampilkan wrapper dulu, lalu geser panel masuk
+        drawer.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => panel.classList.remove('translate-x-full'));
+        });
       } else {
-        drawer.classList.add('opacity-0', 'pointer-events-none');
+        // Close: geser panel keluar dulu, lalu sembunyikan wrapper
         panel.classList.add('translate-x-full');
+        setTimeout(() => drawer.classList.add('hidden'), 200);
       }
     }
+
+    // Tutup drawer dengan tombol Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const drawer = document.getElementById('notification-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) toggleNotificationDrawer();
+      }
+    });
 
     // Live Clock Update
     setInterval(() => {

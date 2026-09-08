@@ -88,7 +88,7 @@
         $activeSession = $tv->playSessions->first();
         $isPrepaid = $activeSession && $activeSession->billing_type === 'prepaid';
         $isPostpaid = $activeSession && $activeSession->billing_type === 'postpaid';
-        
+
         $isTimeUp = false;
         $isAlmostFinished = false;
         $remainingSeconds = 0;
@@ -123,7 +123,7 @@
       @endphp
 
       <div class="p-5 flex flex-col justify-between relative transition-all {{ $cardClass }}" id="unit-card-{{ $tv->id }}" data-tv-id="{{ $tv->id }}" data-status="{{ $tv->status }}">
-        
+
         <!-- Card Header -->
         <div class="flex items-start justify-between pb-3 border-b-2 border-on-surface">
           <div>
@@ -372,7 +372,7 @@
 
     <form id="extend-form" method="POST" action="" class="flex flex-col gap-4">
       @csrf
-      
+
       <div class="p-3 bg-surface border border-on-surface text-xs font-label-sm flex items-center justify-between">
         <span class="text-on-surface-variant font-bold">Waktu Selesai Saat Ini:</span>
         <span class="font-bold text-on-surface text-sm" id="extend-current-end">--:--</span>

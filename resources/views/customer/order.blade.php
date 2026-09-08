@@ -3,34 +3,14 @@
 @section('title', 'Order - TambahBang')
 
 @section('content')
+<div class="flex flex-col">
 
-    <main class="w-full max-w-[420px] bg-background min-h-screen flex flex-col relative px-3.5 pt-3 pb-8 neo-border-2 border-y-0 sm:border-y-2 sm:my-3">
-
-        {{-- ===================== HEADER ===================== --}}
-        <header class="w-full flex flex-col gap-2.5 pb-3 mb-3 border-b-2 border-dashed border-on-surface">
-
-            <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-10 h-10 bg-primary-container text-on-primary neo-border-2 flex items-center justify-center neo-shadow-sm shrink-0">
-                        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">
-                            sports_esports
-                        </span>
-                    </div>
-                    <div>
-                        <h1 class="font-headline-sm text-[17px] font-extrabold tracking-tight text-on-surface leading-tight uppercase">
-                            TAMBAHBANG HUB
-                        </h1>
-                        <p class="font-label-sm text-[11px] text-on-surface-variant font-bold tracking-wider leading-none mt-0.5">
-                            PS RENTAL &amp; POS CONSOLE
-                        </p>
-                    </div>
-                </div>
-
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-tertiary-fixed neo-border-2 text-on-tertiary-fixed neo-shadow-sm shrink-0">
-                    <span class="w-2.5 h-2.5 rounded-full bg-tertiary inline-block pulse-dot"></span>
-                    <span class="font-label-sm text-[11px] font-black tracking-wider whitespace-nowrap">SESI AKTIF</span>
-                </div>
-            </div>
+    {{-- Unit bar (brand header sudah disediakan layouts.customer, jangan diduplikasi) --}}
+    <header class="w-full flex flex-col gap-2.5 pb-3 mb-3 border-b-2 border-dashed border-on-surface">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-tertiary-fixed neo-border-2 text-on-tertiary-fixed neo-shadow-sm self-start">
+            <span class="w-2.5 h-2.5 rounded-full bg-tertiary inline-block pulse-dot"></span>
+            <span class="font-label-sm text-[11px] font-black tracking-wider whitespace-nowrap">SESI AKTIF</span>
+        </div>
 
             <div class="w-full bg-[#FFE500] neo-border-2 px-3 py-2 flex items-center justify-between neo-shadow-sm">
                 <div class="flex items-center gap-2 min-w-0">
@@ -363,6 +343,72 @@
             <span id="toast-msg">Permintaan terkirim ke kasir!</span>
         </div>
 
-    </main>
+</div>
 
 @endsection
+
+@push('scripts')
+<script>
+    let totalSeconds = (1 * 3600) + (24 * 60) + 28;
+    const timerElement = document.getElementById('countdown-timer');
+
+    function updateTimer() {
+        if (!timerElement) return;
+        if (totalSeconds <= 0) {
+            timerElement.textContent = "00:00:00";
+            timerElement.classList.add("text-error");
+            return;
+        }
+        totalSeconds--;
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        timerElement.textContent =
+            String(hours).padStart(2, '0') + ":" +
+            String(minutes).padStart(2, '0') + ":" +
+            String(seconds).padStart(2, '0');
+    }
+
+    setInterval(updateTimer, 1000);
+
+    function handleAction(type) {
+        if (type === 'extend') {
+            document.getElementById('modal-extend').classList.remove('hidden');
+            document.getElementById('modal-extend').classList.add('flex');
+        } else if (type === 'menu') {
+            showToast("Membuka katalog F&B lengkap...");
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+        document.getElementById(id).classList.remove('flex');
+    }
+
+    function submitExtend(duration, price) {
+        closeModal('modal-extend');
+        showToast(`Request ${duration} (Rp ${price.toLocaleString('id-ID')}) dikirim ke kasir!`);
+    }
+
+    function orderQuick(item, price) {
+        showToast(`Pesanan 1x ${item} berhasil dikirim!`);
+    }
+
+    function callCashier() {
+        showToast("Buzzer Meja PS 03 berbunyi di kasir. Mohon tunggu!");
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        const msg = document.getElementById('toast-msg');
+        msg.textContent = message;
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+            toast.classList.remove('flex');
+        }, 3000);
+    }
+</script>
+@endpush
