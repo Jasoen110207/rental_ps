@@ -68,10 +68,3 @@ Mengelola bisnis rental PlayStation melibatkan *tracking usage*, menangani *bill
 4. **User Interface:**
    - Mengikuti *design theme neo brutalism* dengan warna dominan *blue* dan *orange*.
    - Memastikan *interface* bersifat intuitif dan *user-friendly* bagi *kasir* maupun *user*.
-
-## Open Questions
-1. Apa saja *data points* spesifik yang perlu di-*track* untuk setiap *rental session*?
-2. Bagaimana sistem akan menangani *concurrent user requests* untuk *billing* dan *food/drink orders*?
-3. Apa *payment methods* yang disukai untuk *billing prepaid* dan *postpaid*?
-4. Bagaimana sistem akan menangani *disputes* atau *discrepancies* dalam *billing*?
-5. Apa *third-party integrations* yang diperlukan untuk *food and drink orders*?

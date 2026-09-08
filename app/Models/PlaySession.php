@@ -14,6 +14,14 @@ class PlaySession extends Model
 
     protected $guarded = ['id'];
 
+    protected function casts(): array
+    {
+        return [
+            'start_time' => 'datetime',
+            'end_time' => 'datetime',
+        ];
+    }
+
     /**
      * Relasi ke Tv (PlaySession milik satu Tv)
      */

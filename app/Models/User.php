@@ -46,4 +46,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(PlaySession::class);
     }
+
+    /**
+     * Relasi ke Shift
+     */
+    public function shifts(): HasMany
+    {
+        return $this->hasMany(Shift::class);
+    }
 }

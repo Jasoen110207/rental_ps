@@ -21,7 +21,11 @@ return new class extends Migration
             $table->dateTime('start_time');
             $table->dateTime('end_time')->nullable();
             $table->enum('status', ['active', 'completed'])->default('active');
+            $table->integer('rental_amount')->default(0);
+            $table->integer('fnb_amount')->default(0);
             $table->integer('total_amount')->default(0);
+            $table->string('payment_method')->default('cash');
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
