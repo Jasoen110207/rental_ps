@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TambahBang - Customer Requests Hub</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;700;900&amp;family=Space+Grotesk:wght@500;700;800&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-container": "#5c2400",
+            "surface-container": "#eaedff",
+            "on-secondary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "outline-variant": "#c3c6d7",
+            "surface-tint": "#0053db",
+            "primary": "#004ac6",
+            "outline": "#737686",
+            "on-tertiary-fixed-variant": "#005236",
+            "on-error": "#ffffff",
+            "on-primary": "#ffffff",
+            "on-tertiary-container": "#bdffdb",
+            "tertiary-fixed-dim": "#4edea3",
+            "on-secondary-fixed": "#341100",
+            "secondary": "#9d4300",
+            "error": "#ba1a1a",
+            "surface-variant": "#dae2fd",
+            "tertiary-container": "#007d55",
+            "on-error-container": "#93000a",
+            "on-primary-fixed": "#00174b",
+            "error-container": "#ffdad6",
+            "secondary-fixed-dim": "#ffb690",
+            "surface-bright": "#faf8ff",
+            "inverse-surface": "#283044",
+            "inverse-primary": "#b4c5ff",
+            "tertiary-fixed": "#6ffbbe",
+            "surface-container-highest": "#dae2fd",
+            "background": "#faf8ff",
+            "on-primary-container": "#eeefff",
+            "on-tertiary-fixed": "#002113",
+            "on-secondary-fixed-variant": "#783200",
+            "surface": "#faf8ff",
+            "secondary-fixed": "#ffdbca",
+            "inverse-on-surface": "#eef0ff",
+            "surface-container-low": "#f2f3ff",
+            "primary-container": "#2563eb",
+            "on-surface-variant": "#434655",
+            "secondary-container": "#fd761a",
+            "tertiary": "#006242",
+            "on-background": "#131b2e",
+            "surface-dim": "#d2d9f4",
+            "on-surface": "#131b2e",
+            "primary-fixed": "#dbe1ff",
+            "surface-container-high": "#e2e7ff",
+            "primary-fixed-dim": "#b4c5ff",
+            "on-primary-fixed-variant": "#003ea8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "unit-4": "1rem",
+            "unit-12": "3rem",
+            "unit-1": "0.25rem",
+            "unit-2": "0.5rem",
+            "unit-3": "0.75rem",
+            "unit-5": "1.25rem",
+            "unit-10": "2.5rem",
+            "margin-mobile": "1rem",
+            "margin-desktop": "2rem",
+            "unit-6": "1.5rem",
+            "gutter": "1.5rem",
+            "unit-8": "2rem"
+          },
+          "fontFamily": {
+            "headline-xl-mobile": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "timer-display-mobile": ["Space Mono"],
+            "label-lg": ["Space Mono"],
+            "headline-lg": ["Space Grotesk"],
+            "body-lg": ["Chivo"],
+            "headline-sm": ["Space Grotesk"],
+            "headline-xl": ["Space Grotesk"],
+            "body-md": ["Chivo"],
+            "timer-display": ["Space Mono"],
+            "label-sm": ["Space Mono"],
+            "label-md": ["Space Mono"],
+            "body-sm": ["Chivo"]
+          },
+          "fontSize": {
+            "headline-xl-mobile": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "timer-display-mobile": ["36px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-lg": ["18px", { "lineHeight": "26px", "fontWeight": "500" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "body-md": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "timer-display": ["56px", { "lineHeight": "60px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "700" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+    .neo-box-sm { box-shadow: 2px 2px 0px #131b2e; }
+    .neo-box-md { box-shadow: 4px 4px 0px #131b2e; }
+    .neo-box-lg { box-shadow: 6px 6px 0px #131b2e; }
+    .neo-btn {
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+    }
+    .neo-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px #131b2e;
+    }
+    .neo-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px #131b2e;
+    }
+    @keyframes subtle-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.96); }
+    }
+    .live-dot {
+      animation: subtle-pulse 1.8s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased overflow-x-hidden selection:bg-secondary-container selection:text-white min-h-screen">
+<!-- ======================= LEFT SIDEBAR (SideNavBar Component Anchor) ======================= -->
+<aside class="fixed left-0 top-0 h-screen w-64 flex flex-col justify-between p-4 z-40 bg-surface-container-lowest border-r-2 border-on-surface shadow-[4px_0px_0px_#131b2e]">
+<!-- Brand Hub Header -->
+<div>
+<div class="flex items-center gap-3 pb-4 mb-4 border-b-2 border-on-surface">
+<div class="w-10 h-10 bg-primary-container text-white flex items-center justify-center border-2 border-on-surface shadow-[2px_2px_0px_#131b2e]">
+<span class="material-symbols-outlined text-2xl font-bold" style="font-variation-settings: 'FILL' 1;">sports_esports</span>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-extrabold uppercase tracking-tight text-on-surface leading-none">TAMBAHBANG</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant font-bold">PS Rental &amp; POS Hub</p>
+</div>
+</div>
+<!-- Quick Action CTA Button -->
+<button class="w-full mb-5 py-2.5 px-3 bg-secondary-container text-white border-2 border-on-surface font-headline-sm text-label-lg flex items-center justify-center gap-2 neo-box-sm neo-btn">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+<span>NEW RENTAL +</span>
+</button>
+<!-- Navigation Links List (Active: Requests) -->
+<nav aria-label="Main Navigation" class="space-y-1.5">
+<!-- Dashboard -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Rental / POS -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-lg">sports_esports</span>
+<span>Rental / POS</span>
+</a>
+<!-- Requests (ACTIVE TAB PER SPECIFICATION) -->
+<a class="flex items-center justify-between px-3 py-2.5 bg-primary-container text-on-primary font-label-md text-label-md border-2 border-on-surface shadow-[2px_2px_0px_#131b2e]" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+<span class="font-bold">Requests</span>
+</div>
+<!-- Pending Badge -->
+<span class="bg-secondary-container text-white text-label-sm px-1.5 py-0.5 border border-on-surface font-bold tracking-wider">3 PENDING</span>
+</a>
+<!-- F&B Menu -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-lg">restaurant</span>
+<span>F&amp;B Menu</span>
+</a>
+<!-- Transactions -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+<span>Transactions</span>
+</a>
+<!-- Shifts -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-lg">schedule</span>
+<span>Shifts</span>
+</a>
+<!-- Units -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-lg">tv</span>
+<span>Units</span>
+</a>
+<!-- Settings -->
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface font-label-md text-label-md border-2 border-transparent hover:bg-surface-container hover:border-on-surface transition-transform active:translate-x-1 active:translate-y-1" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Footer Terminal Status -->
+<div class="pt-3 border-t-2 border-on-surface bg-surface-container-low p-2.5 border-2 neo-box-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-xl" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<div class="overflow-hidden">
+<p class="text-label-sm font-label-sm font-bold text-on-surface truncate">Shift: Kasir Siang #02 (Online)</p>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500 live-dot"></span>
+<span class="text-label-sm text-tertiary font-bold tracking-tight">LAN ID: TB-POS-02</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- ======================= TOP NAVBAR (TopNavBar Component Anchor) ======================= -->
+<header class="fixed top-0 left-0 right-0 h-16 pl-64 pr-6 flex items-center justify-between z-30 bg-surface-container-lowest border-b-2 border-on-surface shadow-[0px_4px_0px_#131b2e]">
+<!-- Brand / Operational Matrix Identifier -->
+<div class="flex items-center gap-4 pl-6">
+<div class="bg-on-surface text-surface px-2.5 py-1 text-label-sm font-label-sm font-bold tracking-widest uppercase border border-on-surface">
+        CONSOLE MATRIX V3.8
+      </div>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface">
+        TambahBang Operational Matrix
+      </h2>
+</div>
+<!-- Trailing Actions & Shift Badges -->
+<div class="flex items-center gap-3">
+<!-- WS Status Beacon -->
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-high border-2 border-on-surface neo-box-sm">
+<span class="material-symbols-outlined text-base text-primary">wifi_tethering</span>
+<span class="text-label-sm font-label-sm font-bold text-on-surface">WS CONNECTED</span>
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 live-dot"></span>
+</div>
+<!-- Shift Primary Action Banner -->
+<div class="px-3 py-1.5 bg-secondary text-white font-label-sm font-bold border-2 border-on-surface neo-box-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-base">swap_horiz</span>
+<span>SHIFT ACTIVE: KASIR #02</span>
+</div>
+<!-- Quick Trailing Notifications Icon -->
+<button class="p-1.5 bg-surface-container-lowest border-2 border-on-surface neo-box-sm neo-btn relative text-on-surface hover:bg-surface-container" title="Notifications">
+<span class="material-symbols-outlined text-lg">notifications</span>
+<span class="absolute -top-1 -right-1 w-3 h-3 bg-red-600 border border-on-surface rounded-full"></span>
+</button>
+<!-- Operator Avatar -->
+<div class="w-9 h-9 border-2 border-on-surface bg-primary-fixed flex items-center justify-center neo-box-sm ml-1" title="Operator DualSense Avatar">
+<span class="material-symbols-outlined text-primary text-xl">sports_esports</span>
+</div>
+</div>
+</header>
+<!-- ======================= MAIN CONTENT CANVAS ======================= -->
+<main class="pl-64 pt-16 min-h-screen">
+<div class="p-6 max-w-7xl mx-auto">
+<!-- ================= PAGE HEADER & REAL-TIME CONTROLS ================= -->
+<div class="bg-surface-container-lowest border-2 border-on-surface p-5 mb-6 neo-box-md flex flex-wrap items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2.5 mb-1">
+<span class="px-2 py-0.5 bg-secondary-container text-white text-label-sm font-label-sm font-bold border border-on-surface">INCOMING LIVE QUEUE</span>
+<span class="text-label-sm font-label-sm text-outline font-bold">INTERVAL SYNC: 1s</span>
+</div>
+<h1 class="text-headline-lg font-headline-lg font-extrabold text-on-surface tracking-tight">
+            Pusat Permintaan Pelanggan <span class="text-primary font-headline-md">(Customer Requests Hub)</span>
+</h1>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">
+            Kelola persetujuan sewa jam tambahan, orderan F&amp;B dari konsol, dan panggilan bantuan teknisi secara instan.
+          </p>
+</div>
+<!-- Audio Alert & Auto-Sync Switch Controls -->
+<div class="flex items-center gap-3">
+<!-- Audio Beep Status Pill -->
+<button class="flex items-center gap-2 px-3 py-2 bg-surface-container-high border-2 border-on-surface neo-box-sm neo-btn cursor-pointer" id="soundToggleBtn" onclick="toggleSound()">
+<span class="material-symbols-outlined text-primary text-xl" id="soundIcon" style="font-variation-settings: 'FILL' 1;">volume_up</span>
+<div class="text-left">
+<span class="block text-label-sm font-label-sm font-bold leading-none text-on-surface">AUDIO BEEP</span>
+<span class="text-label-sm text-emerald-700 font-bold" id="soundLabel">AKTIF (85dB)</span>
+</div>
+</button>
+<!-- Auto-Sync Real-Time Toggle -->
+<div class="flex items-center gap-2 px-3 py-2 bg-surface-container-lowest border-2 border-on-surface neo-box-sm">
+<span class="w-3 h-3 rounded-full bg-emerald-500 live-dot"></span>
+<div>
+<span class="block text-label-sm font-label-sm font-bold leading-none text-on-surface">AUTO-SYNC</span>
+<span class="text-label-sm text-primary font-bold">REALTIME WS</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer ml-1">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-outline-variant peer-focus:outline-none border-2 border-on-surface peer peer-checked:after:translate-x-full peer-checked:after:border-on-surface peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-2 after:border-on-surface after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</div>
+<!-- Manual Refresh Button -->
+<button class="p-2 bg-surface border-2 border-on-surface neo-box-sm neo-btn text-on-surface hover:bg-surface-container" title="Paksa Refresh Matrix">
+<span class="material-symbols-outlined text-xl">refresh</span>
+</button>
+</div>
+</div>
+<!-- ================= FILTER TABS ================= -->
+<div class="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
+<!-- Tab 1: Menunggu Persetujuan (Active) -->
+<button class="flex items-center gap-2 px-4 py-2.5 bg-on-surface text-white border-2 border-on-surface font-label-md font-bold shadow-[2px_2px_0px_#fd761a] whitespace-nowrap">
+<span class="material-symbols-outlined text-base text-secondary-container" style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+<span>Menunggu Persetujuan</span>
+<span class="ml-1 px-1.5 py-0.2 bg-secondary-container text-white text-label-sm font-bold border border-white">3</span>
+</button>
+<!-- Tab 2: Disetujui Hari Ini -->
+<button class="flex items-center gap-2 px-4 py-2.5 bg-surface-container-lowest text-on-surface border-2 border-on-surface font-label-md font-bold neo-box-sm neo-btn whitespace-nowrap hover:bg-surface-container">
+<span class="material-symbols-outlined text-base text-emerald-600">check_circle</span>
+<span>Disetujui Hari Ini</span>
+<span class="ml-1 px-1.5 py-0.2 bg-surface-container text-on-surface text-label-sm font-bold border border-on-surface">18</span>
+</button>
+<!-- Tab 3: Ditolak -->
+<button class="flex items-center gap-2 px-4 py-2.5 bg-surface-container-lowest text-on-surface border-2 border-on-surface font-label-md font-bold neo-box-sm neo-btn whitespace-nowrap hover:bg-surface-container">
+<span class="material-symbols-outlined text-base text-red-600">cancel</span>
+<span>Ditolak</span>
+<span class="ml-1 px-1.5 py-0.2 bg-red-100 text-error text-label-sm font-bold border border-on-surface">2</span>
+</button>
+<!-- Tab 4: Semua Permintaan -->
+<button class="flex items-center gap-2 px-4 py-2.5 bg-surface-container-lowest text-on-surface border-2 border-on-surface font-label-md font-bold neo-box-sm neo-btn whitespace-nowrap hover:bg-surface-container">
+<span class="material-symbols-outlined text-base text-on-surface-variant">list_alt</span>
+<span>Semua Permintaan</span>
+</button>
+<div class="ml-auto text-label-sm font-label-sm font-bold text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">info</span>
+<span>3 request membutuhkan otorisasi kasir</span>
+</div>
+</div>
+<!-- ================= MAIN LAYOUT: REQUESTS CARDS & LIVE LOG DOCK ================= -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+<!-- ================= LEFT / CENTER: ACTIVE REQUEST CARDS (8 Cols) ================= -->
+<div class="xl:col-span-8 space-y-5">
+<!-- CARD 1: PS 03 - Tambah Waktu -->
+<div class="bg-surface-container-lowest border-[2.5px] border-on-surface neo-box-md overflow-hidden transition-all duration-150" id="card-ps03">
+<!-- Header Bar -->
+<div class="bg-amber-400 text-on-surface px-4 py-2.5 border-b-[2.5px] border-on-surface flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="px-2 py-0.5 bg-on-surface text-white font-label-md font-extrabold text-label-sm border border-on-surface">
+                  BAY #03
+                </span>
+<span class="font-headline-sm text-headline-sm font-extrabold tracking-tight">
+                  PS5 REGULAR 03
+                </span>
+<span class="text-label-sm font-label-sm bg-white px-2 py-0.5 border border-on-surface font-bold">
+                  SISA WAKTU: 00:07:45
+                </span>
+</div>
+<div class="flex items-center gap-1 text-label-sm font-label-sm font-bold bg-on-surface text-white px-2 py-0.5">
+<span class="material-symbols-outlined text-sm text-amber-300">alarm</span>
+<span>14:24 WIB (4m lalu)</span>
+</div>
+</div>
+<!-- Content Body -->
+<div class="p-5">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<!-- Request Info Column -->
+<div class="md:col-span-7 space-y-2">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 bg-secondary text-white text-label-sm font-label-sm font-bold border-2 border-on-surface neo-box-sm">
+                      TAMBAH JAM SEWA
+                    </span>
+<span class="text-headline-md font-headline-md text-on-surface font-extrabold">
+                      Tambah Waktu +30 Menit
+                    </span>
+</div>
+<p class="text-body-sm text-on-surface-variant font-body-sm">
+                    Pelanggan mengajukan ekstensi durasi main sebelum sesi berakhir via menu interaktif gamepad konsol.
+                  </p>
+<div class="flex flex-wrap items-center gap-3 pt-1">
+<div class="px-2.5 py-1 bg-surface-container-high border-2 border-on-surface neo-box-sm">
+<span class="text-label-sm text-on-surface-variant block font-bold">WAKTU SAAT INI</span>
+<span class="font-timer-display-mobile text-label-lg font-bold text-error">00:07:45</span>
+</div>
+<div class="px-2.5 py-1 bg-surface-container-high border-2 border-on-surface neo-box-sm">
+<span class="text-label-sm text-on-surface-variant block font-bold">TAMBAHAN BIAYA</span>
+<span class="font-timer-display-mobile text-label-lg font-bold text-primary">Rp 12.500</span>
+</div>
+<div class="px-2 py-1 bg-surface-container-low border border-on-surface text-label-sm font-bold">
+                      Paket: Normal Non-VIP
+                    </div>
+</div>
+</div>
+<!-- Live Timer Inset Widget -->
+<div class="md:col-span-5 bg-surface-container-low p-3.5 border-2 border-on-surface neo-box-sm text-center">
+<p class="text-label-sm font-label-sm text-on-surface-variant font-bold uppercase mb-1">DURASI BARU SETELAH APPROVE</p>
+<div class="font-timer-display-mobile text-headline-lg font-bold text-on-surface bg-white border-2 border-on-surface py-1">
+                    00:37:45
+                  </div>
+<p class="text-label-sm text-tertiary font-bold mt-1.5 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-sm">lock_reset</span> Otomatis perpanjang timer TV
+                  </p>
+</div>
+</div>
+<!-- Card Action Buttons -->
+<div class="mt-5 pt-4 border-t-2 border-dashed border-on-surface flex flex-wrap items-center justify-between gap-3">
+<span class="text-label-sm font-label-sm text-outline font-bold">ID REQ: #REQ-2024-0981</span>
+<div class="flex items-center gap-3">
+<!-- TOLAK -->
+<button class="px-4 py-2 bg-white text-error border-[2.5px] border-on-surface font-headline-sm text-label-lg font-bold neo-box-sm neo-btn flex items-center gap-1.5 hover:bg-red-50" onclick="rejectRequest('card-ps03', 'PS 03')">
+<span class="material-symbols-outlined text-lg">close</span>
+<span>✕ TOLAK</span>
+</button>
+<!-- APPROVE -->
+<button class="px-5 py-2 bg-emerald-600 text-white border-[2.5px] border-on-surface font-headline-sm text-label-lg font-bold neo-box-sm neo-btn flex items-center gap-2 hover:bg-emerald-700" onclick="approveRequest('card-ps03', 'PS 03', 'Tambah Waktu +30m (Rp 12.500)')">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>✓ SETUJUI (APPROVE)</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- CARD 2: PS 07 - Pesanan F&B Meja -->
+<div class="bg-surface-container-lowest border-[2.5px] border-on-surface neo-box-md overflow-hidden transition-all duration-150" id="card-ps07">
+<!-- Header Bar -->
+<div class="bg-primary text-white px-4 py-2.5 border-b-[2.5px] border-on-surface flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="px-2 py-0.5 bg-white text-on-surface font-label-md font-extrabold text-label-sm border border-on-surface">
+                  BAY #07
+                </span>
+<span class="font-headline-sm text-headline-sm font-extrabold tracking-tight">
+                  PS5 VIP ROOM ALPHA
+                </span>
+<span class="text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 border border-white font-bold">
+                  SESI AKTIF: SISA 01:42:10
+                </span>
+</div>
+<div class="flex items-center gap-1 text-label-sm font-label-sm font-bold bg-on-surface text-white px-2 py-0.5 border border-white">
+<span class="material-symbols-outlined text-sm text-amber-300">alarm</span>
+<span>14:26 WIB (2m lalu)</span>
+</div>
+</div>
+<!-- Content Body -->
+<div class="p-5">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<!-- Request Info Column -->
+<div class="md:col-span-7 space-y-2">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 bg-primary text-white text-label-sm font-label-sm font-bold border-2 border-on-surface neo-box-sm">
+                      F&amp;B ORDER MEJA
+                    </span>
+<span class="text-headline-md font-headline-md text-on-surface font-extrabold">
+                      Pesanan F&amp;B Meja
+                    </span>
+</div>
+<p class="text-body-sm text-on-surface-variant font-body-sm">
+                    Order kudapan &amp; minuman masuk dari konsol. Perlu diteruskan ke dapur / bar kasir.
+                  </p>
+<!-- Order Details Box -->
+<div class="bg-surface-container-low border-2 border-on-surface p-3 neo-box-sm">
+<div class="text-label-sm font-label-sm font-bold text-on-surface-variant mb-1.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">receipt</span>
+<span>RINCIAN ITEM PESANAN:</span>
+</div>
+<ul class="space-y-1 font-label-md text-on-surface">
+<li class="flex justify-between items-center border-b border-dashed border-outline-variant pb-1">
+<span class="font-bold">• 2x Es Teh Manis Jumbo</span>
+<span class="font-timer-display-mobile">Rp 10.000</span>
+</li>
+<li class="flex justify-between items-center pt-0.5">
+<span class="font-bold">• 1x Indomie Goreng Telur (Level 2)</span>
+<span class="font-timer-display-mobile">Rp 15.000</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Total Amount Summary Box -->
+<div class="md:col-span-5 bg-amber-50 p-4 border-2 border-on-surface neo-box-sm text-center">
+<span class="text-label-sm font-label-sm text-secondary font-bold block mb-1">TOTAL TAGIHAN F&amp;B</span>
+<div class="font-timer-display-mobile text-headline-xl text-secondary font-extrabold bg-white border-2 border-on-surface py-2">
+                    Rp 25.000
+                  </div>
+<div class="mt-2 text-label-sm text-on-surface-variant font-bold flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+<span>Masuk ke Tagihan Bay #07</span>
+</div>
+</div>
+</div>
+<!-- Card Action Buttons -->
+<div class="mt-5 pt-4 border-t-2 border-dashed border-on-surface flex flex-wrap items-center justify-between gap-3">
+<span class="text-label-sm font-label-sm text-outline font-bold">ID REQ: #REQ-2024-0982</span>
+<div class="flex items-center gap-3">
+<!-- TOLAK -->
+<button class="px-4 py-2 bg-white text-error border-[2.5px] border-on-surface font-headline-sm text-label-lg font-bold neo-box-sm neo-btn flex items-center gap-1.5 hover:bg-red-50" onclick="rejectRequest('card-ps07', 'PS 07')">
+<span class="material-symbols-outlined text-lg">close</span>
+<span>✕ TOLAK</span>
+</button>
+<!-- APPROVE & MASUK BILL -->
+<button class="px-5 py-2 bg-primary-container text-white border-[2.5px] border-on-surface font-headline-sm text-label-lg font-bold neo-box-sm neo-btn flex items-center gap-2 hover:bg-blue-700" onclick="approveRequest('card-ps07', 'PS 07', 'Order F&amp;B (Rp 25.000)')">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">add_task</span>
+<span>✓ SETUJUI &amp; MASUK BILL</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- CARD 3: PS 02 - Panggil Kasir / Bantuan Stik -->
+<div class="bg-surface-container-lowest border-[2.5px] border-on-surface neo-box-md overflow-hidden transition-all duration-150" id="card-ps02">
+<!-- Header Bar -->
+<div class="bg-rose-500 text-white px-4 py-2.5 border-b-[2.5px] border-on-surface flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="px-2 py-0.5 bg-white text-on-surface font-label-md font-extrabold text-label-sm border border-on-surface">
+                  BAY #02
+                </span>
+<span class="font-headline-sm text-headline-sm font-extrabold tracking-tight">
+                  PS4 PRO CORNER 02
+                </span>
+<span class="text-label-sm font-label-sm bg-white text-error px-2 py-0.5 border border-on-surface font-bold">
+                  BANTUAN HARDWARE
+                </span>
+</div>
+<div class="flex items-center gap-1 text-label-sm font-label-sm font-bold bg-on-surface text-white px-2 py-0.5">
+<span class="material-symbols-outlined text-sm text-amber-300">alarm</span>
+<span>14:28 WIB (Baru Saja)</span>
+</div>
+</div>
+<!-- Content Body -->
+<div class="p-5">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<!-- Request Info Column -->
+<div class="md:col-span-8 space-y-2">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 bg-red-600 text-white text-label-sm font-label-sm font-bold border-2 border-on-surface neo-box-sm">
+                      SERVICE CALL
+                    </span>
+<span class="text-headline-md font-headline-md text-on-surface font-extrabold">
+                      Panggil Kasir / Bantuan Stik
+                    </span>
+</div>
+<p class="text-body-sm text-on-surface-variant font-body-sm">
+                    Pelanggan menekan tombol darurat bantuan teknis pada layar konsol.
+                  </p>
+<div class="bg-error-container text-on-error-container p-3 border-2 border-on-surface neo-box-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-xl font-bold">battery_alert</span>
+<div>
+<span class="font-label-md font-bold block text-on-surface">KENDALA: DualSense 2 baterai lemah / Disconnect</span>
+<span class="text-body-sm">Segera bawakan DualSense cadangan #DS-09 dari rak charging dock kasir.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Fast Indicator Status -->
+<div class="md:col-span-4 bg-surface-container-high p-4 border-2 border-on-surface neo-box-sm text-center">
+<span class="material-symbols-outlined text-3xl text-secondary mb-1">support_agent</span>
+<span class="block font-label-sm font-bold text-on-surface">STATUS TIKET</span>
+<span class="inline-block mt-1 px-3 py-1 bg-secondary-container text-white font-label-sm font-bold border border-on-surface">
+                    MENUNGGU PETUGAS
+                  </span>
+</div>
+</div>
+<!-- Card Action Buttons -->
+<div class="mt-5 pt-4 border-t-2 border-dashed border-on-surface flex flex-wrap items-center justify-between gap-3">
+<span class="text-label-sm font-label-sm text-outline font-bold">ID REQ: #REQ-2024-0983</span>
+<div class="flex items-center gap-3">
+<!-- SELESAI -->
+<button class="px-4 py-2 bg-white text-on-surface border-[2.5px] border-on-surface font-headline-sm text-label-lg font-bold neo-box-sm neo-btn flex items-center gap-1.5 hover:bg-surface-container" onclick="approveRequest('card-ps02', 'PS 02', 'Bantuan Stik Terselesaikan')">
+<span class="material-symbols-outlined text-lg">done_all</span>
+<span>SELESAI</span>
+</button>
+<!-- TANGANI SEKARANG -->
+<button class="px-5 py-2 bg-secondary text-white border-[2.5px] border-on-surface font-headline-sm text-label-lg font-bold neo-box-sm neo-btn flex items-center gap-2 hover:bg-amber-700" onclick="handleAssistance('card-ps02', 'PS 02')">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">directions_run</span>
+<span>✓ TANGANI SEKARANG</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= RIGHT COLUMN: APPROVED HISTORY & AUDIT TRAIL (4 Cols) ================= -->
+<div class="xl:col-span-4 space-y-5">
+<!-- Section Panel Container -->
+<div class="bg-surface-container-lowest border-[2.5px] border-on-surface neo-box-md p-4">
+<div class="flex items-center justify-between pb-3 border-b-2 border-on-surface mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-xl" style="font-variation-settings: 'FILL' 1;">verified</span>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface">
+                  Approved History
+                </h2>
+</div>
+<span class="text-label-sm font-label-sm bg-tertiary-container text-on-tertiary-container px-2 py-0.5 font-bold border border-on-surface">
+                HARI INI: 18
+              </span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-3">
+              Log aktivitas realtime kasir dengan audit timestamp dan konfirmasi unit meja.
+            </p>
+<!-- Real-Time Activity Log Feed -->
+<div class="space-y-3" id="activity-log-feed">
+<!-- Log Item 1 -->
+<div class="p-3 bg-surface-container-low border-2 border-on-surface neo-box-sm">
+<div class="flex items-center justify-between mb-1">
+<span class="px-1.5 py-0.2 bg-emerald-600 text-white font-label-sm text-[10px] font-bold">APPROVED</span>
+<span class="text-label-sm font-label-sm text-outline font-bold">14:18:02 WIB</span>
+</div>
+<div class="font-headline-sm text-body-md font-bold text-on-surface">
+                  PS 05 • Tambah Waktu +1 Jam
+                </div>
+<div class="text-body-sm text-on-surface-variant mt-0.5">
+                  Rp 25.000 • Kasir: #02 (Budi)
+                </div>
+<div class="mt-2 text-label-sm text-tertiary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">check</span>
+<span>Timer konsol sinkron otomatis</span>
+</div>
+</div>
+<!-- Log Item 2 -->
+<div class="p-3 bg-surface-container-low border-2 border-on-surface neo-box-sm">
+<div class="flex items-center justify-between mb-1">
+<span class="px-1.5 py-0.2 bg-primary text-white font-label-sm text-[10px] font-bold">BILLED F&amp;B</span>
+<span class="text-label-sm font-label-sm text-outline font-bold">14:10:45 WIB</span>
+</div>
+<div class="font-headline-sm text-body-md font-bold text-on-surface">
+                  PS 01 • 1x Kopi Susu Aren, 1x Taro
+                </div>
+<div class="text-body-sm text-on-surface-variant mt-0.5">
+                  Rp 28.000 • Kasir: #02 (Budi)
+                </div>
+<div class="mt-2 text-label-sm text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">done_all</span>
+<span>Kertas printer dapur tercetak</span>
+</div>
+</div>
+<!-- Log Item 3 -->
+<div class="p-3 bg-surface-container-low border-2 border-on-surface neo-box-sm">
+<div class="flex items-center justify-between mb-1">
+<span class="px-1.5 py-0.2 bg-emerald-600 text-white font-label-sm text-[10px] font-bold">APPROVED</span>
+<span class="text-label-sm font-label-sm text-outline font-bold">13:52:11 WIB</span>
+</div>
+<div class="font-headline-sm text-body-md font-bold text-on-surface">
+                  PS 09 (VIP) • Tambah Waktu +2 Jam
+                </div>
+<div class="text-body-sm text-on-surface-variant mt-0.5">
+                  Rp 60.000 • Kasir: #02 (Budi)
+                </div>
+<div class="mt-2 text-label-sm text-tertiary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">check</span>
+<span>Diskon Member Platinum 10%</span>
+</div>
+</div>
+<!-- Log Item 4 (Rejected Case) -->
+<div class="p-3 bg-red-50 border-2 border-on-surface neo-box-sm">
+<div class="flex items-center justify-between mb-1">
+<span class="px-1.5 py-0.2 bg-red-600 text-white font-label-sm text-[10px] font-bold">REJECTED</span>
+<span class="text-label-sm font-label-sm text-outline font-bold">13:40:19 WIB</span>
+</div>
+<div class="font-headline-sm text-body-md font-bold text-on-surface">
+                  PS 04 • Tambah Waktu +1 Jam
+                </div>
+<div class="text-body-sm text-error mt-0.5 font-bold">
+                  Ditolak: Booking berikutnya jam 14:00
+                </div>
+</div>
+</div>
+<!-- Full Audit Log Link -->
+<button class="w-full mt-4 py-2 bg-surface text-on-surface border-2 border-on-surface font-label-md font-bold neo-box-sm neo-btn flex items-center justify-center gap-2 hover:bg-surface-container">
+<span class="material-symbols-outlined text-sm">receipt_long</span>
+<span>Buka Audit Log Lengkap</span>
+</button>
+</div>
+<!-- Quick Cashier Shift Stats Card -->
+<div class="bg-surface-container-high border-[2.5px] border-on-surface neo-box-md p-4">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">point_of_sale</span>
+<span>Ringkasan Kasir Shift Ini</span>
+</h3>
+<div class="space-y-2 text-body-sm font-body-sm">
+<div class="flex justify-between items-center py-1 border-b border-on-surface">
+<span class="font-bold">Total Request Disetujui:</span>
+<span class="font-timer-display-mobile font-bold text-tertiary">18 Transaksi</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-on-surface">
+<span class="font-bold">Total Tambahan Jam:</span>
+<span class="font-timer-display-mobile font-bold text-primary">Rp 235.000</span>
+</div>
+<div class="flex justify-between items-center py-1">
+<span class="font-bold">Total Tambahan F&amp;B:</span>
+<span class="font-timer-display-mobile font-bold text-secondary">Rp 142.000</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- ================= NOTIFICATION TOAST OVERLAY CONTAINER ================= -->
+<div class="fixed bottom-6 right-6 z-50 pointer-events-none flex flex-col gap-2" id="toastContainer"></div>
+<!-- ================= INLINE SCRIPT FOR INTERACTION & AUDIO SIMULATION ================= -->
+<script>
+    let soundEnabled = true;
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const soundLabel = document.getElementById('soundLabel');
+      const soundIcon = document.getElementById('soundIcon');
+      if (soundEnabled) {
+        soundLabel.innerText = 'AKTIF (85dB)';
+        soundLabel.className = 'text-label-sm text-emerald-700 font-bold';
+        soundIcon.innerText = 'volume_up';
+        showToast('Suara notifikasi audio diaktifkan', 'tertiary');
+      } else {
+        soundLabel.innerText = 'SENYAP (MUTE)';
+        soundLabel.className = 'text-label-sm text-error font-bold';
+        soundIcon.innerText = 'volume_off';
+        showToast('Suara notifikasi disenyapkan', 'error');
+      }
+    }
+
+    function approveRequest(cardId, bayName, desc) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+
+      // Animate card removal
+      card.style.opacity = '0.5';
+      card.style.transform = 'scale(0.98)';
+
+      setTimeout(() => {
+        card.remove();
+        showToast(`Request ${bayName} BERHASIL DISETUJUI!`, 'emerald');
+
+        // Append to Recent History Log
+        const logFeed = document.getElementById('activity-log-feed');
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+
+        const newLog = document.createElement('div');
+        newLog.className = 'p-3 bg-surface-container-low border-2 border-on-surface neo-box-sm';
+        newLog.innerHTML = `
+          <div class="flex items-center justify-between mb-1">
+            <span class="px-1.5 py-0.2 bg-emerald-600 text-white font-label-sm text-[10px] font-bold">APPROVED</span>
+            <span class="text-label-sm font-label-sm text-outline font-bold">${timeStr}</span>
+          </div>
+          <div class="font-headline-sm text-body-md font-bold text-on-surface">
+            ${bayName} • ${desc}
+          </div>
+          <div class="text-body-sm text-on-surface-variant mt-0.5">
+            Kasir: #02 (Budi) • Eksekusi Instan
+          </div>
+        `;
+        logFeed.insertBefore(newLog, logFeed.firstChild);
+      }, 200);
+    }
+
+    function rejectRequest(cardId, bayName) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+
+      if (!confirm(`Tolak permintaan dari ${bayName}?`)) return;
+
+      card.style.opacity = '0.4';
+      card.style.borderColor = '#ba1a1a';
+
+      setTimeout(() => {
+        card.remove();
+        showToast(`Request ${bayName} Ditolak oleh Kasir`, 'error');
+
+        // Append to Recent History Log
+        const logFeed = document.getElementById('activity-log-feed');
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+
+        const newLog = document.createElement('div');
+        newLog.className = 'p-3 bg-red-50 border-2 border-on-surface neo-box-sm';
+        newLog.innerHTML = `
+          <div class="flex items-center justify-between mb-1">
+            <span class="px-1.5 py-0.2 bg-red-600 text-white font-label-sm text-[10px] font-bold">REJECTED</span>
+            <span class="text-label-sm font-label-sm text-outline font-bold">${timeStr}</span>
+          </div>
+          <div class="font-headline-sm text-body-md font-bold text-on-surface">
+            ${bayName} • Ditolak Operator Kasir
+          </div>
+          <div class="text-body-sm text-error mt-0.5 font-bold">
+            Alasan: Alokasi unit terbatas
+          </div>
+        `;
+        logFeed.insertBefore(newLog, logFeed.firstChild);
+      }, 200);
+    }
+
+    function handleAssistance(cardId, bayName) {
+      showToast(`Teknisi / Kasir meluncur ke ${bayName}!`, 'secondary');
+      const card = document.getElementById(cardId);
+      if (card) {
+        card.classList.add('ring-4', 'ring-amber-500');
+      }
+    }
+
+    function showToast(message, type) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto px-4 py-3 bg-surface-container-lowest text-on-surface border-[2.5px] border-on-surface neo-box-md font-label-md font-bold flex items-center gap-3 animate-bounce';
+      
+      let icon = 'check_circle';
+      let iconColor = 'text-emerald-600';
+      if (type === 'error') {
+        icon = 'cancel';
+        iconColor = 'text-red-600';
+      } else if (type === 'secondary') {
+        icon = 'notifications';
+        iconColor = 'text-secondary';
+      }
+
+      toast.innerHTML = `
+        <span class="material-symbols-outlined ${iconColor}">${icon}</span>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 3200);
+    }
+  </script>
+</body></html>

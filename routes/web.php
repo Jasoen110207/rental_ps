@@ -1,5 +1,6 @@
 <?php
 
+<<<<<<< HEAD
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
@@ -10,6 +11,9 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UnitController;
+=======
+
+>>>>>>> 4f82be74fccc01fa4927ea1c9fa366b23e0e802f
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,6 +24,7 @@ use Illuminate\Support\Facades\Route;
 
 // Root redirect
 Route::get('/', function () {
+<<<<<<< HEAD
     if (auth()->check()) {
         return redirect()->route('admin.dashboard');
     }
@@ -88,4 +93,49 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Settings
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+=======
+    return redirect()->route('kasir.dashboard');
+});
+
+Route::prefix('customer')->name('customer.')->group(function () {
+    Route::get('/order', function () {
+        return view('customer.order');
+    })->name('order');
+});
+
+Route::prefix('kasir')->name('kasir.')->group(function () {
+
+    Route::get('/dashboard', function () {
+        return view('kasir.dashboard');
+    })->name('dashboard');
+
+    Route::get('/pos', function () {
+        return view('kasir.pos');
+    })->name('pos');
+
+    Route::get('/menu', function () {
+        return view('kasir.menu');
+    })->name('menu');
+
+    Route::get('/request', function () {
+        return view('kasir.request');
+    })->name('request');
+
+    Route::get('/setting', function () {
+        return view('kasir.setting');
+    })->name('setting');
+
+    Route::get('/sift', function () {
+        return view('kasir.sift');
+    })->name('sift');
+
+    Route::get('/transaksi', function () {
+        return view('kasir.transaksi');
+    })->name('transaksi');
+
+    Route::get('/unit', function () {
+        return view('kasir.unit');
+    })->name('unit');
+
+>>>>>>> 4f82be74fccc01fa4927ea1c9fa366b23e0e802f
 });
