@@ -14,28 +14,37 @@ class PlaySessionService
     /**
      * Memulai sesi bermain baru pada TV.
      *
-     * @param Tv $tv
-     * @param User $kasir
-     * @param string $billingType ('prepaid' atau 'postpaid')
-     * @return PlaySession
+     * @param  string  $billingType  ('prepaid' atau 'postpaid')
+     *
      * @throws Exception
      */
-    public function startSession(Tv $tv, User $kasir, string $billingType): PlaySession
+    public function startSession(Tv $tv, User $kasir, string $billingType, ?int $durationMinutes = null): PlaySession
     {
         if ($tv->status !== 'available') {
             throw new Exception("TV '{$tv->name}' sedang tidak tersedia (status: {$tv->status}).");
         }
 
-        return DB::transaction(function () use ($tv, $kasir, $billingType) {
+        if ($billingType === 'prepaid' && (! $durationMinutes || $durationMinutes < 1)) {
+            throw new Exception('Durasi wajib diisi untuk billing prepaid.');
+        }
+
+        return DB::transaction(function () use ($tv, $kasir, $billingType, $durationMinutes) {
             // Ubah status TV menjadi playing
             $tv->update(['status' => 'playing']);
+
+            $startTime = Carbon::now();
+            $endTime = ($billingType === 'prepaid' && $durationMinutes)
+                ? $startTime->copy()->addMinutes($durationMinutes)
+                : null;
 
             // Buat sesi bermain baru
             return PlaySession::create([
                 'tv_id' => $tv->id,
                 'user_id' => $kasir->id,
                 'billing_type' => $billingType,
-                'start_time' => Carbon::now(),
+                'duration_minutes' => $durationMinutes,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
                 'status' => 'active',
                 'total_amount' => 0,
             ]);
@@ -45,14 +54,12 @@ class PlaySessionService
     /**
      * Mengakhiri sesi bermain, mengkalkulasi durasi waktu, biaya TV, pesanan F&B, dan total biaya.
      *
-     * @param PlaySession $session
-     * @return PlaySession
      * @throws Exception
      */
     public function endSession(PlaySession $session): PlaySession
     {
         if ($session->status !== 'active') {
-            throw new Exception("Sesi bermain ini sudah tidak aktif atau sudah selesai.");
+            throw new Exception('Sesi bermain ini sudah tidak aktif atau sudah selesai.');
         }
 
         return DB::transaction(function () use ($session) {

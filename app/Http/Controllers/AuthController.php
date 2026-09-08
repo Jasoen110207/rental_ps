@@ -2,77 +2,94 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Shift;
-use App\Models\User;
-use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     public function showLogin()
     {
-        if (Auth::check()) {
-            return redirect()->route('admin.dashboard');
-        }
-
         return view('auth.login');
     }
 
+    /**
+     * Authenticate user & issue Sanctum token.
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'string'],
-            'password' => ['required', 'string'],
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        // Support login with either email or username/name
-        $user = User::where('email', $credentials['email'])
-            ->orWhere('name', $credentials['email'])
-            ->first();
-
-        if ($user && Hash::check($credentials['password'], $user->password)) {
-            Auth::login($user, $request->boolean('remember'));
-            $request->session()->regenerate();
-
-            // Auto-check or initialize shift for cashier
-            $activeShift = Shift::where('user_id', $user->id)
-                ->where('status', 'active')
-                ->latest()
-                ->first();
-
-            if (!$activeShift) {
-                // Check if any active shift exists in system
-                $systemActiveShift = Shift::where('status', 'active')->latest()->first();
-                if (!$systemActiveShift) {
-                    Shift::create([
-                        'user_id' => $user->id,
-                        'start_time' => Carbon::now(),
-                        'starting_cash' => 200000,
-                        'total_revenue' => 0,
-                        'transactions_count' => 0,
-                        'notes' => 'Shift baru dimulai saat login.',
-                        'status' => 'active',
-                    ]);
-                }
+        if (! Auth::attempt($credentials)) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Email atau password salah.',
+                ], 401);
             }
 
-            return redirect()->intended(route('admin.dashboard'))
-                ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
+            return back()->withErrors(['email' => 'Email atau password salah.']);
         }
 
-        return back()->withErrors([
-            'email' => 'Email/Username atau password yang dimasukkan salah.',
-        ])->onlyInput('email');
+        $user = $request->user() ?? Auth::user();
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login berhasil.',
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                ],
+            ]);
+        }
+
+        $request->session()->regenerate();
+        if ($user->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard'));
+        }
+
+        return redirect()->intended(route('kasir.dashboard'));
     }
 
+    /**
+     * Revoke user's current token.
+     */
     public function logout(Request $request)
     {
+        $user = $request->user();
+
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Anda telah berhasil logout.');
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'message' => 'Berhasil logout.',
+            ]);
+        }
+
+        return redirect()->route('login');
+    }
+
+    /**
+     * Return current authenticated user.
+     */
+    public function me(Request $request): JsonResponse
+    {
+        return response()->json([
+            'data' => $request->user(),
+        ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\PlaySession;
+use App\Models\Product;
 use App\Models\Tv;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,6 +15,13 @@ class ControllerTest extends TestCase
 
     public function test_dashboard_index_returns_tvs_list(): void
     {
+        $kasir = User::create([
+            'name' => 'Kasir Test 1',
+            'email' => 'kasir1@rental.com',
+            'role' => 'kasir',
+            'password' => bcrypt('password'),
+        ]);
+
         Tv::create([
             'name' => 'Meja Controller Test',
             'type' => 'ps4',
@@ -21,13 +29,13 @@ class ControllerTest extends TestCase
             'status' => 'available',
         ]);
 
-        $response = $this->getJson('/api/dashboard');
+        $response = $this->actingAs($kasir)->getJson('/api/dashboard');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'name', 'type', 'price_per_hour', 'status', 'active_session']
-                ]
+                    '*' => ['id', 'name', 'type', 'price_per_hour', 'status', 'active_session'],
+                ],
             ]);
     }
 
@@ -48,7 +56,7 @@ class ControllerTest extends TestCase
         ]);
 
         // 1. Store (Start Play Session)
-        $response = $this->postJson('/api/play-sessions', [
+        $response = $this->actingAs($kasir)->postJson('/api/play-sessions', [
             'tv_id' => $tv->id,
             'billing_type' => 'postpaid',
         ]);
@@ -60,7 +68,7 @@ class ControllerTest extends TestCase
         $sessionId = $response->json('data.id');
 
         // 2. Update (End Play Session)
-        $updateResponse = $this->putJson("/api/play-sessions/{$sessionId}");
+        $updateResponse = $this->actingAs($kasir)->putJson("/api/play-sessions/{$sessionId}");
 
         $updateResponse->assertStatus(200)
             ->assertJsonPath('data.status', 'completed');
@@ -90,14 +98,14 @@ class ControllerTest extends TestCase
             'status' => 'active',
         ]);
 
-        $product = \App\Models\Product::create([
+        $product = Product::create([
             'name' => 'Indomie Goreng',
             'price' => 7000,
             'stock' => 10,
         ]);
 
         // Success Order
-        $response = $this->postJson("/api/play-sessions/{$session->id}/orders", [
+        $response = $this->actingAs($kasir)->postJson("/api/play-sessions/{$session->id}/orders", [
             'product_id' => $product->id,
             'quantity' => 2,
         ]);
@@ -111,7 +119,7 @@ class ControllerTest extends TestCase
         ]);
 
         // Out of stock attempt (Exception caught, returning 422)
-        $failedResponse = $this->postJson("/api/play-sessions/{$session->id}/orders", [
+        $failedResponse = $this->actingAs($kasir)->postJson("/api/play-sessions/{$session->id}/orders", [
             'product_id' => $product->id,
             'quantity' => 100,
         ]);
@@ -119,4 +127,3 @@ class ControllerTest extends TestCase
         $failedResponse->assertStatus(422);
     }
 }
-
