@@ -105,7 +105,7 @@ class PosController extends Controller
 
     public function manage(Request $request)
     {
-        $products = Product::orderBy('category')->orderBy('name')->get();
+        $products = Product::latest()->get();
         return view('admin.pos.manage', compact('products'));
     }
 

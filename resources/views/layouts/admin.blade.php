@@ -442,6 +442,23 @@
         clockEl.innerText = now.toLocaleDateString('id-ID', options);
       }
     }, 1000);
+    // Unlock Audio Context on first interaction
+    document.addEventListener('click', function unlockAudio() {
+      initAudio();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.01);
+      
+      document.removeEventListener('click', unlockAudio);
+    }, { once: true });
   </script>
   @stack('scripts')
 </body>

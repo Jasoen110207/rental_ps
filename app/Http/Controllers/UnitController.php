@@ -11,7 +11,7 @@ class UnitController extends Controller
     {
         $units = Tv::with(['playSessions' => function ($q) {
             $q->where('status', 'active');
-        }])->orderBy('id')->get();
+        }])->latest()->get();
 
         return view('admin.units.index', compact('units'));
     }

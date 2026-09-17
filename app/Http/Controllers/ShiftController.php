@@ -55,14 +55,18 @@ class ShiftController extends Controller
     /**
      * Riwayat shift kasir yang sedang login.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $shifts = Shift::where('user_id', $request->user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return response()->json([
-            'data' => $shifts,
-        ]);
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json([
+                'data' => $shifts,
+            ]);
+        }
+
+        return view('admin.shifts.index', compact('shifts'));
     }
 }
