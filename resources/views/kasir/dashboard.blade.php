@@ -308,13 +308,19 @@
       <h3 class="font-black uppercase text-lg" id="checkout-modal-title">Checkout</h3>
       <button onclick="closeModal('modal-checkout')" class="p-1 border border-on-surface btn-press"><span class="material-symbols-outlined">close</span></button>
     </div>
-    <form id="checkout-form" method="POST" action="" class="flex flex-col gap-4">
+    <form id="checkout-form" method="POST" action="" class="flex flex-col gap-4" onsubmit="handleCheckout(event)">
       @csrf
-      <div class="border-2 border-on-surface p-4 bg-surface flex flex-col gap-2 text-xs">
+      <div id="checkout-details" class="border-2 border-on-surface p-4 bg-surface flex flex-col gap-2 text-xs">
         <div class="flex justify-between border-b pb-2"><span class="font-bold text-on-surface-variant uppercase">Rental</span><span class="font-bold" id="checkout-rental-amount">Rp 0</span></div>
         <div class="flex justify-between border-b pb-2"><span class="font-bold text-on-surface-variant uppercase">F&B</span><span class="font-bold" id="checkout-fnb-amount">Rp 0</span></div>
         <div class="flex justify-between pt-1 font-black text-emerald-700 text-base"><span class="uppercase">TOTAL</span><span id="checkout-grand-total">Rp 0</span></div>
       </div>
+
+      <div id="qris-container" class="hidden border-2 border-on-surface p-4 bg-surface text-center">
+        <h4 class="font-bold text-xs uppercase mb-2">Scan QRIS untuk Membayar</h4>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=QRIS_RENTAL_PS_TAMBAHBANG" alt="QRIS Barcode" class="mx-auto w-48 h-48 border-2 border-on-surface">
+      </div>
+
       <div>
         <label class="block text-xs uppercase font-bold mb-2">Metode Pembayaran</label>
         <div class="grid grid-cols-4 gap-2">
@@ -326,7 +332,7 @@
       </div>
       <div class="flex justify-end gap-3 pt-3 border-t-2 border-on-surface">
         <button type="button" onclick="closeModal('modal-checkout')" class="py-2 px-4 border-2 border-on-surface text-xs uppercase font-bold btn-press">Batal</button>
-        <button type="submit" class="py-2.5 px-6 bg-emerald-600 text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">SELESAIKAN LUNAS</button>
+        <button type="submit" id="checkout-submit-btn" class="py-2.5 px-6 bg-emerald-600 text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">SELESAIKAN LUNAS</button>
       </div>
     </form>
   </div>
@@ -406,12 +412,32 @@ function updateFnbTotalPreview(){
   });
   document.getElementById('fnb-total-preview').innerText = 'Rp ' + total.toLocaleString('id-ID');
 }
+let qrisConfirmed = false;
+function handleCheckout(e) {
+  const method = document.querySelector('input[name="payment_method"]:checked').value;
+  if (method === 'qris' && !qrisConfirmed) {
+    e.preventDefault();
+    document.getElementById('checkout-details').classList.add('hidden');
+    document.getElementById('qris-container').classList.remove('hidden');
+    document.getElementById('checkout-submit-btn').innerText = 'KONFIRMASI SUDAH DIBAYAR';
+    qrisConfirmed = true;
+    return false;
+  }
+}
+
 function openCheckoutModal(sessionId, tvName, rentalAmt, fnbAmt, totalAmt){
   document.getElementById('checkout-modal-title').innerText = 'Checkout — ' + tvName;
   document.getElementById('checkout-form').action = '/kasir/rental/' + sessionId + '/checkout';
   document.getElementById('checkout-rental-amount').innerText = 'Rp ' + rentalAmt.toLocaleString('id-ID');
   document.getElementById('checkout-fnb-amount').innerText = 'Rp ' + fnbAmt.toLocaleString('id-ID');
   document.getElementById('checkout-grand-total').innerText = 'Rp ' + totalAmt.toLocaleString('id-ID');
+  
+  document.getElementById('checkout-details').classList.remove('hidden');
+  document.getElementById('qris-container').classList.add('hidden');
+  document.getElementById('checkout-submit-btn').innerText = 'SELESAIKAN LUNAS';
+  qrisConfirmed = false;
+  document.querySelector('input[name="payment_method"][value="cash"]').checked = true;
+
   document.getElementById('modal-checkout').classList.remove('hidden');
 }
 // Filter lokal

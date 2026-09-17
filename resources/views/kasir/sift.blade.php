@@ -50,6 +50,10 @@
       <h3 class="font-black uppercase">Buka Shift Baru</h3>
       <div><label class="text-xs font-bold uppercase">Modal kas awal (Rp)</label>
       <input type="number" name="starting_cash" value="200000" min="0" required class="w-full mt-1 px-3 py-2 border-2 border-on-surface text-xs font-bold"></div>
+      
+      <div><label class="text-xs font-bold uppercase">PIN Kasir</label>
+      <input type="password" name="pin" placeholder="Masukkan 6 Digit PIN" required maxlength="6" minlength="4" class="w-full mt-1 px-3 py-2 border-2 border-on-surface text-xs font-bold"></div>
+      
       <textarea name="notes" placeholder="Catatan..." class="px-3 py-2 border-2 border-on-surface text-xs"></textarea>
       <div class="flex justify-end gap-2">
         <button type="button" onclick="document.getElementById('kasir-start-shift').classList.add('hidden')" class="px-4 py-2 border-2 border-on-surface text-xs font-bold btn-press">BATAL</button>

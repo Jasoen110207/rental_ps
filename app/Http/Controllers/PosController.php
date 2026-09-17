@@ -43,7 +43,7 @@ class PosController extends Controller
             'play_session_id' => 'required_if:target_type,session|nullable|exists:play_sessions,id',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|integer|min:0',
             'payment_method' => 'nullable|in:cash,qris,transfer,other',
         ]);
 

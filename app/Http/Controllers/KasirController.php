@@ -251,7 +251,7 @@ class KasirController extends Controller
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|integer|min:0',
         ]);
 
         $session = PlaySession::findOrFail($sessionId);
@@ -572,8 +572,13 @@ class KasirController extends Controller
     {
         $validated = $request->validate([
             'starting_cash' => 'required|numeric|min:0',
+            'pin' => 'required|string',
             'notes' => 'nullable|string',
         ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($validated['pin'], Auth::user()->pin)) {
+            return back()->with('error', 'PIN yang Anda masukkan salah!');
+        }
 
         Shift::where('status', 'active')->update(['status' => 'closed', 'end_time' => Carbon::now()]);
         Shift::create([

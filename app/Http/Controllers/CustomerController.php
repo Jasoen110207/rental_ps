@@ -70,7 +70,7 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1|max:20',
+            'items.*.quantity' => 'required|integer|min:0|max:20',
             'note' => 'nullable|string|max:255',
         ]);
 

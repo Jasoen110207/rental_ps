@@ -14,42 +14,51 @@ class ShiftController extends Controller
         protected ShiftService $shiftService
     ) {}
 
-    /**
-     * Memulai shift kasir.
-     */
-    public function store(Request $request): JsonResponse
+    public function startShift(Request $request)
     {
-        try {
-            $shift = $this->shiftService->startShift($request->user());
+        $validated = $request->validate([
+            'starting_cash' => 'required|numeric|min:0',
+            'pin' => 'required|string',
+            'notes' => 'nullable|string',
+        ]);
 
-            return response()->json([
-                'message' => 'Shift berhasil dimulai.',
-                'data' => $shift->load('user'),
-            ], 201);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 422);
+        if (!\Illuminate\Support\Facades\Hash::check($validated['pin'], auth()->user()->pin)) {
+            return back()->with('error', 'PIN yang Anda masukkan salah!');
         }
+
+        Shift::where('status', 'active')->update(['status' => 'closed', 'end_time' => \Carbon\Carbon::now()]);
+        Shift::create([
+            'user_id' => auth()->id() ?? 1,
+            'start_time' => \Carbon\Carbon::now(),
+            'starting_cash' => $validated['starting_cash'],
+            'total_revenue' => 0,
+            'transactions_count' => 0,
+            'notes' => $validated['notes'] ?? 'Shift baru dibuka.',
+            'status' => 'active',
+        ]);
+
+        return back()->with('success', 'Shift baru berhasil dimulai.');
     }
 
-    /**
-     * Mengakhiri shift kasir.
-     */
-    public function update(Request $request): JsonResponse
+    public function endShift(Request $request, $id)
     {
-        try {
-            $shift = $this->shiftService->endShift($request->user());
+        $shift = Shift::findOrFail($id);
+        $validated = $request->validate(['notes' => 'nullable|string']);
+        
+        $revenue = \App\Models\PlaySession::where('status', 'completed')
+            ->where('end_time', '>=', $shift->start_time)->sum('total_amount');
+        $txCount = \App\Models\PlaySession::where('status', 'completed')
+            ->where('end_time', '>=', $shift->start_time)->count();
+            
+        $shift->update([
+            'end_time' => \Carbon\Carbon::now(),
+            'total_revenue' => $revenue,
+            'transactions_count' => $txCount,
+            'notes' => $validated['notes'] ?? $shift->notes,
+            'status' => 'closed',
+        ]);
 
-            return response()->json([
-                'message' => 'Shift berhasil diakhiri.',
-                'data' => $shift,
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 422);
-        }
+        return back()->with('success', 'Shift berhasil ditutup dan diserahkan.');
     }
 
     /**
@@ -57,9 +66,7 @@ class ShiftController extends Controller
      */
     public function index(Request $request)
     {
-        $shifts = Shift::where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $shifts = Shift::orderBy('created_at', 'desc')->paginate(8);
 
         if ($request->expectsJson() || $request->wantsJson()) {
             return response()->json([
@@ -67,6 +74,18 @@ class ShiftController extends Controller
             ]);
         }
 
-        return view('admin.shifts.index', compact('shifts'));
+        $activeShift = Shift::with('user')->where('status', 'active')->latest()->first();
+        $ongoingRentalsCount = \App\Models\PlaySession::where('status', 'active')->count();
+        $liveShiftRevenue = 0;
+        $liveShiftTransactions = 0;
+        if ($activeShift) {
+            $liveShiftRevenue = \App\Models\PlaySession::where('status', 'completed')
+                ->where('end_time', '>=', $activeShift->start_time)->sum('total_amount');
+            $liveShiftTransactions = \App\Models\PlaySession::where('status', 'completed')
+                ->where('end_time', '>=', $activeShift->start_time)->count();
+        }
+        $shiftHistory = $shifts;
+
+        return view('admin.shifts.index', compact('shifts', 'activeShift', 'ongoingRentalsCount', 'liveShiftRevenue', 'liveShiftTransactions', 'shiftHistory'));
     }
 }

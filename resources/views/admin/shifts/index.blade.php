@@ -171,6 +171,11 @@
       </div>
 
       <div>
+        <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1">PIN Kasir</label>
+        <input type="password" name="pin" placeholder="Masukkan 6 Digit PIN" required maxlength="6" minlength="4" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-headline-sm text-sm font-bold neo-shadow-sm">
+      </div>
+
+      <div>
         <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1">Catatan Pembukaan</label>
         <textarea name="notes" rows="2" placeholder="Kondisi meja / stok awal" class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm"></textarea>
       </div>
