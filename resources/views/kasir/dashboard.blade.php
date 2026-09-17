@@ -152,14 +152,12 @@
                 <span class="font-bold">Rp {{ number_format($activeSession->fnb_amount, 0, ',', '.') }}</span>
               </div>
             @endif
-            @if ($tv->is_buzzer_on)
-              <div class="mt-2 p-2 bg-error text-white text-xs font-bold uppercase flex items-center justify-between border border-on-surface animate-pulse">
-                <span>ALARM BUZZER AKTIF!</span>
-                <form method="POST" action="{{ route('kasir.rental.toggle-buzzer', $tv->id) }}" class="inline">@csrf
-                  <button class="px-2 py-0.5 bg-white text-error text-[10px] font-bold border border-on-surface">MATIKAN</button>
-                </form>
-              </div>
-            @endif
+            <div id="buzzer-indicator-{{ $tv->id }}" class="mt-2 p-2 bg-error text-white text-xs font-bold uppercase flex items-center justify-between border border-on-surface animate-pulse {{ $tv->is_buzzer_on ? '' : 'hidden' }}">
+              <span>ALARM BUZZER AKTIF!</span>
+              <form method="POST" action="{{ route('kasir.rental.toggle-buzzer', $tv->id) }}" class="inline">@csrf
+                <button class="px-2 py-0.5 bg-white text-error text-[10px] font-bold border border-on-surface">MATIKAN</button>
+              </form>
+            </div>
           @else
             <div class="py-4 text-center text-on-surface-variant">
               <span class="material-symbols-outlined text-3xl">build</span>
@@ -471,7 +469,7 @@ async function pollKasirStatus(){
               <span class="text-xs font-bold uppercase text-primary">${req.tv_name}</span>
               <span class="text-[10px] text-on-surface-variant">${req.time_ago}</span>
             </div>
-            <p class="text-xs font-bold">${req.type === 'add_time' ? 'Tambah Waktu (+' + (req.payload.duration_hours || 1) + ' Jam)' : (req.type === 'service_call' ? 'Panggil Kasir ke Meja' : 'Pesanan F&B')}</p>
+            <p class="text-xs font-bold">${req.type === 'add_time' ? 'Tambah Waktu (+' + (req.payload.duration_hours || 1) + ' Jam)' : (req.type === 'service_call' ? 'Panggil Kasir ke Meja' : (req.payload.items ? req.payload.items.map(i => i.quantity + 'x ' + i.name).join(', ') : 'Pesanan F&B'))}</p>
             <div class="flex gap-2 mt-1">
               <form method="POST" action="/kasir/request/${req.id}/approve" class="flex-1">@csrf<button class="w-full py-1 bg-primary text-white text-[10px] font-bold uppercase border border-on-surface">Setujui</button></form>
               <form method="POST" action="/kasir/request/${req.id}/reject" class="flex-1">@csrf<button class="w-full py-1 bg-surface text-error text-[10px] font-bold uppercase border border-on-surface">Tolak</button></form>
@@ -480,7 +478,17 @@ async function pollKasirStatus(){
       }
     }
     let alarm = false;
-    data.tvs.forEach(tv => { if(tv.is_buzzer_on) alarm = true; });
+    data.tvs.forEach(tv => {
+      if(tv.is_buzzer_on) alarm = true;
+      const buzzerIndicator = document.getElementById('buzzer-indicator-' + tv.id);
+      if (buzzerIndicator) {
+        if (tv.is_buzzer_on) {
+          buzzerIndicator.classList.remove('hidden');
+        } else {
+          buzzerIndicator.classList.add('hidden');
+        }
+      }
+    });
     if(alarm) playAlarmBeep();
   }catch(e){ console.log('poll error', e); }
 }

@@ -134,14 +134,23 @@
         <input type="number" name="price_per_hour" id="unit-price" required min="1000" step="1000" value="15000" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-headline-sm text-sm font-bold text-primary neo-shadow-sm">
       </div>
 
-      <div class="flex items-center justify-end gap-3 pt-3 border-t-2 border-on-surface mt-2">
-        <button type="button" onclick="closeUnitModal()" class="py-2 px-4 border-2 border-on-surface font-headline-sm text-xs uppercase font-bold neo-shadow-sm btn-press hover:bg-surface-container-high">
-          Batal
+      <div class="flex items-center justify-between pt-3 border-t-2 border-on-surface mt-2">
+        <button type="button" id="delete-btn" onclick="submitDelete()" class="hidden py-2 px-4 bg-error text-white font-headline-sm text-xs uppercase font-bold border-2 border-on-surface neo-shadow-sm btn-press hover:bg-red-700">
+          Hapus Unit
         </button>
-        <button type="submit" class="py-2 px-5 bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider font-black border-2 border-on-surface neo-shadow btn-press hover:bg-primary-container">
-          Simpan Unit
-        </button>
+        <div class="flex gap-3 ml-auto">
+          <button type="button" onclick="closeUnitModal()" class="py-2 px-4 border-2 border-on-surface font-headline-sm text-xs uppercase font-bold neo-shadow-sm btn-press hover:bg-surface-container-high">
+            Batal
+          </button>
+          <button type="submit" class="py-2 px-5 bg-primary text-on-primary font-headline-sm text-xs uppercase tracking-wider font-black border-2 border-on-surface neo-shadow btn-press hover:bg-primary-container">
+            Simpan Unit
+          </button>
+        </div>
       </div>
+    </form>
+    <form id="delete-form" method="POST" action="" class="hidden">
+      @csrf
+      @method('DELETE')
     </form>
   </div>
 </div>
@@ -155,6 +164,7 @@
     document.getElementById('unit-status').value = 'available';
     document.getElementById('unit-price').value = 25000;
     document.getElementById('unit-modal-title').innerText = 'Tambah Unit Konsol';
+    document.getElementById('delete-btn').classList.add('hidden');
     document.getElementById('modal-unit').classList.remove('hidden');
   }
 
@@ -166,7 +176,15 @@
     document.getElementById('unit-status').value = status;
     document.getElementById('unit-price').value = price;
     document.getElementById('unit-modal-title').innerText = 'Edit Unit — ' + name;
+    document.getElementById('delete-btn').classList.remove('hidden');
+    document.getElementById('delete-form').action = '/admin/units/' + id;
     document.getElementById('modal-unit').classList.remove('hidden');
+  }
+
+  function submitDelete() {
+    if(confirm('Yakin ingin menghapus unit ini?')) {
+      document.getElementById('delete-form').submit();
+    }
   }
 
   function closeUnitModal() {

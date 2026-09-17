@@ -34,6 +34,21 @@
         </form>
     </header>
 
+    @if(session('error'))
+        <div class="bg-error-container text-error neo-border-2 px-3 py-2 mb-3 text-xs font-bold neo-shadow-sm">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="bg-error-container text-error neo-border-2 px-3 py-2 mb-3 text-xs font-bold neo-shadow-sm">
+            <ul class="list-disc pl-4">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- Timer + billing real --}}
     <section class="w-full bg-surface-container-lowest neo-border-3 neo-shadow-md p-3.5 mb-3.5 flex flex-col relative">
         <div class="flex items-center justify-between pb-2.5 border-b-2 border-on-surface mb-3">

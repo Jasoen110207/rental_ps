@@ -64,4 +64,17 @@ class UnitController extends Controller
 
         return view('admin.units.qr', compact('tv', 'customerUrl'));
     }
+
+    public function destroy($id)
+    {
+        $tv = Tv::findOrFail($id);
+
+        if ($tv->playSessions()->exists()) {
+            return back()->with('error', 'Gagal dihapus: Unit ini memiliki riwayat sesi bermain/transaksi. Ubah statusnya menjadi Maintenance jika tidak digunakan.');
+        }
+
+        $tv->delete();
+
+        return back()->with('success', 'Unit ' . $tv->name . ' berhasil dihapus.');
+    }
 }

@@ -87,6 +87,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::put('/units/{id}', [UnitController::class, 'update'])->name('units.update');
     Route::post('/units/{id}/toggle-status', [UnitController::class, 'toggleStatus'])->name('units.toggle-status');
     Route::get('/units/{id}/qr', [UnitController::class, 'qr'])->name('units.qr');
+    Route::delete('/units/{id}', [UnitController::class, 'destroy'])->name('units.destroy');
 
     // Settings
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');

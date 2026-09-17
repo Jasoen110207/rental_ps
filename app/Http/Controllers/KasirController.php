@@ -605,7 +605,11 @@ class KasirController extends Controller
             'status' => 'closed',
         ]);
 
-        return back()->with('success', 'Shift berhasil ditutup dan diserahkan.');
+        \Illuminate\Support\Facades\Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('success', 'Shift berhasil ditutup, silakan login kembali.');
     }
 
     /* ================= UNIT ================= */
