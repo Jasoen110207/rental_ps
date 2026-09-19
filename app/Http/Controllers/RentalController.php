@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CustomerRequest;
 use App\Models\PlaySession;
 use App\Models\Product;
 use App\Models\SessionOrder;
@@ -25,12 +24,14 @@ class RentalController extends Controller
             'billing_type' => 'required|in:prepaid,postpaid',
             'duration_hours' => 'nullable|numeric|min:0.5',
             'notes' => 'nullable|string',
+            'customer_name' => 'nullable|string|max:100',
+            'controller_count' => 'nullable|integer|min:1|max:10',
         ]);
 
         $tv = Tv::findOrFail($validated['tv_id']);
 
         if ($tv->status !== 'available') {
-            return back()->with('error', 'Unit ' . $tv->name . ' sedang tidak tersedia!');
+            return back()->with('error', 'Unit '.$tv->name.' sedang tidak tersedia!');
         }
 
         $now = Carbon::now();
@@ -48,6 +49,8 @@ class RentalController extends Controller
             PlaySession::create([
                 'tv_id' => $tv->id,
                 'user_id' => Auth::id() ?? 1,
+                'customer_name' => $validated['customer_name'] ?? null,
+                'controller_count' => $validated['controller_count'] ?? 1,
                 'billing_type' => $validated['billing_type'],
                 'start_time' => $startTime,
                 'end_time' => $endTime,
@@ -65,7 +68,7 @@ class RentalController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Rental berhasil dimulai untuk ' . $tv->name);
+        return back()->with('success', 'Rental berhasil dimulai untuk '.$tv->name);
     }
 
     /**
@@ -85,9 +88,9 @@ class RentalController extends Controller
         }
 
         $addedMinutes = 0;
-        if (!empty($validated['added_hours'])) {
+        if (! empty($validated['added_hours'])) {
             $addedMinutes = (int) round($validated['added_hours'] * 60);
-        } elseif (!empty($validated['added_minutes'])) {
+        } elseif (! empty($validated['added_minutes'])) {
             $addedMinutes = (int) $validated['added_minutes'];
         } else {
             $addedMinutes = 60; // Default 1 hour
@@ -119,7 +122,7 @@ class RentalController extends Controller
             $session->tv->update(['is_buzzer_on' => false]);
         });
 
-        return back()->with('success', 'Waktu berhasil diperpanjang +' . $addedMinutes . ' menit untuk ' . $session->tv->name);
+        return back()->with('success', 'Waktu berhasil diperpanjang +'.$addedMinutes.' menit untuk '.$session->tv->name);
     }
 
     /**
@@ -169,7 +172,7 @@ class RentalController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Pesanan F&B berhasil ditambahkan ke tagihan ' . $session->tv->name);
+        return back()->with('success', 'Pesanan F&B berhasil ditambahkan ke tagihan '.$session->tv->name);
     }
 
     /**
@@ -231,7 +234,7 @@ class RentalController extends Controller
         });
 
         return redirect()->route('admin.dashboard')
-            ->with('success', 'Checkout berhasil! Pembayaran ' . $session->tv->name . ' sebesar Rp ' . number_format($grandTotal, 0, ',', '.') . ' telah lunas.');
+            ->with('success', 'Checkout berhasil! Pembayaran '.$session->tv->name.' sebesar Rp '.number_format($grandTotal, 0, ',', '.').' telah lunas.');
     }
 
     /**
@@ -241,10 +244,11 @@ class RentalController extends Controller
     {
         $tv = Tv::findOrFail($tvId);
         $tv->update([
-            'is_buzzer_on' => !$tv->is_buzzer_on,
+            'is_buzzer_on' => ! $tv->is_buzzer_on,
         ]);
 
         $status = $tv->is_buzzer_on ? 'diaktifkan' : 'dimatikan';
-        return back()->with('success', 'Buzzer alarm untuk ' . $tv->name . ' berhasil ' . $status);
+
+        return back()->with('success', 'Buzzer alarm untuk '.$tv->name.' berhasil '.$status);
     }
 }

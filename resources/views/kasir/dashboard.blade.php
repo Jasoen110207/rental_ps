@@ -152,7 +152,15 @@
                 <span class="font-bold">Rp {{ number_format($activeSession->fnb_amount, 0, ',', '.') }}</span>
               </div>
             @endif
-            <div id="buzzer-indicator-{{ $tv->id }}" class="mt-2 p-2 bg-error text-white text-xs font-bold uppercase flex items-center justify-between border border-on-surface animate-pulse {{ $tv->is_buzzer_on ? '' : 'hidden' }}">
+            @if ($activeSession->customer_name)
+              <div class="mt-2 p-1.5 bg-surface border border-on-surface text-[11px] flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-primary">person</span>
+                <span class="font-bold">{{ $activeSession->customer_name }}</span>
+                <span class="text-on-surface-variant">•</span>
+                <span class="font-bold">{{ $activeSession->controller_count ?? 1 }} Stik</span>
+              </div>
+            @endif
+            <div id="buzzer-indicator-{{ $tv->id }}" class="mt-2 p-2 bg-error text-white text-xs font-bold uppercase flex items-center justify-between border border-on-surface animate-pulse {{ ($tv->is_buzzer_on || $isTimeUp) ? '' : 'hidden' }}">
               <span>ALARM BUZZER AKTIF!</span>
               <form method="POST" action="{{ route('kasir.rental.toggle-buzzer', $tv->id) }}" class="inline">@csrf
                 <button class="px-2 py-0.5 bg-white text-error text-[10px] font-bold border border-on-surface">MATIKAN</button>
@@ -204,6 +212,27 @@
     <form method="POST" action="{{ route('kasir.rental.start') }}" class="flex flex-col gap-4">
       @csrf
       <input type="hidden" name="tv_id" id="start-tv-id">
+      
+      <!-- Nama Penyewa -->
+      <div>
+        <label class="block text-xs uppercase font-bold mb-1.5">Nama Penyewa</label>
+        <input type="text" name="customer_name" id="start-customer-name"
+          placeholder="Misal: Budi, Andi, dll."
+          class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-sm neo-shadow-sm" required>
+      </div>
+
+      <!-- Jumlah Stik Kontroller -->
+      <div>
+        <label class="block text-xs uppercase font-bold mb-1.5">Jumlah Stik Kontroller</label>
+        <div class="grid grid-cols-4 gap-2">
+          <button type="button" onclick="setControllerCount(1)" class="controller-btn py-2 border-2 border-on-surface text-xs font-bold neo-shadow-sm btn-press bg-primary-fixed" data-count="1">1 Stik</button>
+          <button type="button" onclick="setControllerCount(2)" class="controller-btn py-2 border-2 border-on-surface text-xs font-bold neo-shadow-sm btn-press bg-surface hover:bg-primary-fixed" data-count="2">2 Stik</button>
+          <button type="button" onclick="setControllerCount(3)" class="controller-btn py-2 border-2 border-on-surface text-xs font-bold neo-shadow-sm btn-press bg-surface hover:bg-primary-fixed" data-count="3">3 Stik</button>
+          <button type="button" onclick="setControllerCount(4)" class="controller-btn py-2 border-2 border-on-surface text-xs font-bold neo-shadow-sm btn-press bg-surface hover:bg-primary-fixed" data-count="4">4 Stik</button>
+        </div>
+        <input type="hidden" name="controller_count" id="start-controller-count" value="1">
+      </div>
+
       <div>
         <label class="block text-xs uppercase font-bold mb-1.5">Tipe Billing</label>
         <div class="grid grid-cols-2 gap-2">
@@ -349,9 +378,23 @@ window.openStartModal = function(tvId, tvName, rate){
   document.getElementById('start-modal-title').innerText = 'Mulai Rental — ' + tvName;
   currentTvRate = rate;
   document.getElementById('start-rate-display').innerText = 'Rp ' + rate.toLocaleString('id-ID') + ' / jam';
+  document.getElementById('start-customer-name').value = '';
+  setControllerCount(1);
   setBillingType('prepaid'); setDuration(1);
   document.getElementById('modal-start').classList.remove('hidden');
 };
+function setControllerCount(count) {
+  document.getElementById('start-controller-count').value = count;
+  document.querySelectorAll('.controller-btn').forEach(btn => {
+    if (parseInt(btn.getAttribute('data-count')) === count) {
+      btn.classList.add('bg-primary-fixed');
+      btn.classList.remove('bg-surface');
+    } else {
+      btn.classList.remove('bg-primary-fixed');
+      btn.classList.add('bg-surface');
+    }
+  });
+}
 function setBillingType(type){
   document.getElementById('start-billing-type').value = type;
   const pre = document.getElementById('btn-billing-prepaid'), post = document.getElementById('btn-billing-postpaid');
@@ -505,10 +548,10 @@ async function pollKasirStatus(){
     }
     let alarm = false;
     data.tvs.forEach(tv => {
-      if(tv.is_buzzer_on) alarm = true;
+      if(tv.is_buzzer_on || (tv.active_session && tv.active_session.is_time_up)) alarm = true;
       const buzzerIndicator = document.getElementById('buzzer-indicator-' + tv.id);
       if (buzzerIndicator) {
-        if (tv.is_buzzer_on) {
+        if (tv.is_buzzer_on || (tv.active_session && tv.active_session.is_time_up)) {
           buzzerIndicator.classList.remove('hidden');
         } else {
           buzzerIndicator.classList.add('hidden');

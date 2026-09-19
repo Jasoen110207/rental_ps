@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * KasirController — seluruh halaman kasir tersambung ke database yang sama
@@ -88,6 +89,11 @@ class KasirController extends Controller
                     if ($activeSession->end_time->isPast()) {
                         $isTimeUp = true;
                         $timeUpCount++;
+
+                        if (! $tv->is_buzzer_on && $activeSession->end_time->diffInSeconds($now) <= 30) {
+                            $tv->update(['is_buzzer_on' => true]);
+                            $tv->is_buzzer_on = true; // Update local object for the API response
+                        }
                     } else {
                         $remainingSeconds = $now->diffInSeconds($activeSession->end_time, false);
                         if ($remainingSeconds <= 600) {
@@ -106,6 +112,8 @@ class KasirController extends Controller
                     'billing_type' => $activeSession->billing_type,
                     'start_time' => $activeSession->start_time->format('H:i'),
                     'end_time' => $activeSession->end_time ? $activeSession->end_time->format('H:i') : null,
+                    'customer_name' => $activeSession->customer_name,
+                    'controller_count' => $activeSession->controller_count ?? 1,
                     'elapsed_seconds' => $elapsedSeconds,
                     'remaining_seconds' => max(0, $remainingSeconds),
                     'is_almost_finished' => $isAlmostFinished,
@@ -174,11 +182,13 @@ class KasirController extends Controller
             'billing_type' => 'required|in:prepaid,postpaid',
             'duration_hours' => 'nullable|numeric|min:0.5',
             'notes' => 'nullable|string',
+            'customer_name' => 'nullable|string|max:100',
+            'controller_count' => 'nullable|integer|min:1|max:10',
         ]);
 
         $tv = Tv::findOrFail($validated['tv_id']);
         if ($tv->status !== 'available') {
-            return back()->with('error', 'Unit ' . $tv->name . ' sedang tidak tersedia!');
+            return back()->with('error', 'Unit '.$tv->name.' sedang tidak tersedia!');
         }
 
         $startTime = Carbon::now();
@@ -194,6 +204,8 @@ class KasirController extends Controller
             PlaySession::create([
                 'tv_id' => $tv->id,
                 'user_id' => Auth::id() ?? 1,
+                'customer_name' => $validated['customer_name'] ?? null,
+                'controller_count' => $validated['controller_count'] ?? 1,
                 'billing_type' => $validated['billing_type'],
                 'start_time' => $startTime,
                 'end_time' => $endTime,
@@ -207,7 +219,7 @@ class KasirController extends Controller
             $tv->update(['status' => 'playing', 'is_buzzer_on' => false]);
         });
 
-        return back()->with('success', 'Rental berhasil dimulai untuk ' . $tv->name);
+        return back()->with('success', 'Rental berhasil dimulai untuk '.$tv->name);
     }
 
     public function extendRental(Request $request, $sessionId)
@@ -222,7 +234,7 @@ class KasirController extends Controller
             return back()->with('error', 'Sesi rental tidak aktif!');
         }
 
-        $addedMinutes = !empty($validated['added_hours'])
+        $addedMinutes = ! empty($validated['added_hours'])
             ? (int) round($validated['added_hours'] * 60)
             : (int) ($validated['added_minutes'] ?? 60);
         $additionalFee = (int) round(($addedMinutes / 60) * $session->tv->price_per_hour);
@@ -243,7 +255,7 @@ class KasirController extends Controller
             $session->tv->update(['is_buzzer_on' => false]);
         });
 
-        return back()->with('success', 'Waktu +' . $addedMinutes . ' menit untuk ' . $session->tv->name);
+        return back()->with('success', 'Waktu +'.$addedMinutes.' menit untuk '.$session->tv->name);
     }
 
     public function addFnb(Request $request, $sessionId)
@@ -281,7 +293,7 @@ class KasirController extends Controller
             $session->update(['fnb_amount' => $newFnb, 'total_amount' => $session->rental_amount + $newFnb]);
         });
 
-        return back()->with('success', 'F&B ditambahkan ke ' . $session->tv->name);
+        return back()->with('success', 'F&B ditambahkan ke '.$session->tv->name);
     }
 
     public function checkout(Request $request, $sessionId)
@@ -328,15 +340,15 @@ class KasirController extends Controller
         });
 
         return redirect()->route('kasir.dashboard')
-            ->with('success', 'Checkout ' . $session->tv->name . ' lunas Rp ' . number_format($grandTotal, 0, ',', '.'));
+            ->with('success', 'Checkout '.$session->tv->name.' lunas Rp '.number_format($grandTotal, 0, ',', '.'));
     }
 
     public function toggleBuzzer($tvId)
     {
         $tv = Tv::findOrFail($tvId);
-        $tv->update(['is_buzzer_on' => !$tv->is_buzzer_on]);
+        $tv->update(['is_buzzer_on' => ! $tv->is_buzzer_on]);
 
-        return back()->with('success', 'Buzzer ' . $tv->name . ' ' . ($tv->is_buzzer_on ? 'dimatikan' : 'diaktifkan'));
+        return back()->with('success', 'Buzzer '.$tv->name.' '.($tv->is_buzzer_on ? 'dimatikan' : 'diaktifkan'));
     }
 
     /* ================= POS / MENU ================= */
@@ -366,7 +378,7 @@ class KasirController extends Controller
         if ($category !== 'all') {
             $query->where('category', $category);
         }
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->where('name', 'like', "%{$search}%");
         }
         $products = $query->orderBy('name')->get();
@@ -475,7 +487,7 @@ class KasirController extends Controller
                     'total_amount' => $newRental + $activeSession->fnb_amount,
                 ]);
                 $activeSession->tv->update(['is_buzzer_on' => false]);
-            } elseif ($customerRequest->type === 'order_food' && $activeSession && !empty($payload['items'])) {
+            } elseif ($customerRequest->type === 'order_food' && $activeSession && ! empty($payload['items'])) {
                 $addedFnb = 0;
                 foreach ($payload['items'] as $item) {
                     $product = Product::find($item['product_id']);
@@ -576,7 +588,7 @@ class KasirController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        if (!\Illuminate\Support\Facades\Hash::check($validated['pin'], Auth::user()->pin)) {
+        if (! Hash::check($validated['pin'], Auth::user()->pin)) {
             return back()->with('error', 'PIN yang Anda masukkan salah!');
         }
 
@@ -610,7 +622,7 @@ class KasirController extends Controller
             'status' => 'closed',
         ]);
 
-        \Illuminate\Support\Facades\Auth::logout();
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
@@ -632,7 +644,7 @@ class KasirController extends Controller
         $tv = Tv::findOrFail($id);
         $tv->update(['status' => $tv->status === 'maintenance' ? 'available' : 'maintenance']);
 
-        return back()->with('success', 'Status ' . $tv->name . ' menjadi ' . $tv->status);
+        return back()->with('success', 'Status '.$tv->name.' menjadi '.$tv->status);
     }
 
     /* ================= SETTING ================= */

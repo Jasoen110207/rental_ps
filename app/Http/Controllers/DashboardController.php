@@ -98,6 +98,11 @@ class DashboardController extends Controller
                         $remainingSeconds = 0;
                         $isTimeUp = true;
                         $timeUpCount++;
+
+                        if (! $tv->is_buzzer_on && $activeSession->end_time->diffInSeconds($now) <= 30) {
+                            $tv->update(['is_buzzer_on' => true]);
+                            $tv->is_buzzer_on = true; // Update local object for the API response
+                        }
                     } else {
                         $remainingSeconds = $now->diffInSeconds($activeSession->end_time, false);
                         if ($remainingSeconds <= 600) { // <= 10 mins
@@ -119,6 +124,8 @@ class DashboardController extends Controller
                     'billing_type' => $activeSession->billing_type,
                     'start_time' => $activeSession->start_time->format('H:i'),
                     'end_time' => $activeSession->end_time ? $activeSession->end_time->format('H:i') : null,
+                    'customer_name' => $activeSession->customer_name,
+                    'controller_count' => $activeSession->controller_count ?? 1,
                     'elapsed_seconds' => $elapsedSeconds,
                     'remaining_seconds' => max(0, $remainingSeconds),
                     'is_almost_finished' => $isAlmostFinished,

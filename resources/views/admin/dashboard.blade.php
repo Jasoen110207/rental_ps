@@ -206,20 +206,32 @@
 
               <!-- F&B Summary if any -->
               @if ($activeSession->sessionOrders->count() > 0)
-                <div class="p-2 bg-surface-container border border-on-surface text-[11px] font-body-md flex items-center justify-between">
+                <div class="p-2 bg-surface-container border border-on-surface text-[11px] font-body-md flex items-center justify-between mt-1">
                   <span class="text-on-surface-variant font-bold">🍱 Pesanan F&B ({{ $activeSession->sessionOrders->sum('quantity') }} item)</span>
                   <span class="font-headline-sm font-bold">Rp {{ number_format($activeSession->fnb_amount, 0, ',', '.') }}</span>
                 </div>
               @endif
 
+              @if ($activeSession->customer_name)
+                <div class="p-1.5 bg-surface border border-on-surface text-xs flex items-center gap-1.5 mt-1">
+                  <span class="material-symbols-outlined text-sm text-primary">person</span>
+                  <span class="font-bold text-on-surface">{{ $activeSession->customer_name }}</span>
+                  <span class="text-on-surface-variant">•</span>
+                  <span class="font-bold text-on-surface">{{ $activeSession->controller_count ?? 1 }} Stik</span>
+                </div>
+              @endif
+
               <!-- Buzzer State Indicator -->
-              @if ($tv->is_buzzer_on)
-                <div class="p-2 bg-error text-on-error font-headline-sm text-xs font-bold uppercase flex items-center justify-between border border-on-surface animate-pulse">
-                  <span>🚨 ALARM BUZZER AKTIF!</span>
+              @if ($tv->is_buzzer_on || $isTimeUp)
+                <div class="p-2.5 bg-error text-on-error font-headline-sm text-xs font-bold uppercase flex items-center justify-between border-2 border-on-surface animate-pulse neo-shadow-sm mt-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">alarm</span>
+                    <span>ALARM BUZZER AKTIF!</span>
+                  </div>
                   <form method="POST" action="{{ route('admin.rental.toggle-buzzer', $tv->id) }}" class="inline">
                     @csrf
-                    <button type="submit" class="px-2 py-0.5 bg-white text-error font-bold text-[10px] border border-on-surface neo-shadow-sm">
-                      MATIKAN
+                    <button type="submit" class="px-3 py-1 bg-white text-error font-black text-[11px] border-2 border-on-surface neo-shadow-sm btn-press hover:bg-red-50">
+                      MATIKAN BUZZER
                     </button>
                   </form>
                 </div>
@@ -295,6 +307,26 @@
     <form method="POST" action="{{ route('admin.rental.start') }}" class="flex flex-col gap-4">
       @csrf
       <input type="hidden" name="tv_id" id="start-tv-id">
+
+      <!-- Nama Penyewa -->
+      <div>
+        <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1.5">Nama Penyewa</label>
+        <input type="text" name="customer_name" id="start-customer-name"
+          placeholder="Misal: Budi, Andi, dll."
+          class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-sm neo-shadow-sm" required>
+      </div>
+
+      <!-- Jumlah Stik Kontroller -->
+      <div>
+        <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1.5">Jumlah Stik Kontroller</label>
+        <div class="grid grid-cols-4 gap-2">
+          <button type="button" onclick="setControllerCount(1)" class="controller-btn py-2 border-2 border-on-surface font-headline-sm text-xs font-bold neo-shadow-sm btn-press bg-primary-fixed" data-count="1">1 Stik</button>
+          <button type="button" onclick="setControllerCount(2)" class="controller-btn py-2 border-2 border-on-surface font-headline-sm text-xs font-bold neo-shadow-sm btn-press bg-surface hover:bg-primary-fixed" data-count="2">2 Stik</button>
+          <button type="button" onclick="setControllerCount(3)" class="controller-btn py-2 border-2 border-on-surface font-headline-sm text-xs font-bold neo-shadow-sm btn-press bg-surface hover:bg-primary-fixed" data-count="3">3 Stik</button>
+          <button type="button" onclick="setControllerCount(4)" class="controller-btn py-2 border-2 border-on-surface font-headline-sm text-xs font-bold neo-shadow-sm btn-press bg-surface hover:bg-primary-fixed" data-count="4">4 Stik</button>
+        </div>
+        <input type="hidden" name="controller_count" id="start-controller-count" value="1">
+      </div>
 
       <!-- Billing Mode Tabs -->
       <div>
@@ -579,11 +611,26 @@
     document.getElementById('start-modal-title').innerText = 'Mulai Rental — ' + tvName;
     currentTvRate = rate;
     document.getElementById('start-rate-display').innerText = 'Rp ' + rate.toLocaleString('id-ID') + ' / jam';
+    document.getElementById('start-customer-name').value = '';
+    setControllerCount(1);
 
     setBillingType('prepaid');
     setDuration(1);
     modal.classList.remove('hidden');
   };
+
+  function setControllerCount(count) {
+    document.getElementById('start-controller-count').value = count;
+    document.querySelectorAll('.controller-btn').forEach(btn => {
+      if (parseInt(btn.getAttribute('data-count')) === count) {
+        btn.classList.add('bg-primary-fixed');
+        btn.classList.remove('bg-surface');
+      } else {
+        btn.classList.remove('bg-primary-fixed');
+        btn.classList.add('bg-surface');
+      }
+    });
+  }
 
   function setBillingType(type) {
     document.getElementById('start-billing-type').value = type;
