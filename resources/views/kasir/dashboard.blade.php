@@ -160,7 +160,7 @@
                 <span class="font-bold">{{ $activeSession->controller_count ?? 1 }} Stik</span>
               </div>
             @endif
-            <div id="buzzer-indicator-{{ $tv->id }}" class="mt-2 p-2 bg-error text-white text-xs font-bold uppercase flex items-center justify-between border border-on-surface animate-pulse {{ ($tv->is_buzzer_on || $isTimeUp) ? '' : 'hidden' }}">
+            <div id="buzzer-indicator-{{ $tv->id }}" class="mt-2 p-2 bg-error text-white text-xs font-bold uppercase flex items-center justify-between border border-on-surface animate-pulse {{ $tv->is_buzzer_on ? '' : 'hidden' }}">
               <span>ALARM BUZZER AKTIF!</span>
               <form method="POST" action="{{ route('kasir.rental.toggle-buzzer', $tv->id) }}" class="inline">@csrf
                 <button class="px-2 py-0.5 bg-white text-error text-[10px] font-bold border border-on-surface">MATIKAN</button>
@@ -556,10 +556,10 @@ async function pollKasirStatus(){
     }
     let alarm = false;
     data.tvs.forEach(tv => {
-      if(tv.is_buzzer_on || (tv.active_session && tv.active_session.is_time_up)) alarm = true;
+      if(tv.is_buzzer_on) alarm = true;
       const buzzerIndicator = document.getElementById('buzzer-indicator-' + tv.id);
       if (buzzerIndicator) {
-        if (tv.is_buzzer_on || (tv.active_session && tv.active_session.is_time_up)) {
+        if (tv.is_buzzer_on) {
           buzzerIndicator.classList.remove('hidden');
         } else {
           buzzerIndicator.classList.add('hidden');

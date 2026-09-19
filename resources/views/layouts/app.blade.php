@@ -231,15 +231,22 @@
     <div class="pt-3 border-t-2 border-on-surface flex flex-col gap-2">
       <div class="p-2.5 bg-surface-container-high border-2 border-on-surface flex items-center justify-between neo-shadow-sm">
         <div class="flex items-center gap-2 min-w-0">
-          <div class="w-7 h-7 bg-primary text-on-primary border border-on-surface flex items-center justify-center font-bold text-xs">RH</div>
+          <div class="w-7 h-7 bg-primary text-on-primary border border-on-surface flex items-center justify-center font-bold text-xs">
+            {{ strtoupper(substr(auth()->user()->name ?? 'K', 0, 1)) }}
+          </div>
           <div class="min-w-0">
-            <p class="font-headline-sm text-xs font-bold truncate">Rian Hidayat</p>
-            <p class="text-[10px] font-label-sm uppercase text-on-surface-variant font-bold">Kasir • Shift #02 Online</p>
+            <p class="font-headline-sm text-xs font-bold truncate">{{ auth()->user()->name ?? 'Kasir' }}</p>
+            <p class="text-[10px] font-label-sm uppercase text-on-surface-variant font-bold">
+              {{ auth()->user()->role ?? 'kasir' }} • Online
+            </p>
           </div>
         </div>
-        <button type="button" title="Keluar Shift" class="p-1.5 bg-error text-white border border-on-surface hover:bg-red-700 btn-press flex items-center justify-center">
-          <span class="material-symbols-outlined text-base">logout</span>
-        </button>
+        <form method="POST" action="{{ route('logout') }}">
+          @csrf
+          <button type="submit" title="Logout" class="p-1.5 bg-error text-white border border-on-surface hover:bg-red-700 btn-press flex items-center justify-center">
+            <span class="material-symbols-outlined text-base">logout</span>
+          </button>
+        </form>
       </div>
 
       <!-- Quick Sound Alert Toggle (sama seperti admin) -->

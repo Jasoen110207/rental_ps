@@ -187,6 +187,14 @@
           <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
         </a>
 
+        <a href="{{ route('admin.users.index') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('admin.users.*') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-lg">group</span>
+            <span>Manajemen Kasir</span>
+          </div>
+          <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+        </a>
+
         <a href="{{ route('admin.settings.index') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('admin.settings.*') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
           <div class="flex items-center gap-2.5">
             <span class="material-symbols-outlined text-lg">settings</span>

@@ -222,8 +222,8 @@
               @endif
 
               <!-- Buzzer State Indicator -->
-              @if ($tv->is_buzzer_on || $isTimeUp)
-                <div class="p-2.5 bg-error text-on-error font-headline-sm text-xs font-bold uppercase flex items-center justify-between border-2 border-on-surface animate-pulse neo-shadow-sm mt-2">
+              @if ($tv->is_buzzer_on)
+                <div id="buzzer-indicator-{{ $tv->id }}" class="p-2.5 bg-error text-on-error font-headline-sm text-xs font-bold uppercase flex items-center justify-between border-2 border-on-surface animate-pulse neo-shadow-sm mt-2">
                   <div class="flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-base">alarm</span>
                     <span>ALARM BUZZER AKTIF!</span>
@@ -810,7 +810,7 @@
         // Check if any unit is in critical alarm buzzer state
         let hasAlarm = false;
         data.tvs.forEach(tv => {
-          if (tv.is_buzzer_on || (tv.active_session && tv.active_session.is_time_up)) {
+          if (tv.is_buzzer_on) {
             hasAlarm = true;
           }
         });

@@ -11,6 +11,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -92,6 +93,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Settings
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+
+    // Users / Kasir
+    Route::resource('users', UserController::class);
 });
 
 // Kasir routes — tersambung ke database via KasirController
