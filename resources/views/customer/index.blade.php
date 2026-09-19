@@ -97,14 +97,19 @@
     </button>
 
     <!-- 2. Order F&B -->
-    <button type="button" onclick="openFoodDrawer()" class="p-4 bg-primary text-on-primary border-2 border-on-surface neo-shadow btn-press hover:bg-primary-container flex items-center justify-between text-left transition">
+    <button type="button" 
+      @if (!$activeSession || (isset($isTimeUp) && $isTimeUp))
+        disabled onclick="alert('Sesi bermain tidak aktif atau waktu habis! Anda tidak dapat memesan F&B.')" class="p-4 bg-surface-container-high text-on-surface-variant border-2 border-on-surface neo-shadow flex items-center justify-between text-left opacity-60 cursor-not-allowed"
+      @else
+        onclick="openFoodDrawer()" class="p-4 bg-primary text-on-primary border-2 border-on-surface neo-shadow btn-press hover:bg-primary-container flex items-center justify-between text-left transition"
+      @endif>
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-white text-primary border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
+        <div class="w-10 h-10 bg-white {{ (!$activeSession || (isset($isTimeUp) && $isTimeUp)) ? 'text-on-surface-variant' : 'text-primary' }} border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
           <span class="material-symbols-outlined text-2xl">restaurant</span>
         </div>
         <div>
           <h3 class="font-headline-lg font-black text-base uppercase leading-tight">PESAN MAKANAN & MINUMAN</h3>
-          <p class="text-[11px] font-body-md text-white/90">Pesan Indomie, snack & minuman diantar ke meja</p>
+          <p class="text-[11px] font-body-md {{ (!$activeSession || (isset($isTimeUp) && $isTimeUp)) ? 'text-on-surface-variant' : 'text-white/90' }}">Pesan Indomie, snack & minuman diantar ke meja</p>
         </div>
       </div>
       <span class="material-symbols-outlined text-xl">arrow_forward</span>

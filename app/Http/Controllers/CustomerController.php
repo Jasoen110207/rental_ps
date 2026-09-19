@@ -74,6 +74,15 @@ class CustomerController extends Controller
             'note' => 'nullable|string|max:255',
         ]);
 
+        $activeSession = PlaySession::where('tv_id', $tv->id)->where('status', 'active')->first();
+        if (!$activeSession) {
+            return back()->with('error', 'Tidak ada sesi bermain yang aktif! Anda tidak dapat memesan F&B.');
+        }
+        
+        if ($activeSession->billing_type === 'prepaid' && $activeSession->end_time && $activeSession->end_time->isPast()) {
+            return back()->with('error', 'Waktu bermain sudah habis! Anda tidak dapat memesan makanan & minuman.');
+        }
+
         $orderItems = [];
         $totalPrice = 0;
 

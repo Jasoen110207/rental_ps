@@ -128,8 +128,13 @@
             <span class="material-symbols-outlined text-xl font-black">arrow_forward</span>
         </button>
 
-        <button class="neo-btn w-full min-h-[50px] bg-primary hover:bg-primary-container text-on-primary px-4 py-3 neo-border-3 neo-shadow-md flex items-center justify-between font-headline-sm text-sm font-black tracking-tight"
-            onclick="document.getElementById('quick-menu').scrollIntoView({behavior:'smooth'});">
+        <button class="neo-btn w-full min-h-[50px] {{ (!$activeSession || (isset($isTimeUp) && $isTimeUp)) ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed opacity-60' : 'bg-primary hover:bg-primary-container text-on-primary' }} px-4 py-3 neo-border-3 neo-shadow-md flex items-center justify-between font-headline-sm text-sm font-black tracking-tight"
+            @if (!$activeSession || (isset($isTimeUp) && $isTimeUp))
+                onclick="alert('Sesi bermain tidak aktif atau waktu sudah habis! Anda tidak dapat memesan F&B.');"
+            @else
+                onclick="document.getElementById('quick-menu').scrollIntoView({behavior:'smooth'});"
+            @endif
+            >
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-2xl shrink-0" style="font-variation-settings: 'FILL' 1;">ramen_dining</span>
                 <span class="uppercase">PESAN MAKANAN & MINUMAN</span>
@@ -197,7 +202,13 @@
                         @csrf
                         <input type="hidden" name="items[0][product_id]" value="{{ $p->id }}">
                         <input type="hidden" name="items[0][quantity]" value="1">
-                        <button class="neo-btn mt-2.5 w-full bg-on-surface text-surface-container-lowest font-label-sm text-[11px] font-bold py-1.5 px-2 neo-border-2 neo-shadow-sm flex items-center justify-center gap-1">
+                        <button type="{{ (!$activeSession || (isset($isTimeUp) && $isTimeUp)) ? 'button' : 'submit' }}"
+                            @if (!$activeSession || (isset($isTimeUp) && $isTimeUp))
+                                onclick="alert('Sesi bermain tidak aktif atau waktu sudah habis! Anda tidak dapat memesan F&B.');"
+                                class="neo-btn mt-2.5 w-full bg-surface-container-high text-on-surface-variant font-label-sm text-[11px] font-bold py-1.5 px-2 neo-border-2 neo-shadow-sm flex items-center justify-center gap-1 cursor-not-allowed opacity-60"
+                            @else
+                                class="neo-btn mt-2.5 w-full bg-on-surface text-surface-container-lowest font-label-sm text-[11px] font-bold py-1.5 px-2 neo-border-2 neo-shadow-sm flex items-center justify-center gap-1"
+                            @endif>
                             <span class="material-symbols-outlined text-xs">add</span> PESAN
                         </button>
                     </form>
