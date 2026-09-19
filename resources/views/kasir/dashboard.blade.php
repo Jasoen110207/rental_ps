@@ -209,7 +209,7 @@
       <h3 class="font-black uppercase text-lg" id="start-modal-title">Mulai Rental</h3>
       <button onclick="closeModal('modal-start')" class="p-1 border border-on-surface btn-press"><span class="material-symbols-outlined">close</span></button>
     </div>
-    <form method="POST" action="{{ route('kasir.rental.start') }}" class="flex flex-col gap-4">
+    <form method="POST" action="{{ route('kasir.rental.start') }}" class="flex flex-col gap-4" onsubmit="return validateStartRental(this)">
       @csrf
       <input type="hidden" name="tv_id" id="start-tv-id">
       
@@ -394,6 +394,14 @@ function setControllerCount(count) {
       btn.classList.add('bg-surface');
     }
   });
+}
+function validateStartRental(form) {
+  const customerName = form.querySelector('input[name="customer_name"]').value;
+  if (customerName.trim() === '') {
+    alert('Nama penyewa wajib diisi dan tidak boleh hanya berisi spasi atau karakter kosong.');
+    return false;
+  }
+  return true;
 }
 function setBillingType(type){
   document.getElementById('start-billing-type').value = type;

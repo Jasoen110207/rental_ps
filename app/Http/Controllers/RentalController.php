@@ -24,7 +24,7 @@ class RentalController extends Controller
             'billing_type' => 'required|in:prepaid,postpaid',
             'duration_hours' => 'nullable|numeric|min:0.5',
             'notes' => 'nullable|string',
-            'customer_name' => 'nullable|string|max:100',
+            'customer_name' => 'required|string|max:100',
             'controller_count' => 'nullable|integer|min:1|max:10',
         ]);
 

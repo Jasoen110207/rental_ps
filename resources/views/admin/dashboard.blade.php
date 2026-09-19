@@ -304,7 +304,7 @@
       </button>
     </div>
 
-    <form method="POST" action="{{ route('admin.rental.start') }}" class="flex flex-col gap-4">
+    <form method="POST" action="{{ route('admin.rental.start') }}" class="flex flex-col gap-4" onsubmit="return validateStartRental(this)">
       @csrf
       <input type="hidden" name="tv_id" id="start-tv-id">
 
@@ -630,6 +630,15 @@
         btn.classList.add('bg-surface');
       }
     });
+  }
+
+  function validateStartRental(form) {
+    const customerName = form.querySelector('input[name="customer_name"]').value;
+    if (customerName.trim() === '') {
+      alert('Nama penyewa wajib diisi dan tidak boleh hanya berisi spasi atau karakter kosong.');
+      return false;
+    }
+    return true;
   }
 
   function setBillingType(type) {
