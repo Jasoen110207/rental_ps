@@ -150,8 +150,8 @@
             <span class="material-symbols-outlined text-lg">receipt_long</span>
             <span>Customer Request</span>
           </div>
-          <span id="nav-requests-badge" class="px-1.5 py-0.5 text-[10px] font-label-sm font-bold bg-secondary-container text-on-secondary border border-on-surface {{ \App\Models\CustomerRequest::where('status', 'pending')->count() > 0 ? '' : 'hidden' }}">
-            {{ \App\Models\CustomerRequest::where('status', 'pending')->count() }}
+          <span id="nav-requests-badge" class="px-1.5 py-0.5 text-[10px] font-label-sm font-bold bg-secondary-container text-on-secondary border border-on-surface {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'hidden' }}">
+            {{ auth()->user()->unreadNotifications->count() }}
           </span>
         </a>
 
@@ -269,8 +269,8 @@
         <!-- Notifications Slide-over Button -->
         <button onclick="toggleNotificationDrawer()" class="relative p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high">
           <span class="material-symbols-outlined text-xl">notifications</span>
-          <span id="top-notif-badge" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-secondary-container text-on-secondary border border-on-surface rounded-full text-[10px] font-bold flex items-center justify-center {{ \App\Models\CustomerRequest::where('status', 'pending')->count() > 0 ? '' : 'hidden' }}">
-            {{ \App\Models\CustomerRequest::where('status', 'pending')->count() }}
+          <span id="top-notif-badge" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-secondary-container text-on-secondary border border-on-surface rounded-full text-[10px] font-bold flex items-center justify-center {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'hidden' }}">
+            {{ auth()->user()->unreadNotifications->count() }}
           </span>
         </button>
       </div>
@@ -329,7 +329,7 @@
         <div class="flex items-center justify-between pb-4 border-b-2 border-on-surface mb-4">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-2xl text-primary">notifications_active</span>
-            <h3 class="font-headline-md font-bold uppercase text-lg">Notifikasi & Request</h3>
+            <h3 class="font-headline-md font-bold uppercase text-lg">Notifikasi (<span id="drawer-notif-count">{{ auth()->user()->unreadNotifications->count() }}</span>)</h3>
           </div>
           <button onclick="toggleNotificationDrawer()" class="p-1 border border-on-surface hover:bg-surface-container-high btn-press">
             <span class="material-symbols-outlined text-lg">close</span>
@@ -337,8 +337,18 @@
         </div>
 
         <div id="drawer-notifications-list" class="flex flex-col gap-3">
-          <!-- Populated by JS -->
-          <p class="text-xs text-on-surface-variant font-bold text-center py-6">Memuat notifikasi...</p>
+          @forelse (auth()->user()->unreadNotifications()->take(10)->get() as $notif)
+            <div class="p-2.5 bg-surface-container-low border-2 border-on-surface neo-shadow-sm flex flex-col gap-2 notif-item" id="notif-{{ $notif->id }}">
+              <div class="flex items-center justify-between">
+                <span class="px-1.5 py-0.5 bg-primary text-white font-label-sm text-[10px] font-bold border border-on-surface">{{ $notif->data['tv_name'] ?? 'Meja' }}</span>
+                <span class="font-label-sm text-[11px] text-outline font-bold">{{ $notif->created_at->format('H:i') }}</span>
+              </div>
+              <p class="font-headline-sm text-xs font-bold">{{ $notif->data['message'] }}</p>
+              <button onclick="markNotifAsRead('{{ $notif->id }}')" class="w-full py-1 bg-tertiary text-white font-label-md text-xs font-bold border-2 border-on-surface btn-press">TANDAI TERBACA & LIHAT DETAIL</button>
+            </div>
+          @empty
+            <p class="text-xs text-on-surface-variant font-bold text-center py-6">Tidak ada notifikasi baru.</p>
+          @endforelse
         </div>
       </div>
 
@@ -450,6 +460,68 @@
         clockEl.innerText = now.toLocaleDateString('id-ID', options);
       }
     }, 1000);
+
+    /* Polling Notification */
+    let currentUnreadCount = parseInt(document.getElementById('top-notif-badge')?.innerText || '0');
+    
+    function updateNotifBadges(count) {
+      const badges = ['nav-requests-badge', 'top-notif-badge'];
+      badges.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.innerText = count;
+          if (count > 0) {
+            el.classList.remove('hidden');
+          } else {
+            el.classList.add('hidden');
+          }
+        }
+      });
+      const drawerCount = document.getElementById('drawer-notif-count');
+      if(drawerCount) drawerCount.innerText = count;
+    }
+
+    async function checkNotifications() {
+      try {
+        const res = await fetch('{{ route("notifications.unread-count") }}', {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+        
+        if (data.count > currentUnreadCount) {
+          playAlarmBeep(); // Alert admin!
+        }
+        currentUnreadCount = data.count;
+        updateNotifBadges(currentUnreadCount);
+      } catch (e) {
+        console.error('Failed to fetch notifications', e);
+      }
+    }
+
+    async function markNotifAsRead(id) {
+      try {
+        await fetch(`/notifications/${id}/mark-as-read`, {
+          method: 'POST',
+          headers: { 
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          }
+        });
+        const notifCard = document.getElementById('notif-' + id);
+        if (notifCard) {
+          notifCard.remove();
+        }
+        currentUnreadCount = Math.max(0, currentUnreadCount - 1);
+        updateNotifBadges(currentUnreadCount);
+        
+        window.location.href = '{{ route("admin.requests.index") }}';
+      } catch (e) {
+        console.error('Failed to mark as read', e);
+      }
+    }
+
+    setInterval(checkNotifications, 15000); // 15 detik polling
+
     // Unlock Audio Context on first interaction
     document.addEventListener('click', function unlockAudio() {
       initAudio();

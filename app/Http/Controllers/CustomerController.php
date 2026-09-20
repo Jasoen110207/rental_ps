@@ -49,7 +49,7 @@ class CustomerController extends Controller
         $hours = (float) $validated['duration_hours'];
         $estimatedPrice = (int) round($hours * $tv->price_per_hour);
 
-        CustomerRequest::create([
+        $customerRequest = CustomerRequest::create([
             'tv_id' => $tv->id,
             'type' => 'add_time',
             'payload' => [
@@ -59,6 +59,9 @@ class CustomerController extends Controller
             ],
             'status' => 'pending',
         ]);
+
+        $kasirAndAdmin = \App\Models\User::whereIn('role', ['kasir', 'admin'])->get();
+        \Illuminate\Support\Facades\Notification::send($kasirAndAdmin, new \App\Notifications\CustomerRequestNotification($customerRequest));
 
         return back()->with('success', 'Permintaan tambah waktu berhasil dikirim ke kasir! Mohon tunggu konfirmasi.');
     }
@@ -113,7 +116,7 @@ class CustomerController extends Controller
             }
         }
 
-        CustomerRequest::create([
+        $customerRequest = CustomerRequest::create([
             'tv_id' => $tv->id,
             'type' => 'order_food',
             'payload' => [
@@ -123,6 +126,9 @@ class CustomerController extends Controller
             ],
             'status' => 'pending',
         ]);
+
+        $kasirAndAdmin = \App\Models\User::whereIn('role', ['kasir', 'admin'])->get();
+        \Illuminate\Support\Facades\Notification::send($kasirAndAdmin, new \App\Notifications\CustomerRequestNotification($customerRequest));
 
         return back()->with('success', 'Pesanan makanan & minuman berhasil dikirim ke kasir!');
     }
@@ -188,7 +194,7 @@ class CustomerController extends Controller
             return back()->with('error', 'Kasir sudah dipanggil, mohon tunggu sebentar!');
         }
 
-        CustomerRequest::create([
+        $customerRequest = CustomerRequest::create([
             'tv_id' => $tv->id,
             'type' => 'service_call',
             'payload' => [
@@ -196,6 +202,9 @@ class CustomerController extends Controller
             ],
             'status' => 'pending',
         ]);
+
+        $kasirAndAdmin = \App\Models\User::whereIn('role', ['kasir', 'admin'])->get();
+        \Illuminate\Support\Facades\Notification::send($kasirAndAdmin, new \App\Notifications\CustomerRequestNotification($customerRequest));
 
         return back()->with('success', 'Kasir sedang menuju ke meja ' . $tv->name . '!');
     }

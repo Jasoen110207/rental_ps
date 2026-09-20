@@ -12,6 +12,7 @@ use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,6 +46,13 @@ Route::prefix('customer')->name('customer.')->group(function () {
 // QR short url alias
 Route::get('/scan/{tv_id}', function ($tv_id) {
     return redirect()->route('customer.index', ['tv_id' => $tv_id]);
+});
+
+// Notifications API (Shared Auth)
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::get('/notifications/api', [NotificationController::class, 'getNotifications'])->name('notifications.api');
+    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
 });
 
 // Protected Cashier / Admin Routes
