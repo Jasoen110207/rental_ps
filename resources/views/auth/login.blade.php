@@ -11,56 +11,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,700;0,900;1,400&family=Space+Grotesk:wght@500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS (config terpusat di public/js/tailwind-theme.js) -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#004ac6",
-            "primary-container": "#2563eb",
-            "on-primary": "#ffffff",
-            "secondary": "#9d4300",
-            "secondary-container": "#fd761a",
-            "on-secondary": "#ffffff",
-            "background": "#faf8ff",
-            "surface": "#faf8ff",
-            "surface-container-lowest": "#ffffff",
-            "surface-container-high": "#e2e7ff",
-            "on-surface": "#131b2e",
-            "on-surface-variant": "#434655",
-            "error": "#ba1a1a",
-          },
-          fontFamily: {
-            "body-md": ["Chivo", "sans-serif"],
-            "headline-lg": ["Space Grotesk", "sans-serif"],
-            "headline-md": ["Space Grotesk", "sans-serif"],
-            "headline-sm": ["Space Grotesk", "sans-serif"],
-            "label-sm": ["Space Mono", "monospace"],
-          }
-        }
-      }
-    }
-  </script>
+  <script src="{{ asset('js/tailwind-theme.js') }}"></script>
 
-  <style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .neo-shadow {
-      box-shadow: 4px 4px 0px #131b2e;
-    }
-    .neo-shadow-lg {
-      box-shadow: 6px 6px 0px #131b2e;
-    }
-    .btn-press:active {
-      transform: translate(3px, 3px);
-      box-shadow: 0px 0px 0px #131b2e !important;
-    }
-  </style>
+  <!-- External CSS: tampilan login -->
+  <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
 
 <body class="bg-background text-on-surface min-h-screen flex items-center justify-center p-4 font-body-md">

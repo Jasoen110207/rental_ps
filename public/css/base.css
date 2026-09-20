@@ -1,0 +1,95 @@
+/* ============================================================
+ * TambahBang — Base Design System (Neo-Brutalism)
+ * Dipakai oleh: layouts admin, kasir, customer, login
+ * Cara pakai: <link rel="stylesheet" href="{{ asset('css/base.css') }}">
+ * ============================================================ */
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* --- Neo shadows --- */
+.neo-shadow-sm {
+  box-shadow: 2px 2px 0px #131b2e;
+}
+
+.neo-shadow {
+  box-shadow: 3.5px 3.5px 0px #131b2e;
+}
+
+.neo-shadow-md {
+  box-shadow: 4px 4px 0px #131b2e;
+}
+
+.neo-shadow-lg {
+  box-shadow: 5px 5px 0px #131b2e;
+}
+
+.neo-shadow-inset {
+  box-shadow: inset 2px 2px 0px rgba(19, 27, 46, 0.08);
+}
+
+/* --- Pressed button effect --- */
+.btn-press:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #131b2e !important;
+}
+
+/* --- Alarm (sisa waktu habis / overdue) --- */
+@keyframes pulse-alarm {
+  0%, 100% {
+    border-color: #ba1a1a;
+    box-shadow: 0 0 0 3px #ffdad6, 4px 4px 0px #131b2e;
+  }
+  50% {
+    border-color: #ba1a1a;
+    box-shadow: 0 0 0 6px #ba1a1a, 4px 4px 0px #131b2e;
+  }
+}
+
+.alarm-card {
+  animation: pulse-alarm 1.2s infinite;
+}
+
+/* --- Warning (sisa < 15 menit) --- */
+@keyframes warning-pulse {
+  0%, 100% {
+    border-color: #fd761a;
+    box-shadow: 0 0 0 2px #ffdbca, 3.5px 3.5px 0px #131b2e;
+  }
+  50% {
+    border-color: #9d4300;
+    box-shadow: 0 0 0 4px #fd761a, 3.5px 3.5px 0px #131b2e;
+  }
+}
+
+.warning-card {
+  animation: warning-pulse 2s infinite;
+}
+
+/* --- Live dot --- */
+.live-dot {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* --- Receipt divider --- */
+.dashed-receipt-divider {
+  border-top: 2px dashed rgba(19, 27, 46, 0.4);
+}
+
+/* --- Hide scrollbar --- */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}

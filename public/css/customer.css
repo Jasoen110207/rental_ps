@@ -1,0 +1,37 @@
+/* ============================================================
+ * TambahBang — Customer Extra (mobile QR portal)
+ * Dipakai oleh: layouts/customer.blade.php
+ * Harus dimuat SETELAH base.css
+ * ============================================================ */
+
+.neo-border-2 {
+  border: 2px solid #131b2e;
+}
+
+.neo-border-3 {
+  border: 3px solid #131b2e;
+}
+
+.neo-btn {
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  touch-action: manipulation;
+}
+
+.neo-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #131b2e !important;
+}
+
+@keyframes pulse-dot-anim {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.55; }
+}
+
+.pulse-dot {
+  animation: pulse-dot-anim 1.8s infinite ease-in-out;
+}
+
+/* --- Ikon solid (pengganti inline style font-variation-settings) --- */
+.icon-fill {
+  font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+}

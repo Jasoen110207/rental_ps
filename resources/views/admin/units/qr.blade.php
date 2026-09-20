@@ -12,20 +12,8 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    .neo-shadow {
-      box-shadow: 5px 5px 0px #000;
-    }
-    @media print {
-      body {
-        background: #fff;
-        padding: 0;
-      }
-      .no-print {
-        display: none !important;
-      }
-    }
-  </style>
+  <!-- External CSS: kartu QR cetak -->
+  <link rel="stylesheet" href="{{ asset('css/qr.css') }}">
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-6 font-sans">

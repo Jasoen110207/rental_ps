@@ -1,0 +1,18 @@
+/* ============================================================
+ * TambahBang — Kartu QR meja (cetak)
+ * Dipakai oleh: admin/units/qr.blade.php
+ * ============================================================ */
+
+.neo-shadow {
+  box-shadow: 5px 5px 0px #000;
+}
+
+@media print {
+  body {
+    background: #fff;
+    padding: 0;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,27 @@
+/* ============================================================
+ * TambahBang — Kasir Extra (kompatibilitas kelas lama)
+ * Dipakai oleh: layouts/app.blade.php (kasir)
+ * Harus dimuat SETELAH base.css
+ * ============================================================ */
+
+.neo-box-sm { box-shadow: 2px 2px 0px #131b2e; }
+.neo-box-md { box-shadow: 3.5px 3.5px 0px #131b2e; }
+.neo-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #131b2e !important; }
+.neo-border { border: 2px solid #131b2e; }
+.neo-border-thick { border: 3px solid #131b2e; }
+.neo-shadow-md { box-shadow: 3.5px 3.5px 0px #131b2e; }
+
+.brutal-card { background: #ffffff; border: 2px solid #131b2e; box-shadow: 4px 4px 0px #131b2e; }
+.brutal-btn-press:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #131b2e !important; }
+.brutal-btn-primary { background: #004ac6; color: #fff; border: 2px solid #131b2e; box-shadow: 3px 3px 0px #131b2e; }
+.brutal-btn-secondary { background: #ffffff; color: #131b2e; border: 2px solid #131b2e; box-shadow: 2px 2px 0px #131b2e; }
+.brutal-btn-orange { background: #fd761a; color: #5c2400; border: 2px solid #131b2e; box-shadow: 2px 2px 0px #131b2e; }
+.brutal-badge-green { background: #6ffbbe; color: #002113; border: 1px solid #131b2e; }
+.brutal-badge-blue { background: #dbe1ff; color: #00174b; border: 1px solid #131b2e; }
+.brutal-badge-red { background: #ffdad6; color: #93000a; border: 1px solid #131b2e; }
+
+.brutal-qr-pattern {
+  background-image:
+    repeating-linear-gradient(0deg, #131b2e 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(90deg, #131b2e 0 2px, transparent 2px 5px);
+}

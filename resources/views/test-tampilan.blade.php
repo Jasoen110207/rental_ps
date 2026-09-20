@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Test Backend Rental PS</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
-        .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    </style>
+    <!-- External CSS: halaman debug -->
+    <link rel="stylesheet" href="{{ asset('css/debug.css') }}">
 </head>
 <body>
     <h1>Dashboard Darurat Backend</h1>

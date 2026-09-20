@@ -14,102 +14,12 @@
   <!-- Material Symbols Outlined -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS (config terpusat di public/js/tailwind-theme.js) -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#004ac6",
-            "primary-container": "#2563eb",
-            "on-primary": "#ffffff",
-            "on-primary-container": "#eeefff",
-            "primary-fixed": "#dbe1ff",
-            "secondary": "#9d4300",
-            "secondary-container": "#fd761a",
-            "on-secondary": "#ffffff",
-            "on-secondary-container": "#5c2400",
-            "secondary-fixed": "#ffdbca",
-            "tertiary": "#006242",
-            "tertiary-container": "#007d55",
-            "on-tertiary": "#ffffff",
-            "error": "#ba1a1a",
-            "error-container": "#ffdad6",
-            "background": "#faf8ff",
-            "surface": "#faf8ff",
-            "surface-dim": "#d2d9f4",
-            "surface-container-lowest": "#ffffff",
-            "surface-container-low": "#f2f3ff",
-            "surface-container": "#eaedff",
-            "surface-container-high": "#e2e7ff",
-            "surface-container-highest": "#dae2fd",
-            "on-surface": "#131b2e",
-            "on-surface-variant": "#434655",
-            "outline": "#737686",
-          },
-          fontFamily: {
-            "body-md": ["Chivo", "sans-serif"],
-            "body-sm": ["Chivo", "sans-serif"],
-            "headline-lg": ["Space Grotesk", "sans-serif"],
-            "headline-md": ["Space Grotesk", "sans-serif"],
-            "headline-sm": ["Space Grotesk", "sans-serif"],
-            "headline-xl": ["Space Grotesk", "sans-serif"],
-            "timer-display": ["Space Mono", "monospace"],
-            "label-lg": ["Space Mono", "monospace"],
-            "label-md": ["Space Mono", "monospace"],
-            "label-sm": ["Space Mono", "monospace"],
-          }
-        }
-      }
-    }
-  </script>
+  <script src="{{ asset('js/tailwind-theme.js') }}"></script>
 
-  <style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
-      display: inline-block;
-      vertical-align: middle;
-      line-height: 1;
-    }
-    .neo-shadow-sm {
-      box-shadow: 2px 2px 0px #131b2e;
-    }
-    .neo-shadow {
-      box-shadow: 3.5px 3.5px 0px #131b2e;
-    }
-    .neo-shadow-lg {
-      box-shadow: 5px 5px 0px #131b2e;
-    }
-    .neo-shadow-inset {
-      box-shadow: inset 2px 2px 0px rgba(19, 27, 46, 0.08);
-    }
-    .btn-press:active {
-      transform: translate(2px, 2px);
-      box-shadow: 0px 0px 0px #131b2e !important;
-    }
-    @keyframes pulse-alarm {
-      0%, 100% {
-        border-color: #ba1a1a;
-        box-shadow: 0 0 0 3px #ffdad6, 4px 4px 0px #131b2e;
-      }
-      50% {
-        border-color: #ba1a1a;
-        box-shadow: 0 0 0 6px #ba1a1a, 4px 4px 0px #131b2e;
-      }
-    }
-    .alarm-card {
-      animation: pulse-alarm 1.2s infinite;
-    }
-    @keyframes warning-pulse {
-      0%, 100% { border-color: #fd761a; box-shadow: 0 0 0 2px #ffdbca, 3.5px 3.5px 0px #131b2e; }
-      50% { border-color: #9d4300; box-shadow: 0 0 0 4px #fd761a, 3.5px 3.5px 0px #131b2e; }
-    }
-    .warning-card {
-      animation: warning-pulse 2s infinite;
-    }
-  </style>
+  <!-- External CSS: sistem desain Neo-Brutalism -->
+  <link rel="stylesheet" href="{{ asset('css/base.css') }}">
   @stack('styles')
 </head>
 

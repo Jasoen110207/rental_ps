@@ -122,7 +122,7 @@
         <button class="neo-btn w-full min-h-[50px] bg-secondary-container hover:bg-secondary text-surface-container-lowest px-4 py-3 neo-border-3 neo-shadow-md flex items-center justify-between font-headline-sm text-sm font-black tracking-tight"
             onclick="document.getElementById('order-modal-extend').classList.remove('hidden');document.getElementById('order-modal-extend').classList.add('flex');">
             <div class="flex items-center gap-2.5">
-                <span class="material-symbols-outlined text-2xl shrink-0" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                <span class="material-symbols-outlined icon-fill text-2xl shrink-0">bolt</span>
                 <span class="uppercase">TAMBAH WAKTU / EXTEND</span>
             </div>
             <span class="material-symbols-outlined text-xl font-black">arrow_forward</span>
@@ -136,7 +136,7 @@
             @endif
             >
             <div class="flex items-center gap-2.5">
-                <span class="material-symbols-outlined text-2xl shrink-0" style="font-variation-settings: 'FILL' 1;">ramen_dining</span>
+                <span class="material-symbols-outlined icon-fill text-2xl shrink-0">ramen_dining</span>
                 <span class="uppercase">PESAN MAKANAN & MINUMAN</span>
             </div>
             <span class="material-symbols-outlined text-xl font-black">add_shopping_cart</span>

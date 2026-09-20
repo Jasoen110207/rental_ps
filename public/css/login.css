@@ -1,0 +1,28 @@
+/* ============================================================
+ * TambahBang — Login
+ * Dipakai oleh: auth/login.blade.php
+ * Self-contained (tidak butuh base.css)
+ * ============================================================ */
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.neo-shadow {
+  box-shadow: 4px 4px 0px #131b2e;
+}
+
+.neo-shadow-sm {
+  box-shadow: 2px 2px 0px #131b2e;
+}
+
+.neo-shadow-lg {
+  box-shadow: 6px 6px 0px #131b2e;
+}
+
+.btn-press:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px #131b2e !important;
+}

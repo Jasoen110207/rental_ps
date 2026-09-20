@@ -14,102 +14,13 @@
   <!-- Material Symbols Outlined -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS (config terpusat di public/js/tailwind-theme.js) -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#004ac6",
-            "primary-container": "#2563eb",
-            "on-primary": "#ffffff",
-            "on-primary-container": "#eeefff",
-            "primary-fixed": "#dbe1ff",
-            "secondary": "#9d4300",
-            "secondary-container": "#fd761a",
-            "on-secondary": "#ffffff",
-            "tertiary": "#006242",
-            "tertiary-container": "#007d55",
-            "tertiary-fixed": "#6ffbbe",
-            "on-tertiary-fixed": "#002113",
-            "error": "#ba1a1a",
-            "background": "#faf8ff",
-            "surface": "#faf8ff",
-            "surface-container-lowest": "#ffffff",
-            "surface-container-low": "#f2f3ff",
-            "surface-container": "#eaedff",
-            "surface-container-high": "#e2e7ff",
-            "surface-container-highest": "#dae2fd",
-            "on-surface": "#131b2e",
-            "on-surface-variant": "#434655",
-            "outline": "#737686",
-          },
-          fontFamily: {
-            "body-md": ["Chivo", "sans-serif"],
-            "body-sm": ["Chivo", "sans-serif"],
-            "headline-lg": ["Space Grotesk", "sans-serif"],
-            "headline-md": ["Space Grotesk", "sans-serif"],
-            "headline-sm": ["Space Grotesk", "sans-serif"],
-            "timer-display": ["Space Mono", "monospace"],
-            "label-lg": ["Space Mono", "monospace"],
-            "label-sm": ["Space Mono", "monospace"],
-          }
-        }
-      }
-    }
-  </script>
+  <script src="{{ asset('js/tailwind-theme.js') }}"></script>
 
-  <style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
-      display: inline-block;
-      vertical-align: middle;
-      line-height: 1;
-    }
-    .neo-border-2 {
-      border: 2px solid #131b2e;
-    }
-    .neo-border-3 {
-      border: 3px solid #131b2e;
-    }
-    .neo-shadow-sm {
-      box-shadow: 2px 2px 0px #131b2e;
-    }
-    .neo-shadow {
-      box-shadow: 3.5px 3.5px 0px #131b2e;
-    }
-    .neo-shadow-md {
-      box-shadow: 4px 4px 0px #131b2e;
-    }
-    .neo-shadow-lg {
-      box-shadow: 5px 5px 0px #131b2e;
-    }
-    .neo-btn {
-      transition: transform 0.08s ease, box-shadow 0.08s ease;
-      touch-action: manipulation;
-    }
-    .btn-press:active,
-    .neo-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: 0px 0px 0px #131b2e !important;
-    }
-    @keyframes pulse-alarm {
-      0%, 100% { border-color: #ba1a1a; box-shadow: 0 0 0 3px #ffdad6, 3.5px 3.5px 0px #131b2e; }
-      50% { border-color: #ba1a1a; box-shadow: 0 0 0 6px #ba1a1a, 3.5px 3.5px 0px #131b2e; }
-    }
-    .alarm-card {
-      animation: pulse-alarm 1.2s infinite;
-    }
-    @keyframes pulse-dot-anim {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.35); opacity: 0.55; }
-    }
-    .pulse-dot {
-      animation: pulse-dot-anim 1.8s infinite ease-in-out;
-    }
-  </style>
+  <!-- External CSS: sistem desain Neo-Brutalism + mobile portal -->
+  <link rel="stylesheet" href="{{ asset('css/base.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/customer.css') }}">
   @stack('styles')
 </head>
 
