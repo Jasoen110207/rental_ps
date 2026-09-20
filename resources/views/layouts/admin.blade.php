@@ -321,6 +321,9 @@
     </footer>
   </div>
 
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
   <!-- NOTIFICATION SLIDE-OVER DRAWER -->
   <div id="notification-drawer" class="fixed inset-0 z-50 hidden">
     <div onclick="toggleNotificationDrawer()" class="fixed inset-0 bg-on-surface/40 backdrop-blur-xs"></div>
@@ -490,6 +493,11 @@
         
         if (data.count > currentUnreadCount) {
           playAlarmBeep(); // Alert admin!
+          
+          if (data.latest) {
+             showToastNotification(data.latest);
+             showOSNotification(data.latest);
+          }
         }
         currentUnreadCount = data.count;
         updateNotifBadges(currentUnreadCount);
@@ -497,6 +505,66 @@
         console.error('Failed to fetch notifications', e);
       }
     }
+
+    function showToastNotification(latest) {
+      const container = document.getElementById('toast-container');
+      if(!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = 'bg-surface-container-lowest border-2 border-on-surface neo-shadow p-4 min-w-[300px] max-w-[350px] pointer-events-auto transform translate-x-full transition-transform duration-300 animate-slide-in';
+      toast.innerHTML = `
+        <div class="flex items-center justify-between mb-2 pb-2 border-b-2 border-on-surface">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">notifications_active</span>
+            <span class="font-headline-sm font-bold text-xs uppercase">${latest.tv_name}</span>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()" class="text-on-surface-variant hover:text-error btn-press"><span class="material-symbols-outlined text-lg">close</span></button>
+        </div>
+        <p class="text-xs font-bold">${latest.message}</p>
+        <button onclick="window.location.href='{{ route('admin.requests.index') }}'" class="mt-3 w-full py-1.5 bg-primary text-on-primary border-2 border-on-surface text-xs font-bold uppercase btn-press neo-shadow-sm">Lihat Request</button>
+      `;
+
+      container.appendChild(toast);
+      
+      // Animate in
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          toast.classList.remove('translate-x-full');
+        });
+      });
+
+      // Auto remove after 8 seconds
+      setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => toast.remove(), 300);
+      }, 8000);
+    }
+
+    function showOSNotification(latest) {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "granted") {
+        new Notification("Request Baru: " + latest.tv_name, {
+          body: latest.message,
+          icon: '/favicon.ico' // You can change this if you have an icon
+        });
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            new Notification("Request Baru: " + latest.tv_name, {
+              body: latest.message
+            });
+          }
+        });
+      }
+    }
+
+    // Minta Izin Notifikasi OS pas user klik pertama kali
+    document.addEventListener('click', function requestNotifPerm() {
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+      document.removeEventListener('click', requestNotifPerm);
+    }, { once: true });
 
     async function markNotifAsRead(id) {
       try {

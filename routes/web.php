@@ -70,6 +70,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Customer Requests Center
     Route::get('/requests', [RequestCenterController::class, 'index'])->name('requests.index');
+    Route::get('/requests/api', [RequestCenterController::class, 'apiRequests'])->name('requests.api');
     Route::post('/requests/{id}/approve', [RequestCenterController::class, 'approve'])->name('requests.approve');
     Route::post('/requests/{id}/reject', [RequestCenterController::class, 'reject'])->name('requests.reject');
 
@@ -116,6 +117,7 @@ Route::middleware('auth')->prefix('kasir')->name('kasir.')->group(function () {
     Route::post('/pos/order', [KasirController::class, 'storeOrder'])->name('pos.order');
 
     Route::get('/request', [KasirController::class, 'requests'])->name('request');
+    Route::get('/request/api', [KasirController::class, 'apiRequests'])->name('request.api');
     Route::post('/request/{id}/approve', [KasirController::class, 'approveRequest'])->name('request.approve');
     Route::post('/request/{id}/reject', [KasirController::class, 'rejectRequest'])->name('request.reject');
 

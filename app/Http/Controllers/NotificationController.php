@@ -8,8 +8,17 @@ class NotificationController extends Controller
 {
     public function unreadCount()
     {
+        $user = auth()->user();
+        $latest = $user->unreadNotifications()->latest()->first();
+
         return response()->json([
-            'count' => auth()->user()->unreadNotifications->count()
+            'count' => $user->unreadNotifications->count(),
+            'latest' => $latest ? [
+                'id' => $latest->id,
+                'title' => $latest->data['title'] ?? 'Notifikasi Baru',
+                'message' => $latest->data['message'] ?? 'Ada request baru dari pelanggan',
+                'tv_name' => $latest->data['tv_name'] ?? 'Meja',
+            ] : null
         ]);
     }
 

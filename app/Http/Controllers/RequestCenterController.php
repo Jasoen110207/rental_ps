@@ -36,8 +36,35 @@ class RequestCenterController extends Controller
             'approved' => CustomerRequest::where('status', 'approved')->count(),
             'rejected' => CustomerRequest::where('status', 'rejected')->count(),
         ];
-
         return view('admin.requests.index', compact('requests', 'filter', 'counts'));
+    }
+
+    public function apiRequests(Request $request)
+    {
+        $filter = $request->get('tab', 'all');
+
+        $query = CustomerRequest::with(['tv.playSessions' => function ($q) {
+            $q->where('status', 'active');
+        }])->orderBy('created_at', 'desc');
+
+        if ($filter === 'pending') {
+            $query->where('status', 'pending');
+        } elseif ($filter === 'approved') {
+            $query->where('status', 'approved');
+        } elseif ($filter === 'rejected') {
+            $query->where('status', 'rejected');
+        }
+
+        $requests = $query->paginate(15);
+
+        $counts = [
+            'all' => CustomerRequest::count(),
+            'pending' => CustomerRequest::where('status', 'pending')->count(),
+            'approved' => CustomerRequest::where('status', 'approved')->count(),
+            'rejected' => CustomerRequest::where('status', 'rejected')->count(),
+        ];
+
+        return view('admin.requests.partial-list', compact('requests', 'filter', 'counts'));
     }
 
     public function approve(Request $request, $id)
@@ -45,6 +72,9 @@ class RequestCenterController extends Controller
         $customerRequest = CustomerRequest::with('tv.playSessions')->findOrFail($id);
 
         if ($customerRequest->status !== 'pending') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Permintaan ini sudah diproses sebelumnya!'], 400);
+            }
             return back()->with('error', 'Permintaan ini sudah diproses sebelumnya!');
         }
 
@@ -111,6 +141,14 @@ class RequestCenterController extends Controller
             $customerRequest->update(['status' => 'approved']);
         });
 
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('data->request_id', $id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Permintaan dari ' . ($customerRequest->tv->name ?? 'Meja') . ' berhasil disetujui!']);
+        }
         return back()->with('success', 'Permintaan dari ' . ($customerRequest->tv->name ?? 'Meja') . ' berhasil disetujui!');
     }
 
@@ -119,11 +157,22 @@ class RequestCenterController extends Controller
         $customerRequest = CustomerRequest::findOrFail($id);
 
         if ($customerRequest->status !== 'pending') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Permintaan ini sudah diproses sebelumnya!'], 400);
+            }
             return back()->with('error', 'Permintaan ini sudah diproses sebelumnya!');
         }
 
         $customerRequest->update(['status' => 'rejected']);
 
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('data->request_id', $id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Permintaan telah ditolak.']);
+        }
         return back()->with('success', 'Permintaan telah ditolak.');
     }
 }

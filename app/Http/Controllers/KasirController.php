@@ -461,10 +461,32 @@ class KasirController extends Controller
         return view('kasir.request', compact('requests', 'filter', 'counts'));
     }
 
-    public function approveRequest($id)
+    public function apiRequests(Request $request)
+    {
+        $filter = $request->get('tab', 'pending');
+        $query = CustomerRequest::with(['tv.playSessions' => fn ($q) => $q->where('status', 'active')])
+            ->orderBy('created_at', 'desc');
+        if (in_array($filter, ['pending', 'approved', 'rejected'])) {
+            $query->where('status', $filter);
+        }
+        $requests = $query->paginate(12)->withQueryString();
+        $counts = [
+            'all' => CustomerRequest::count(),
+            'pending' => CustomerRequest::where('status', 'pending')->count(),
+            'approved' => CustomerRequest::where('status', 'approved')->count(),
+            'rejected' => CustomerRequest::where('status', 'rejected')->count(),
+        ];
+
+        return view('kasir.partial-list', compact('requests', 'filter', 'counts'));
+    }
+
+    public function approveRequest(Request $request, $id)
     {
         $customerRequest = CustomerRequest::with('tv.playSessions')->findOrFail($id);
         if ($customerRequest->status !== 'pending') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Permintaan sudah diproses sebelumnya!'], 400);
+            }
             return back()->with('error', 'Permintaan sudah diproses sebelumnya!');
         }
 
@@ -512,17 +534,36 @@ class KasirController extends Controller
             $customerRequest->update(['status' => 'approved']);
         });
 
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('data->request_id', $id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Permintaan disetujui!']);
+        }
         return back()->with('success', 'Permintaan disetujui!');
     }
 
-    public function rejectRequest($id)
+    public function rejectRequest(Request $request, $id)
     {
         $customerRequest = CustomerRequest::findOrFail($id);
         if ($customerRequest->status !== 'pending') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Permintaan sudah diproses sebelumnya!'], 400);
+            }
             return back()->with('error', 'Permintaan sudah diproses sebelumnya!');
         }
         $customerRequest->update(['status' => 'rejected']);
 
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('data->request_id', $id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Permintaan ditolak.']);
+        }
         return back()->with('success', 'Permintaan ditolak.');
     }
 
