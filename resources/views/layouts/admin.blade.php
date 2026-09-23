@@ -506,7 +506,7 @@
       }
     }
 
-    setInterval(checkNotifications, 15000); // 15 detik polling
+    setInterval(checkNotifications, 3000); // 3 detik polling
 
     document.addEventListener('DOMContentLoaded', () => {
       if (sessionStorage.getItem('audio_unlocked')) {

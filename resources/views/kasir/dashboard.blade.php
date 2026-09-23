@@ -182,7 +182,11 @@
           @elseif ($tv->status === 'playing' && $activeSession)
             <div class="flex flex-col gap-2">
               <div class="grid grid-cols-2 gap-2">
-                <button onclick="openExtendModal({{ $activeSession->id }}, '{{ $tv->name }}', {{ $tv->price_per_hour }}, '{{ $activeSession->end_time ? $activeSession->end_time->format('H:i') : '' }}')" class="py-1.5 bg-secondary-container text-[11px] uppercase font-bold border-2 border-on-surface neo-shadow-sm btn-press">+ WAKTU</button>
+                @if ($activeSession->billing_type !== 'postpaid')
+                  <button onclick="openExtendModal({{ $activeSession->id }}, '{{ $tv->name }}', {{ $tv->price_per_hour }}, '{{ $activeSession->end_time ? $activeSession->end_time->format('H:i') : '' }}')" class="py-1.5 bg-secondary-container text-[11px] uppercase font-bold border-2 border-on-surface neo-shadow-sm btn-press">+ WAKTU</button>
+                @else
+                  <button disabled class="py-1.5 bg-surface-container-high text-on-surface-variant text-[11px] uppercase font-bold border-2 border-on-surface neo-shadow-sm cursor-not-allowed opacity-60" title="Tidak tersedia untuk Postpaid">+ WAKTU</button>
+                @endif
                 <button onclick="openAddFnbModal({{ $activeSession->id }}, '{{ $tv->name }}')" class="py-1.5 bg-surface text-[11px] uppercase font-bold border-2 border-on-surface neo-shadow-sm btn-press">+ F&B</button>
               </div>
               <button onclick="openCheckoutModal({{ $activeSession->id }}, '{{ $tv->name }}', {{ $activeSession->rental_amount }}, {{ $activeSession->fnb_amount }}, {{ $activeSession->total_amount }})" class="w-full py-2 bg-emerald-600 text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">SELESAI / CHECKOUT</button>

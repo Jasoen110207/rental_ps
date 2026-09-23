@@ -83,18 +83,33 @@
   <!-- LARGE TOUCH ACTION BUTTONS -->
   <div class="grid grid-cols-1 gap-3">
     <!-- 1. Request Extra Time -->
-    <button type="button" onclick="openTimeDrawer()" class="p-4 bg-secondary-container text-on-secondary border-2 border-on-surface neo-shadow btn-press hover:bg-secondary flex items-center justify-between text-left transition">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-white text-secondary border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
-          <span class="material-symbols-outlined text-2xl">more_time</span>
+    @if ($activeSession && $activeSession->billing_type === 'postpaid')
+      <button type="button" disabled class="p-4 bg-surface-container-high text-on-surface-variant border-2 border-on-surface neo-shadow flex items-center justify-between text-left opacity-60 cursor-not-allowed">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-white text-on-surface-variant border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl">more_time</span>
+          </div>
+          <div>
+            <h3 class="font-headline-lg font-black text-base uppercase leading-tight">TAMBAH WAKTU</h3>
+            <p class="text-[11px] font-body-md text-on-surface-variant">Tidak tersedia untuk Open Billing (Postpaid)</p>
+          </div>
         </div>
-        <div>
-          <h3 class="font-headline-lg font-black text-base uppercase leading-tight">TAMBAH WAKTU</h3>
-          <p class="text-[11px] font-body-md text-white/90">Request perpanjangan jam main ke kasir</p>
+        <span class="material-symbols-outlined text-xl">arrow_forward</span>
+      </button>
+    @else
+      <button type="button" onclick="openTimeDrawer()" class="p-4 bg-secondary-container text-on-secondary border-2 border-on-surface neo-shadow btn-press hover:bg-secondary flex items-center justify-between text-left transition">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-white text-secondary border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl">more_time</span>
+          </div>
+          <div>
+            <h3 class="font-headline-lg font-black text-base uppercase leading-tight">TAMBAH WAKTU</h3>
+            <p class="text-[11px] font-body-md text-white/90">Request perpanjangan jam main ke kasir</p>
+          </div>
         </div>
-      </div>
-      <span class="material-symbols-outlined text-xl">arrow_forward</span>
-    </button>
+        <span class="material-symbols-outlined text-xl">arrow_forward</span>
+      </button>
+    @endif
 
     <!-- 2. Order F&B & Addon -->
     <button type="button" 
@@ -116,21 +131,36 @@
     </button>
 
     <!-- 3. Call Attendant -->
-    <form method="POST" action="{{ route('customer.call-cashier', $tv->id) }}" class="m-0">
-      @csrf
-      <button type="submit" onclick="return confirm('Panggil petugas ke meja Anda?')" class="w-full p-4 bg-tertiary text-on-tertiary border-2 border-on-surface neo-shadow btn-press hover:bg-tertiary-container flex items-center justify-between text-left transition">
+    @if (!$activeSession)
+      <button type="button" onclick="alert('Silakan mulai rental terlebih dahulu sebelum memanggil petugas.')" class="w-full p-4 bg-surface-container-high text-on-surface-variant border-2 border-on-surface neo-shadow flex items-center justify-between text-left opacity-60 cursor-not-allowed">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-white text-tertiary border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
+          <div class="w-10 h-10 bg-white text-on-surface-variant border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
             <span class="material-symbols-outlined text-2xl">support_agent</span>
           </div>
           <div>
             <h3 class="font-headline-lg font-black text-base uppercase leading-tight">PANGGIL PETUGAS</h3>
-            <p class="text-[11px] font-body-md text-white/90">Bantuan kasir jika ada kendala</p>
+            <p class="text-[11px] font-body-md text-on-surface-variant">Bantuan kasir jika ada kendala</p>
           </div>
         </div>
         <span class="material-symbols-outlined text-xl">arrow_forward</span>
       </button>
-    </form>
+    @else
+      <form method="POST" action="{{ route('customer.call-cashier', $tv->id) }}" class="m-0">
+        @csrf
+        <button type="submit" onclick="return confirm('Panggil petugas ke meja Anda?')" class="w-full p-4 bg-tertiary text-on-tertiary border-2 border-on-surface neo-shadow btn-press hover:bg-tertiary-container flex items-center justify-between text-left transition">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white text-tertiary border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
+              <span class="material-symbols-outlined text-2xl">support_agent</span>
+            </div>
+            <div>
+              <h3 class="font-headline-lg font-black text-base uppercase leading-tight">PANGGIL PETUGAS</h3>
+              <p class="text-[11px] font-body-md text-white/90">Bantuan kasir jika ada kendala</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-xl">arrow_forward</span>
+        </button>
+      </form>
+    @endif
   </div>
 
   <!-- CUSTOMER REQUEST STATUS HISTORY -->

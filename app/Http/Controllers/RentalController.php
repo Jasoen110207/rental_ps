@@ -87,6 +87,10 @@ class RentalController extends Controller
             return back()->with('error', 'Sesi rental tidak aktif!');
         }
 
+        if ($session->billing_type === 'postpaid') {
+            return back()->with('error', 'Tidak dapat menambah waktu untuk sesi Open Billing (Postpaid).');
+        }
+
         $addedMinutes = 0;
         if (! empty($validated['added_hours'])) {
             $addedMinutes = (int) round($validated['added_hours'] * 60);

@@ -257,10 +257,17 @@
             <div class="flex flex-col gap-2">
               <!-- Quick Action Row -->
               <div class="grid grid-cols-2 gap-2">
-                <button onclick="openExtendModal({{ $activeSession->id }}, '{{ $tv->name }}', {{ $tv->price_per_hour }}, '{{ $activeSession->end_time ? $activeSession->end_time->format('H:i') : '' }}')" class="py-1.5 px-2 bg-secondary-container text-on-secondary font-headline-sm text-[11px] uppercase font-bold border-2 border-on-surface neo-shadow-sm btn-press hover:bg-secondary flex items-center justify-center gap-1">
-                  <span class="material-symbols-outlined text-sm">more_time</span>
-                  <span>+ WAKTU</span>
-                </button>
+                @if ($activeSession->billing_type !== 'postpaid')
+                  <button onclick="openExtendModal({{ $activeSession->id }}, '{{ $tv->name }}', {{ $tv->price_per_hour }}, '{{ $activeSession->end_time ? $activeSession->end_time->format('H:i') : '' }}')" class="py-1.5 px-2 bg-secondary-container text-on-secondary font-headline-sm text-[11px] uppercase font-bold border-2 border-on-surface neo-shadow-sm btn-press hover:bg-secondary flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-sm">more_time</span>
+                    <span>+ WAKTU</span>
+                  </button>
+                @else
+                  <button disabled class="py-1.5 px-2 bg-surface-container-high text-on-surface-variant font-headline-sm text-[11px] uppercase font-bold border-2 border-on-surface neo-shadow-sm cursor-not-allowed opacity-60 flex items-center justify-center gap-1" title="Tidak tersedia untuk Postpaid">
+                    <span class="material-symbols-outlined text-sm">more_time</span>
+                    <span>+ WAKTU</span>
+                  </button>
+                @endif
                 <button onclick="openAddFnbModal({{ $activeSession->id }}, '{{ $tv->name }}')" class="py-1.5 px-2 bg-surface border-2 border-on-surface font-headline-sm text-[11px] uppercase font-bold neo-shadow-sm btn-press hover:bg-surface-container-high flex items-center justify-center gap-1">
                   <span class="material-symbols-outlined text-sm">restaurant</span>
                   <span>+ F&B</span>

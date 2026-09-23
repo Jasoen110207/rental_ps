@@ -78,6 +78,9 @@
     .then(data => {
       if(data.success) {
         fetchLatestRequests();
+        if (typeof checkNotifications === 'function') {
+          checkNotifications();
+        }
       } else {
         alert(data.message || 'Terjadi kesalahan.');
       }
