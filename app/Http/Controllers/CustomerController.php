@@ -46,6 +46,11 @@ class CustomerController extends Controller
             'note' => 'nullable|string|max:255',
         ]);
 
+        $activeSession = PlaySession::where('tv_id', $tv->id)->where('status', 'active')->first();
+        if ($activeSession && $activeSession->billing_type === 'postpaid') {
+            return back()->with('error', 'Tidak dapat menambah waktu untuk sesi Open Billing (Postpaid).');
+        }
+
         $hours = (float) $validated['duration_hours'];
         $estimatedPrice = (int) round($hours * $tv->price_per_hour);
 
