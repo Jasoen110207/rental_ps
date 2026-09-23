@@ -27,10 +27,14 @@ class CustomerController extends Controller
             ->orderBy('name')
             ->get();
 
-        $requests = CustomerRequest::where('tv_id', $tv->id)
-            ->where('created_at', '>=', Carbon::now()->subHours(12))
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $requests = collect();
+        if ($activeSession) {
+            $requests = CustomerRequest::where('tv_id', $tv->id)
+                ->where('created_at', '>=', $activeSession->start_time)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
 
         $storeName = Setting::get('store_name', 'TambahBang Rental PS');
 
@@ -254,19 +258,22 @@ class CustomerController extends Controller
             ];
         }
 
-        $recentRequests = CustomerRequest::where('tv_id', $tv->id)
-            ->where('created_at', '>=', Carbon::now()->subHours(12))
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($req) {
-                return [
-                    'id' => $req->id,
-                    'type' => $req->type,
-                    'payload' => $req->payload,
-                    'status' => $req->status,
-                    'time' => $req->created_at->format('H:i'),
-                ];
-            });
+        $recentRequests = collect();
+        if ($activeSession) {
+            $recentRequests = CustomerRequest::where('tv_id', $tv->id)
+                ->where('created_at', '>=', $activeSession->start_time)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($req) {
+                    return [
+                        'id' => $req->id,
+                        'type' => $req->type,
+                        'payload' => $req->payload,
+                        'status' => $req->status,
+                        'time' => $req->created_at->format('H:i'),
+                    ];
+                });
+        }
 
         return response()->json([
             'tv' => [

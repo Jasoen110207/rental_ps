@@ -120,13 +120,7 @@
           <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
         </a>
 
-        <a href="{{ route('kasir.setting') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.setting') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg">settings</span>
-            <span>Settings</span>
-          </div>
-          <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
-        </a>
+
       </nav>
     </div>
 

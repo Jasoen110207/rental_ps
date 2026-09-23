@@ -696,20 +696,4 @@ class KasirController extends Controller
         return back()->with('success', 'Status '.$tv->name.' menjadi '.$tv->status);
     }
 
-    /* ================= SETTING ================= */
-    public function setting()
-    {
-        $settings = Setting::all()->pluck('value', 'key');
-
-        return view('kasir.setting', compact('settings'));
-    }
-
-    public function updateSetting(Request $request)
-    {
-        foreach ($request->except('_token') as $key => $value) {
-            Setting::set($key, $value);
-        }
-
-        return back()->with('success', 'Pengaturan berhasil disimpan!');
-    }
 }

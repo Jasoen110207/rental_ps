@@ -225,17 +225,7 @@
           class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-sm neo-shadow-sm" required>
       </div>
 
-      <!-- Jumlah Stik Kontroller -->
-      <div>
-        <label class="block text-xs uppercase font-bold mb-1.5">Jumlah Stik Kontroller</label>
-        <div class="grid grid-cols-4 gap-2">
-          <button type="button" onclick="setControllerCount(1)" class="controller-btn py-2 border-2 border-on-surface text-xs font-bold neo-shadow-sm btn-press bg-primary-fixed" data-count="1">1 Stik</button>
-          <button type="button" onclick="setControllerCount(2)" class="controller-btn py-2 border-2 border-on-surface text-xs font-bold neo-shadow-sm btn-press bg-surface hover:bg-primary-fixed" data-count="2">2 Stik</button>
-          <button type="button" onclick="setControllerCount(3)" class="controller-btn py-2 border-2 border-on-surface text-xs font-bold neo-shadow-sm btn-press bg-surface hover:bg-primary-fixed" data-count="3">3 Stik</button>
-          <button type="button" onclick="setControllerCount(4)" class="controller-btn py-2 border-2 border-on-surface text-xs font-bold neo-shadow-sm btn-press bg-surface hover:bg-primary-fixed" data-count="4">4 Stik</button>
-        </div>
-        <input type="hidden" name="controller_count" id="start-controller-count" value="1">
-      </div>
+      <input type="hidden" name="controller_count" id="start-controller-count" value="2">
 
       <div>
         <label class="block text-xs uppercase font-bold mb-1.5">Tipe Billing</label>
@@ -383,22 +373,9 @@ window.openStartModal = function(tvId, tvName, rate){
   currentTvRate = rate;
   document.getElementById('start-rate-display').innerText = 'Rp ' + rate.toLocaleString('id-ID') + ' / jam';
   document.getElementById('start-customer-name').value = '';
-  setControllerCount(1);
   setBillingType('prepaid'); setDuration(1);
   document.getElementById('modal-start').classList.remove('hidden');
 };
-function setControllerCount(count) {
-  document.getElementById('start-controller-count').value = count;
-  document.querySelectorAll('.controller-btn').forEach(btn => {
-    if (parseInt(btn.getAttribute('data-count')) === count) {
-      btn.classList.add('bg-primary-fixed');
-      btn.classList.remove('bg-surface');
-    } else {
-      btn.classList.remove('bg-primary-fixed');
-      btn.classList.add('bg-surface');
-    }
-  });
-}
 function validateStartRental(form) {
   const customerName = form.querySelector('input[name="customer_name"]').value;
   if (customerName.trim() === '') {

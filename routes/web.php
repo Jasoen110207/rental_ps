@@ -129,8 +129,7 @@ Route::middleware('auth')->prefix('kasir')->name('kasir.')->group(function () {
     Route::get('/unit', [KasirController::class, 'unit'])->name('unit');
     Route::post('/unit/{id}/toggle', [KasirController::class, 'toggleUnit'])->name('unit.toggle');
 
-    Route::get('/setting', [KasirController::class, 'setting'])->name('setting');
-    Route::post('/setting', [KasirController::class, 'updateSetting'])->name('setting.update');
+
 
     // Aksi rental kasir
     Route::post('/rental/start', [KasirController::class, 'startRental'])->name('rental.start');
