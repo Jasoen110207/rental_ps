@@ -331,6 +331,14 @@ class KasirController extends Controller
                 'payment_method' => $validated['payment_method'],
                 'notes' => $validated['notes'] ?? $session->notes,
             ]);
+
+            // Kembalikan stok untuk produk addon
+            foreach ($session->sessionOrders as $order) {
+                if ($order->product && $order->product->category === 'addon') {
+                    $order->product->increment('stock', $order->quantity);
+                }
+            }
+
             $session->tv->update(['status' => 'available', 'is_buzzer_on' => false]);
             $activeShift = Shift::where('status', 'active')->latest()->first();
             if ($activeShift) {

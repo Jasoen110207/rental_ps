@@ -109,6 +109,7 @@
             <option value="food">Makanan</option>
             <option value="drink">Minuman</option>
             <option value="snack">Snack</option>
+            <option value="addon">Add-on / Tambahan</option>
           </select>
         </div>
 

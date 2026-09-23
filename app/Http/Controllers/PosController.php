@@ -114,7 +114,7 @@ class PosController extends Controller
         $validated = $request->validate([
             'id' => 'nullable|exists:products,id',
             'name' => 'required|string|max:255',
-            'category' => 'required|in:food,drink,snack',
+            'category' => 'required|in:food,drink,snack,addon',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'is_available' => 'nullable|boolean',

@@ -79,6 +79,13 @@ class PlaySessionService
             // Total tagihan keseluruhan
             $totalAmount = $playCost + $foodCost;
 
+            // Kembalikan stok untuk produk addon
+            foreach ($session->sessionOrders as $order) {
+                if ($order->product && $order->product->category === 'addon') {
+                    $order->product->increment('stock', $order->quantity);
+                }
+            }
+
             // Update sesi bermain
             $session->update([
                 'end_time' => $endTime,

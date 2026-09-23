@@ -219,6 +219,13 @@ class RentalController extends Controller
                 'notes' => $validated['notes'] ?? $session->notes,
             ]);
 
+            // Kembalikan stok untuk produk addon
+            foreach ($session->sessionOrders as $order) {
+                if ($order->product && $order->product->category === 'addon') {
+                    $order->product->increment('stock', $order->quantity);
+                }
+            }
+
             // Set TV available and buzzer off
             $session->tv->update([
                 'status' => 'available',
