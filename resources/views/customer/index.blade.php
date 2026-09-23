@@ -96,24 +96,41 @@
       <span class="material-symbols-outlined text-xl">arrow_forward</span>
     </button>
 
-    <!-- 2. Order F&B -->
+    <!-- 2. Order F&B & Addon -->
     <button type="button" 
       @if (!$activeSession || (isset($isTimeUp) && $isTimeUp))
-        disabled onclick="alert('Sesi bermain tidak aktif atau waktu habis! Anda tidak dapat memesan F&B.')" class="p-4 bg-surface-container-high text-on-surface-variant border-2 border-on-surface neo-shadow flex items-center justify-between text-left opacity-60 cursor-not-allowed"
+        disabled onclick="alert('Sesi bermain tidak aktif atau waktu habis! Anda tidak dapat memesan.')" class="p-4 bg-surface-container-high text-on-surface-variant border-2 border-on-surface neo-shadow flex items-center justify-between text-left opacity-60 cursor-not-allowed"
       @else
         onclick="openFoodDrawer()" class="p-4 bg-primary text-on-primary border-2 border-on-surface neo-shadow btn-press hover:bg-primary-container flex items-center justify-between text-left transition"
       @endif>
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-white {{ (!$activeSession || (isset($isTimeUp) && $isTimeUp)) ? 'text-on-surface-variant' : 'text-primary' }} border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
-          <span class="material-symbols-outlined text-2xl">restaurant</span>
+          <span class="material-symbols-outlined text-2xl">shopping_cart</span>
         </div>
         <div>
-          <h3 class="font-headline-lg font-black text-base uppercase leading-tight">PESAN MAKANAN & MINUMAN</h3>
-          <p class="text-[11px] font-body-md {{ (!$activeSession || (isset($isTimeUp) && $isTimeUp)) ? 'text-on-surface-variant' : 'text-white/90' }}">Pesan Indomie, snack & minuman diantar ke meja</p>
+          <h3 class="font-headline-lg font-black text-base uppercase leading-tight">PESAN F&B / ADD-ON</h3>
+          <p class="text-[11px] font-body-md {{ (!$activeSession || (isset($isTimeUp) && $isTimeUp)) ? 'text-on-surface-variant' : 'text-white/90' }}">Pesan makanan, minuman & extra stick</p>
         </div>
       </div>
       <span class="material-symbols-outlined text-xl">arrow_forward</span>
     </button>
+
+    <!-- 3. Call Attendant -->
+    <form method="POST" action="{{ route('customer.call-cashier', $tv->id) }}" class="m-0">
+      @csrf
+      <button type="submit" onclick="return confirm('Panggil petugas ke meja Anda?')" class="w-full p-4 bg-tertiary text-on-tertiary border-2 border-on-surface neo-shadow btn-press hover:bg-tertiary-container flex items-center justify-between text-left transition">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-white text-tertiary border border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl">support_agent</span>
+          </div>
+          <div>
+            <h3 class="font-headline-lg font-black text-base uppercase leading-tight">PANGGIL PETUGAS</h3>
+            <p class="text-[11px] font-body-md text-white/90">Bantuan kasir jika ada kendala</p>
+          </div>
+        </div>
+        <span class="material-symbols-outlined text-xl">arrow_forward</span>
+      </button>
+    </form>
   </div>
 
   <!-- CUSTOMER REQUEST STATUS HISTORY -->
@@ -249,8 +266,8 @@
   <div class="w-full max-w-md mx-auto bg-surface-container-lowest border-t-2 border-x-2 border-on-surface p-5 neo-shadow-lg relative max-h-[90vh] flex flex-col justify-between animate-in slide-in-from-bottom duration-200">
     <div class="flex items-center justify-between pb-3 border-b-2 border-on-surface mb-3">
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-2xl text-primary">restaurant</span>
-        <h3 class="font-headline-lg font-black uppercase text-base">Menu Makanan & Minuman</h3>
+        <span class="material-symbols-outlined text-2xl text-primary">shopping_cart</span>
+        <h3 class="font-headline-lg font-black uppercase text-base">Menu F&B & Add-on</h3>
       </div>
       <button onclick="closeDrawer('drawer-food')" class="p-1 border border-on-surface hover:bg-surface-container-high btn-press">
         <span class="material-symbols-outlined">close</span>

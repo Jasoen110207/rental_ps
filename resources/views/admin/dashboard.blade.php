@@ -421,7 +421,7 @@
 
       <div class="flex items-center gap-2">
         <label class="font-headline-sm text-xs font-bold uppercase whitespace-nowrap">Kustom Tambahan (Jam):</label>
-        <input type="number" step="0.5" min="0.25" max="12" name="added_hours" id="extend-hours-input" value="1" oninput="calculateExtendCost()" class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-sm neo-shadow-sm">
+        <input type="number" step="0.25" min="0.25" max="12" name="added_hours" id="extend-hours-input" value="1" oninput="calculateExtendCost()" class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-sm neo-shadow-sm">
       </div>
 
       <div class="p-3 bg-surface-container-high border-2 border-on-surface neo-shadow-sm flex items-center justify-between">

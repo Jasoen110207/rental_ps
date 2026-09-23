@@ -25,6 +25,22 @@
 
 <body class="bg-background text-on-surface antialiased select-none min-h-screen flex flex-col font-body-md">
 
+  <!-- AUDIO UNLOCK OVERLAY MODAL -->
+  <div id="audio-unlock-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/80 backdrop-blur-sm">
+    <div class="bg-surface-container-lowest p-6 max-w-sm w-full border-2 border-on-surface neo-shadow-lg text-center flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
+      <div class="w-16 h-16 bg-primary text-on-primary border-2 border-on-surface flex items-center justify-center neo-shadow-sm rounded-full">
+        <span class="material-symbols-outlined text-3xl">volume_up</span>
+      </div>
+      <div>
+        <h2 class="font-headline-lg font-black text-xl uppercase mb-1">Inisialisasi Sistem</h2>
+        <p class="text-sm font-body-md text-on-surface-variant">Browser mewajibkan interaksi Anda terlebih dahulu agar suara notifikasi dan buzzer dapat otomatis berbunyi.</p>
+      </div>
+      <button onclick="unlockAudioSystem()" class="w-full mt-2 py-3 bg-secondary-container text-on-secondary font-headline-lg font-black tracking-wider uppercase border-2 border-on-surface neo-shadow btn-press hover:bg-secondary">
+        MULAI DASHBOARD
+      </button>
+    </div>
+  </div>
+
   <!-- LEFT PERSISTENT SIDEBAR (Fixed w-64) -->
   <aside class="fixed left-0 top-0 h-screen w-64 flex flex-col justify-between p-4 z-40 bg-surface-container-lowest border-r-2 border-on-surface neo-shadow">
     <div class="flex flex-col gap-4">
@@ -468,14 +484,6 @@
       }
     }
 
-    // Minta Izin Notifikasi OS pas user klik pertama kali
-    document.addEventListener('click', function requestNotifPerm() {
-      if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission();
-      }
-      document.removeEventListener('click', requestNotifPerm);
-    }, { once: true });
-
     async function markNotifAsRead(id) {
       try {
         await fetch(`/notifications/${id}/mark-as-read`, {
@@ -500,10 +508,11 @@
 
     setInterval(checkNotifications, 15000); // 15 detik polling
 
-    // Unlock Audio Context on first interaction
-    document.addEventListener('click', function unlockAudio() {
-      initAudio();
-      if (audioCtx && audioCtx.state === 'suspended') {
+    function unlockAudioSystem() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
         audioCtx.resume();
       }
       
@@ -515,8 +524,13 @@
       osc.start();
       osc.stop(audioCtx.currentTime + 0.01);
       
-      document.removeEventListener('click', unlockAudio);
-    }, { once: true });
+      // Minta izin notifikasi OS sekalian
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+      
+      document.getElementById('audio-unlock-modal').remove();
+    }
   </script>
   @stack('scripts')
 </body>
