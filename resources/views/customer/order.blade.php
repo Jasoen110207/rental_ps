@@ -136,8 +136,8 @@
             @endif
             >
             <div class="flex items-center gap-2.5">
-                <span class="material-symbols-outlined icon-fill text-2xl shrink-0">ramen_dining</span>
-                <span class="uppercase">PESAN MAKANAN & MINUMAN</span>
+                <span class="material-symbols-outlined icon-fill text-2xl shrink-0">shopping_cart</span>
+                <span class="uppercase">PESAN F&B & ADD-ON</span>
             </div>
             <span class="material-symbols-outlined text-xl font-black">add_shopping_cart</span>
         </button>
