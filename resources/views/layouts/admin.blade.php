@@ -508,28 +508,45 @@
 
     setInterval(checkNotifications, 15000); // 15 detik polling
 
+    document.addEventListener('DOMContentLoaded', () => {
+      if (sessionStorage.getItem('audio_unlocked')) {
+        const modal = document.getElementById('audio-unlock-modal');
+        if (modal) modal.remove();
+        document.addEventListener('click', unlockAudioSystemSilent, { once: true });
+      }
+    });
+
+    function unlockAudioSystemSilent() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        gain.gain.value = 0;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.01);
+      } catch (e) {
+        console.log('Silent audio unlock failed', e);
+      }
+    }
+
     function unlockAudioSystem() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      gain.gain.value = 0;
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.01);
+      unlockAudioSystemSilent();
+      sessionStorage.setItem('audio_unlocked', 'true');
       
       // Minta izin notifikasi OS sekalian
       if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission();
       }
       
-      document.getElementById('audio-unlock-modal').remove();
+      const modal = document.getElementById('audio-unlock-modal');
+      if (modal) modal.remove();
     }
   </script>
   @stack('scripts')
