@@ -54,7 +54,7 @@
     .catch(err => console.error('Gagal memuat request terbaru:', err));
   }
 
-  setInterval(fetchLatestRequests, 15000);
+  setInterval(fetchLatestRequests, 3000);
 
   function processRequestAction(id, action, role) {
     if (!confirm(action === 'approve' ? 'Setujui request ini?' : 'Tolak request ini?')) return;

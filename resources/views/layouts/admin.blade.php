@@ -322,6 +322,9 @@
         if (!audioCtx) {
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
         const now = audioCtx.currentTime;
         for (let i = 0; i < 6; i++) {
           const t = now + i * 0.11;
@@ -425,6 +428,13 @@
              showOSNotification(data.latest);
           }
         }
+
+        if (data.count !== currentUnreadCount) {
+          if (typeof fetchLatestRequests === 'function') {
+            fetchLatestRequests();
+          }
+        }
+        
         currentUnreadCount = data.count;
         updateNotifBadges(currentUnreadCount);
       } catch (e) {
