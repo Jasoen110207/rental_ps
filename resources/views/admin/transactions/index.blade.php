@@ -35,11 +35,11 @@
 
   <!-- Filter Bar -->
   <div class="p-4 bg-surface-container-lowest border-2 border-on-surface neo-shadow">
-    <form method="GET" action="{{ route('admin.transactions.index') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+    <form method="GET" action="{{ route('admin.transactions.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <!-- Search Input -->
       <div>
         <label class="block font-headline-sm text-[11px] uppercase font-bold mb-1">Cari ID / Meja</label>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nomor transaksi / nama meja" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Nomor trx / meja" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm">
       </div>
 
       <!-- TV Unit Filter -->
@@ -65,6 +65,18 @@
         </select>
       </div>
 
+      <!-- Start Date -->
+      <div>
+        <label class="block font-headline-sm text-[11px] uppercase font-bold mb-1">Dari Tanggal</label>
+        <input type="date" name="start_date" value="{{ request('start_date') }}" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm">
+      </div>
+
+      <!-- End Date -->
+      <div>
+        <label class="block font-headline-sm text-[11px] uppercase font-bold mb-1">Sampai Tanggal</label>
+        <input type="date" name="end_date" value="{{ request('end_date') }}" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm">
+      </div>
+
       <!-- Submit & Reset -->
       <div class="flex items-end gap-2">
         <button type="submit" class="flex-1 py-2 bg-primary text-on-primary font-headline-sm text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press hover:bg-primary-container flex items-center justify-center gap-1">
@@ -74,11 +86,11 @@
         <a href="{{ route('admin.transactions.index') }}" class="p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high" title="Reset Filter">
           <span class="material-symbols-outlined text-sm">refresh</span>
         </a>
-        <a href="{{ route('admin.reports.csv') }}" class="p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high" title="Export CSV Laporan Seminggu Terakhir">
+        <a href="{{ route('admin.reports.csv', request()->query()) }}" class="p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high" title="Export CSV">
           <span class="material-symbols-outlined text-sm">csv</span>
           <span class="font-bold text-xs uppercase">CSV</span>
         </a>
-        <a href="{{ route('admin.reports.pdf') }}" class="p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high" title="Export PDF Laporan Seminggu Terakhir">
+        <a href="{{ route('admin.reports.pdf', request()->query()) }}" class="p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high" title="Export PDF">
           <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
           <span class="font-bold text-xs uppercase">PDF</span>
         </a>

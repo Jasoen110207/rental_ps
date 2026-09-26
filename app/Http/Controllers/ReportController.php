@@ -48,16 +48,33 @@ class ReportController extends Controller
         $period = $request->query('period', 'all');
         $query = PlaySession::with(['tv', 'user'])->where('status', 'completed');
 
-        if ($period === 'today') {
-            $query->whereDate('created_at', Carbon::today());
-        } elseif ($period === 'week') {
-            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
-        } elseif ($period === 'month') {
-            $query->whereYear('created_at', Carbon::now()->year)
-                ->whereMonth('created_at', Carbon::now()->month);
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhereHas('tv', function ($tq) use ($search) {
+                      $tq->where('name', 'like', "%{$search}%");
+                  });
+            });
         }
 
-        $data = $query->get();
+        if ($request->filled('tv_id')) {
+            $query->where('tv_id', $request->get('tv_id'));
+        }
+
+        if ($request->filled('billing_type')) {
+            $query->where('billing_type', $request->get('billing_type'));
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->get('start_date'));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->get('end_date'));
+        }
+
+        $data = $query->orderBy('created_at', 'desc')->get();
 
         $filename = 'laporan_'.$period.'_'.now()->format('Ymd').'.csv';
 
@@ -98,16 +115,33 @@ class ReportController extends Controller
         $period = $request->query('period', 'all');
         $query = PlaySession::with(['tv', 'user'])->where('status', 'completed');
 
-        if ($period === 'today') {
-            $query->whereDate('created_at', Carbon::today());
-        } elseif ($period === 'week') {
-            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
-        } elseif ($period === 'month') {
-            $query->whereYear('created_at', Carbon::now()->year)
-                ->whereMonth('created_at', Carbon::now()->month);
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhereHas('tv', function ($tq) use ($search) {
+                      $tq->where('name', 'like', "%{$search}%");
+                  });
+            });
         }
 
-        $data = $query->get();
+        if ($request->filled('tv_id')) {
+            $query->where('tv_id', $request->get('tv_id'));
+        }
+
+        if ($request->filled('billing_type')) {
+            $query->where('billing_type', $request->get('billing_type'));
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->get('start_date'));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->get('end_date'));
+        }
+
+        $data = $query->orderBy('created_at', 'desc')->get();
 
         $pdf = Pdf::loadView('admin.reports.pdf', compact('data', 'period'));
 

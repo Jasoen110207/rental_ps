@@ -35,16 +35,21 @@ class TransactionController extends Controller
             $query->where('billing_type', $request->get('billing_type'));
         }
 
-        if ($request->filled('date')) {
-            $query->whereDate('end_time', $request->get('date'));
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->get('start_date'));
         }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->get('end_date'));
+        }
+
+        $totalRevenue = (clone $query)->sum('total_amount');
+        $totalRentalRevenue = (clone $query)->sum('rental_amount');
+        $totalFnbRevenue = (clone $query)->sum('fnb_amount');
 
         $transactions = $query->paginate(15)->withQueryString();
 
         $tvs = Tv::orderBy('name')->get();
-        $totalRevenue = PlaySession::where('status', 'completed')->sum('total_amount');
-        $totalRentalRevenue = PlaySession::where('status', 'completed')->sum('rental_amount');
-        $totalFnbRevenue = PlaySession::where('status', 'completed')->sum('fnb_amount');
 
         return view('admin.transactions.index', compact(
             'transactions',
