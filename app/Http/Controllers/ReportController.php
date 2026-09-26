@@ -43,14 +43,23 @@ class ReportController extends Controller
         ]);
     }
 
-    public function exportCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function exportCsv(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $data = PlaySession::with(['tv', 'user'])
-            ->where('status', 'completed')
-            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-            ->get();
+        $period = $request->query('period', 'all');
+        $query = PlaySession::with(['tv', 'user'])->where('status', 'completed');
 
-        $filename = 'laporan_mingguan_'.now()->format('Ymd').'.csv';
+        if ($period === 'today') {
+            $query->whereDate('created_at', Carbon::today());
+        } elseif ($period === 'week') {
+            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($period === 'month') {
+            $query->whereYear('created_at', Carbon::now()->year)
+                ->whereMonth('created_at', Carbon::now()->month);
+        }
+
+        $data = $query->get();
+
+        $filename = 'laporan_'.$period.'_'.now()->format('Ymd').'.csv';
 
         $headers = [
             'Content-type' => 'text/csv',
@@ -84,15 +93,25 @@ class ReportController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    public function exportPdf(): \Illuminate\Http\Response
+    public function exportPdf(Request $request): \Illuminate\Http\Response
     {
-        $data = PlaySession::with(['tv', 'user'])
-            ->where('status', 'completed')
-            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-            ->get();
+        $period = $request->query('period', 'all');
+        $query = PlaySession::with(['tv', 'user'])->where('status', 'completed');
 
-        $pdf = Pdf::loadView('admin.reports.pdf', compact('data'));
+        if ($period === 'today') {
+            $query->whereDate('created_at', Carbon::today());
+        } elseif ($period === 'week') {
+            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($period === 'month') {
+            $query->whereYear('created_at', Carbon::now()->year)
+                ->whereMonth('created_at', Carbon::now()->month);
+        }
 
-        return $pdf->download('laporan_mingguan_'.now()->format('Ymd').'.pdf');
+        $data = $query->get();
+
+        $pdf = Pdf::loadView('admin.reports.pdf', compact('data', 'period'));
+
+        return $pdf->download('laporan_'.$period.'_'.now()->format('Ymd').'.pdf');
     }
 }
+
