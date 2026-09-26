@@ -140,7 +140,7 @@
         </div>
         <div>
           <label class="text-xs font-bold uppercase">Durasi (jam, prepaid):</label>
-          <input type="number" name="duration_hours" value="2" step="0.5" min="0.5" class="w-full mt-1 px-3 py-2 border-2 border-on-surface text-xs font-bold">
+          <input type="number" name="duration_hours" value="2" step="0.01" min="0.01" class="w-full mt-1 px-3 py-2 border-2 border-on-surface text-xs font-bold">
         </div>
         <button class="w-full py-4 bg-primary text-white font-black uppercase border-2 border-on-surface neo-shadow btn-press">MULAI SEWA UNIT</button>
       </form>

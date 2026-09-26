@@ -46,7 +46,7 @@ class CustomerController extends Controller
         $tv = Tv::findOrFail($tvId);
 
         $validated = $request->validate([
-            'duration_hours' => 'required|numeric|min:0.5|max:12',
+            'duration_hours' => 'required|numeric|min:0.01|max:12',
             'note' => 'nullable|string|max:255',
         ]);
 

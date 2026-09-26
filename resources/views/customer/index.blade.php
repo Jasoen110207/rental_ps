@@ -267,7 +267,7 @@
 
       <div class="flex items-center gap-2">
         <label class="font-headline-sm text-xs font-bold uppercase whitespace-nowrap">Durasi Lain (Jam):</label>
-        <input type="number" step="0.5" min="0.5" max="12" name="duration_hours" id="cust-duration-input" value="1" oninput="calcCustCost()" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-body-md text-sm neo-shadow-sm">
+        <input type="number" step="0.01" min="0.01" max="12" name="duration_hours" id="cust-duration-input" value="1" oninput="calcCustCost()" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-body-md text-sm neo-shadow-sm">
       </div>
 
       <div class="p-3 bg-surface-container-high border-2 border-on-surface neo-shadow-sm flex items-center justify-between">

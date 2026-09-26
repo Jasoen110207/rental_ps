@@ -179,7 +179,7 @@ class KasirController extends Controller
         $validated = $request->validate([
             'tv_id' => 'required|exists:tvs,id',
             'billing_type' => 'required|in:prepaid,postpaid',
-            'duration_hours' => 'nullable|numeric|min:0.5',
+            'duration_hours' => 'nullable|numeric|min:0.01',
             'notes' => 'nullable|string',
             'customer_name' => 'required|string|max:100',
             'controller_count' => 'nullable|integer|min:1|max:10',

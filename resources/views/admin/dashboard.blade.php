@@ -361,7 +361,7 @@
 
         <div class="flex items-center gap-2">
           <label class="font-headline-sm text-xs font-bold uppercase whitespace-nowrap">Durasi Kustom (Jam):</label>
-          <input type="number" step="0.5" min="0.5" max="24" name="duration_hours" id="start-duration-input" value="1" oninput="calculateStartCost()" class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-sm neo-shadow-sm">
+          <input type="number" step="0.01" min="0.01" max="24" name="duration_hours" id="start-duration-input" value="1" oninput="calculateStartCost()" class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-sm neo-shadow-sm">
         </div>
       </div>
 

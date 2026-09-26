@@ -244,7 +244,7 @@
         </div>
         <div class="flex items-center gap-2">
           <label class="text-xs font-bold uppercase whitespace-nowrap">Durasi (Jam):</label>
-          <input type="number" step="0.5" min="0.5" max="24" name="duration_hours" id="start-duration-input" value="1" oninput="calculateStartCost()" class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface text-sm">
+          <input type="number" step="0.01" min="0.01" max="24" name="duration_hours" id="start-duration-input" value="1" oninput="calculateStartCost()" class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface text-sm">
         </div>
       </div>
       <div id="postpaid-options" class="p-3 bg-blue-50 border-2 border-on-surface text-xs hidden">Mode Postpaid: timer naik, biaya dihitung saat checkout.</div>
