@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'admin@rental.com',
                 'role' => 'admin',
                 'password' => Hash::make('password'),
+                'pin' => '123456',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -34,6 +35,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'kasir@rental.com',
                 'role' => 'kasir',
                 'password' => Hash::make('password'),
+                'pin' => '123456',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -304,7 +306,7 @@ class DatabaseSeeder extends Seeder
                 'payload' => json_encode([
                     'duration_hours' => 1,
                     'price' => 15000,
-                    'note' => 'Tambah 1 Jam'
+                    'note' => 'Tambah 1 Jam',
                 ]),
                 'status' => 'pending',
                 'created_at' => $now->copy()->subMinutes(5),
@@ -320,7 +322,7 @@ class DatabaseSeeder extends Seeder
                         ['product_id' => 10, 'name' => 'Kopi Susu Dingin', 'price' => 8000, 'quantity' => 1, 'subtotal' => 8000],
                     ],
                     'total_price' => 20000,
-                    'note' => 'Cabai 3 biji ya bang'
+                    'note' => 'Cabai 3 biji ya bang',
                 ]),
                 'status' => 'pending',
                 'created_at' => $now->copy()->subMinutes(2),
@@ -333,7 +335,7 @@ class DatabaseSeeder extends Seeder
                 'payload' => json_encode([
                     'duration_hours' => 2,
                     'price' => 50000,
-                    'note' => 'Tambah 2 Jam'
+                    'note' => 'Tambah 2 Jam',
                 ]),
                 'status' => 'pending',
                 'created_at' => $now->copy()->subMinutes(1),

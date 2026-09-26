@@ -89,6 +89,18 @@
         </div>
       </div>
 
+      <div>
+        <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1.5 text-on-surface">
+          PIN Kasir
+        </label>
+        <div class="relative">
+          <input type="password" name="pin" id="pin" required value="123456" class="w-full px-3.5 py-2.5 bg-surface border-2 border-on-surface font-body-md text-sm text-on-surface neo-shadow focus:outline-none focus:ring-0 focus:bg-white" placeholder="••••••">
+          <button type="button" onclick="togglePin()" class="absolute right-3 top-2.5 text-on-surface-variant hover:text-on-surface">
+            <span class="material-symbols-outlined" id="eye-icon-pin">visibility</span>
+          </button>
+        </div>
+      </div>
+
       <div class="flex items-center justify-between text-xs font-headline-sm my-1">
         <label class="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" name="remember" class="w-4 h-4 rounded-none border-2 border-on-surface text-primary focus:ring-0">
@@ -127,6 +139,18 @@
         icon.innerText = 'visibility_off';
       } else {
         pass.type = 'password';
+        icon.innerText = 'visibility';
+      }
+    }
+
+    function togglePin() {
+      const pin = document.getElementById('pin');
+      const icon = document.getElementById('eye-icon-pin');
+      if (pin.type === 'password') {
+        pin.type = 'text';
+        icon.innerText = 'visibility_off';
+      } else {
+        pin.type = 'password';
         icon.innerText = 'visibility';
       }
     }

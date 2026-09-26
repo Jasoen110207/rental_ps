@@ -199,11 +199,12 @@ class RentalController extends Controller
         $rentalAmount = $session->rental_amount;
         if ($session->billing_type === 'postpaid') {
             $durationMinutes = max(1, $session->start_time->diffInMinutes($now));
-            $durationHours = ceil($durationMinutes / 60); // standard hourly billing
+            $blokWaktu = ceil($durationMinutes / 5);
+            $tarifPerLimaMenit = ($session->tv->price_per_hour / 60) * 5;
             if (isset($validated['custom_rental_amount']) && $validated['custom_rental_amount'] !== '') {
                 $rentalAmount = (int) $validated['custom_rental_amount'];
             } else {
-                $rentalAmount = (int) ($durationHours * $session->tv->price_per_hour);
+                $rentalAmount = (int) ($blokWaktu * $tarifPerLimaMenit);
             }
         } elseif (isset($validated['custom_rental_amount']) && $validated['custom_rental_amount'] !== '') {
             $rentalAmount = (int) $validated['custom_rental_amount'];
