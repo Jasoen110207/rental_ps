@@ -43,14 +43,40 @@ class ReportController extends Controller
         ]);
     }
 
-    public function exportCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function exportCsv(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $data = PlaySession::with(['tv', 'user'])
-            ->where('status', 'completed')
-            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-            ->get();
+        $period = $request->query('period', 'all');
+        $query = PlaySession::with(['tv', 'user'])->where('status', 'completed');
 
-        $filename = 'laporan_mingguan_'.now()->format('Ymd').'.csv';
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhereHas('tv', function ($tq) use ($search) {
+                      $tq->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($request->filled('tv_id')) {
+            $query->where('tv_id', $request->get('tv_id'));
+        }
+
+        if ($request->filled('billing_type')) {
+            $query->where('billing_type', $request->get('billing_type'));
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->get('start_date'));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->get('end_date'));
+        }
+
+        $data = $query->orderBy('created_at', 'desc')->get();
+
+        $filename = 'laporan_'.$period.'_'.now()->format('Ymd').'.csv';
 
         $headers = [
             'Content-type' => 'text/csv',
@@ -84,15 +110,42 @@ class ReportController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    public function exportPdf(): \Illuminate\Http\Response
+    public function exportPdf(Request $request): \Illuminate\Http\Response
     {
-        $data = PlaySession::with(['tv', 'user'])
-            ->where('status', 'completed')
-            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-            ->get();
+        $period = $request->query('period', 'all');
+        $query = PlaySession::with(['tv', 'user'])->where('status', 'completed');
 
-        $pdf = Pdf::loadView('admin.reports.pdf', compact('data'));
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhereHas('tv', function ($tq) use ($search) {
+                      $tq->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
 
-        return $pdf->download('laporan_mingguan_'.now()->format('Ymd').'.pdf');
+        if ($request->filled('tv_id')) {
+            $query->where('tv_id', $request->get('tv_id'));
+        }
+
+        if ($request->filled('billing_type')) {
+            $query->where('billing_type', $request->get('billing_type'));
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->get('start_date'));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->get('end_date'));
+        }
+
+        $data = $query->orderBy('created_at', 'desc')->get();
+
+        $pdf = Pdf::loadView('admin.reports.pdf', compact('data', 'period'));
+
+        return $pdf->download('laporan_'.$period.'_'.now()->format('Ymd').'.pdf');
     }
 }
+
