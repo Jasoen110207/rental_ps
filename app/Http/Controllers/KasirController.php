@@ -6,7 +6,6 @@ use App\Models\CustomerRequest;
 use App\Models\PlaySession;
 use App\Models\Product;
 use App\Models\SessionOrder;
-use App\Models\Setting;
 use App\Models\Shift;
 use App\Models\Tv;
 use Carbon\Carbon;
@@ -310,10 +309,11 @@ class KasirController extends Controller
 
         if ($session->billing_type === 'postpaid') {
             $durationMinutes = max(1, $session->start_time->diffInMinutes($now));
-            $durationHours = (int) ceil($durationMinutes / 60);
+            $blokWaktu = ceil($durationMinutes / 5);
+            $tarifPerLimaMenit = ($session->tv->price_per_hour / 60) * 5;
             $rentalAmount = isset($validated['custom_rental_amount']) && $validated['custom_rental_amount'] !== ''
                 ? (int) $validated['custom_rental_amount']
-                : (int) ($durationHours * $session->tv->price_per_hour);
+                : (int) ($blokWaktu * $tarifPerLimaMenit);
         } elseif (isset($validated['custom_rental_amount']) && $validated['custom_rental_amount'] !== '') {
             $rentalAmount = (int) $validated['custom_rental_amount'];
         }
@@ -495,6 +495,7 @@ class KasirController extends Controller
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Permintaan sudah diproses sebelumnya!'], 400);
             }
+
             return back()->with('error', 'Permintaan sudah diproses sebelumnya!');
         }
 
@@ -542,7 +543,7 @@ class KasirController extends Controller
             $customerRequest->update(['status' => 'approved']);
         });
 
-        \Illuminate\Support\Facades\DB::table('notifications')
+        DB::table('notifications')
             ->where('data->request_id', $id)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
@@ -550,6 +551,7 @@ class KasirController extends Controller
         if (request()->ajax()) {
             return response()->json(['success' => true, 'message' => 'Permintaan disetujui!']);
         }
+
         return back()->with('success', 'Permintaan disetujui!');
     }
 
@@ -560,11 +562,12 @@ class KasirController extends Controller
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Permintaan sudah diproses sebelumnya!'], 400);
             }
+
             return back()->with('error', 'Permintaan sudah diproses sebelumnya!');
         }
         $customerRequest->update(['status' => 'rejected']);
 
-        \Illuminate\Support\Facades\DB::table('notifications')
+        DB::table('notifications')
             ->where('data->request_id', $id)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
@@ -572,6 +575,7 @@ class KasirController extends Controller
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'Permintaan ditolak.']);
         }
+
         return back()->with('success', 'Permintaan ditolak.');
     }
 
@@ -695,5 +699,4 @@ class KasirController extends Controller
 
         return back()->with('success', 'Status '.$tv->name.' menjadi '.$tv->status);
     }
-
 }

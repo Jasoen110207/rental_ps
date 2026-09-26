@@ -74,6 +74,14 @@
         <a href="{{ route('admin.transactions.index') }}" class="p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high" title="Reset Filter">
           <span class="material-symbols-outlined text-sm">refresh</span>
         </a>
+        <a href="{{ route('admin.reports.csv') }}" class="p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high" title="Export CSV Laporan Seminggu Terakhir">
+          <span class="material-symbols-outlined text-sm">csv</span>
+          <span class="font-bold text-xs uppercase">CSV</span>
+        </a>
+        <a href="{{ route('admin.reports.pdf') }}" class="p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high" title="Export PDF Laporan Seminggu Terakhir">
+          <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+          <span class="font-bold text-xs uppercase">PDF</span>
+        </a>
       </div>
     </form>
   </div>

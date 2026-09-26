@@ -4,15 +4,16 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KasirController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\RentalController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RequestCenterController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,6 +27,7 @@ Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('admin.dashboard');
     }
+
     return redirect()->route('login');
 });
 
@@ -86,6 +88,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transactions.show');
     Route::get('/transactions/{id}/invoice', [TransactionController::class, 'printInvoice'])->name('transactions.invoice');
 
+    // Reports Export
+    Route::get('/reports/export-csv', [ReportController::class, 'exportCsv'])->name('reports.csv');
+    Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
+
     // Shift Management
     Route::get('/shifts', [ShiftController::class, 'index'])->name('shifts.index');
     Route::post('/shifts/start', [ShiftController::class, 'startShift'])->name('shifts.start');
@@ -128,8 +134,6 @@ Route::middleware('auth')->prefix('kasir')->name('kasir.')->group(function () {
 
     Route::get('/unit', [KasirController::class, 'unit'])->name('unit');
     Route::post('/unit/{id}/toggle', [KasirController::class, 'toggleUnit'])->name('unit.toggle');
-
-
 
     // Aksi rental kasir
     Route::post('/rental/start', [KasirController::class, 'startRental'])->name('rental.start');
