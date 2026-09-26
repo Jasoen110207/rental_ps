@@ -134,7 +134,7 @@
           @elseif ($tv->status === 'playing' && $activeSession)
             <div class="text-center py-2 bg-surface-container-lowest border-2 border-on-surface neo-shadow-sm">
               <span class="text-[10px] font-bold uppercase text-on-surface-variant block">{{ $isPrepaid ? 'SISA WAKTU' : 'DURASI BERJALAN' }}</span>
-              <div class="text-3xl font-timer-display font-black {{ $isTimeUp ? 'text-error animate-pulse' : ($almost ? 'text-secondary' : '') }}" id="timer-tv-{{ $tv->id }}" data-type="{{ $activeSession->billing_type }}" data-end="{{ $activeSession->end_time ? $activeSession->end_time->timestamp : '' }}" data-start="{{ $activeSession->start_time->timestamp }}">--:--:--</div>
+              <div class="text-3xl font-timer-display font-black {{ $isTimeUp ? 'text-error animate-pulse' : ($almost ? 'text-secondary' : '') }}" id="timer-tv-{{ $tv->id }}" data-type="{{ $activeSession->billing_type }}" data-end="{{ $activeSession->end_time ? $activeSession->end_time->timestamp : '' }}" data-start="{{ $activeSession->start_time->timestamp }}" data-rate="{{ $tv->price_per_hour }}" data-fnb="{{ $activeSession->fnb_amount }}">--:--:--</div>
             </div>
             <div class="grid grid-cols-2 gap-2 text-xs mt-2">
               <div class="p-1.5 bg-surface border border-on-surface">
@@ -143,7 +143,7 @@
               </div>
               <div class="p-1.5 bg-surface border border-on-surface">
                 <span class="text-[10px] block font-bold text-on-surface-variant">TOTAL</span>
-                <span class="font-bold text-primary">Rp {{ number_format($activeSession->total_amount, 0, ',', '.') }}</span>
+                <span class="font-bold text-primary" id="total-tv-{{ $tv->id }}">Rp {{ number_format($activeSession->total_amount, 0, ',', '.') }}</span>
               </div>
             </div>
             @if ($activeSession->sessionOrders->count() > 0)
@@ -189,7 +189,7 @@
                 @endif
                 <button onclick="openAddFnbModal({{ $activeSession->id }}, '{{ $tv->name }}')" class="py-1.5 bg-surface text-[11px] uppercase font-bold border-2 border-on-surface neo-shadow-sm btn-press">+ F&B</button>
               </div>
-              <button onclick="openCheckoutModal({{ $activeSession->id }}, '{{ $tv->name }}', {{ $activeSession->rental_amount }}, {{ $activeSession->fnb_amount }}, {{ $activeSession->total_amount }})" class="w-full py-2 bg-emerald-600 text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">SELESAI / CHECKOUT</button>
+              <button id="btn-checkout-{{ $tv->id }}" data-session-id="{{ $activeSession->id }}" data-tv-name="{{ $tv->name }}" onclick="openCheckoutModal({{ $activeSession->id }}, '{{ $tv->name }}', {{ $activeSession->rental_amount }}, {{ $activeSession->fnb_amount }}, {{ $activeSession->total_amount }})" class="w-full py-2 bg-emerald-600 text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">SELESAI / CHECKOUT</button>
             </div>
           @else
             <form method="POST" action="{{ route('kasir.unit.toggle', $tv->id) }}">@csrf
@@ -497,8 +497,26 @@ setInterval(() => {
   const now = Math.floor(Date.now()/1000);
   document.querySelectorAll('[id^="timer-tv-"]').forEach(el => {
     const type = el.dataset.type, start = parseInt(el.dataset.start) || 0, end = parseInt(el.dataset.end) || 0;
+    const tvId = el.id.replace('timer-tv-', '');
     if(type === 'prepaid' && end > 0){ el.innerText = end - now <= 0 ? '00:00:00' : fmt(end - now); }
-    else if(type === 'postpaid' && start > 0){ el.innerText = fmt(now - start); }
+    else if(type === 'postpaid' && start > 0){ 
+      const elapsed = now - start;
+      el.innerText = fmt(elapsed); 
+      
+      const rate = parseInt(el.dataset.rate) || 0;
+      const fnb = parseInt(el.dataset.fnb) || 0;
+      const billedElapsed = Math.floor(elapsed / 300) * 300;
+      const runningRental = Math.round((billedElapsed / 3600) * rate);
+      const runningTotal = runningRental + fnb;
+      
+      const totalEl = document.getElementById('total-tv-' + tvId);
+      if(totalEl) totalEl.innerText = 'Rp ' + runningTotal.toLocaleString('id-ID');
+      
+      const btnEl = document.getElementById('btn-checkout-' + tvId);
+      if(btnEl) {
+        btnEl.setAttribute('onclick', `openCheckoutModal(${btnEl.dataset.sessionId}, '${btnEl.dataset.tvName}', ${runningRental}, ${fnb}, ${runningTotal})`);
+      }
+    }
   });
 }, 1000);
 // Polling DB tiap 5 detik → sinkron KPI + badge + drawer

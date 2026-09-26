@@ -183,7 +183,7 @@
                 <span class="text-[10px] font-label-sm uppercase font-bold text-on-surface-variant block">
                   {{ $isPrepaid ? 'SISA WAKTU BERMAIN' : 'DURASI BERJALAN (POSTPAID)' }}
                 </span>
-                <div class="text-3xl font-timer-display font-black tracking-tight {{ $isTimeUp ? 'text-error animate-pulse' : ($isAlmostFinished ? 'text-secondary-container' : 'text-on-surface') }}" id="timer-tv-{{ $tv->id }}" data-type="{{ $activeSession->billing_type }}" data-end="{{ $activeSession->end_time ? $activeSession->end_time->timestamp : '' }}" data-start="{{ $activeSession->start_time->timestamp }}">
+                <div class="text-3xl font-timer-display font-black tracking-tight {{ $isTimeUp ? 'text-error animate-pulse' : ($isAlmostFinished ? 'text-secondary-container' : 'text-on-surface') }}" id="timer-tv-{{ $tv->id }}" data-type="{{ $activeSession->billing_type }}" data-end="{{ $activeSession->end_time ? $activeSession->end_time->timestamp : '' }}" data-start="{{ $activeSession->start_time->timestamp }}" data-rate="{{ $tv->price_per_hour }}" data-fnb="{{ $activeSession->fnb_amount }}">
                   --:--:--
                 </div>
               </div>
@@ -275,7 +275,7 @@
               </div>
 
               <!-- Checkout CTA -->
-              <button onclick="openCheckoutModal({{ $activeSession->id }}, '{{ $tv->name }}', '{{ $activeSession->billing_type }}', {{ $tv->price_per_hour }}, {{ $activeSession->rental_amount }}, {{ $activeSession->fnb_amount }}, {{ $activeSession->total_amount }}, '{{ $activeSession->start_time->format('H:i') }}', '{{ $activeSession->end_time ? $activeSession->end_time->format('H:i') : 'Loss' }}')" class="w-full py-2 bg-emerald-600 text-white font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface neo-shadow btn-press hover:bg-emerald-700 flex items-center justify-center gap-1">
+              <button id="btn-checkout-{{ $tv->id }}" data-session-id="{{ $activeSession->id }}" data-tv-name="{{ $tv->name }}" data-billing-type="{{ $activeSession->billing_type }}" data-rate="{{ $tv->price_per_hour }}" data-start-formatted="{{ $activeSession->start_time->format('H:i') }}" data-end-formatted="{{ $activeSession->end_time ? $activeSession->end_time->format('H:i') : 'Loss' }}" onclick="openCheckoutModal({{ $activeSession->id }}, '{{ $tv->name }}', '{{ $activeSession->billing_type }}', {{ $tv->price_per_hour }}, {{ $activeSession->rental_amount }}, {{ $activeSession->fnb_amount }}, {{ $activeSession->total_amount }}, '{{ $activeSession->start_time->format('H:i') }}', '{{ $activeSession->end_time ? $activeSession->end_time->format('H:i') : 'Loss' }}')" class="w-full py-2 bg-emerald-600 text-white font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface neo-shadow btn-press hover:bg-emerald-700 flex items-center justify-center gap-1">
                 <span class="material-symbols-outlined text-base">point_of_sale</span>
                 <span>SELESAI / CHECKOUT</span>
               </button>
@@ -784,6 +784,27 @@
       } else if (type === 'postpaid' && startUnix > 0) {
         const elapsed = nowUnix - startUnix;
         el.innerText = formatSeconds(elapsed);
+        
+        const rate = parseInt(el.getAttribute('data-rate')) || 0;
+        const fnb = parseInt(el.getAttribute('data-fnb')) || 0;
+        const tvId = el.id.replace('timer-tv-', '');
+        const billedElapsed = Math.floor(elapsed / 300) * 300;
+        const runningRental = Math.round((billedElapsed / 3600) * rate);
+        const runningTotal = runningRental + fnb;
+        
+        const totalEl = document.getElementById('total-tv-' + tvId);
+        if(totalEl) totalEl.innerText = 'Rp ' + runningTotal.toLocaleString('id-ID');
+        
+        const btnEl = document.getElementById('btn-checkout-' + tvId);
+        if(btnEl) {
+          const sId = btnEl.getAttribute('data-session-id');
+          const tName = btnEl.getAttribute('data-tv-name');
+          const bType = btnEl.getAttribute('data-billing-type');
+          const sRate = btnEl.getAttribute('data-rate');
+          const sStart = btnEl.getAttribute('data-start-formatted');
+          const sEnd = btnEl.getAttribute('data-end-formatted');
+          btnEl.setAttribute('onclick', `openCheckoutModal(${sId}, '${tName}', '${bType}', ${sRate}, ${runningRental}, ${fnb}, ${runningTotal}, '${sStart}', '${sEnd}')`);
+        }
       }
     });
   }, 1000);
