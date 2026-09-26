@@ -24,7 +24,7 @@ class AuthController extends Controller
             'pin' => 'required|string',
         ]);
 
-        if (! Auth::attempt($credentials)) {
+        if (! Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'message' => 'Email atau password salah.',
@@ -35,6 +35,20 @@ class AuthController extends Controller
         }
 
         $user = $request->user() ?? Auth::user();
+
+        if (! \Illuminate\Support\Facades\Hash::check($credentials['pin'], $user->pin)) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'PIN salah.',
+                ], 401);
+            }
+
+            return back()->withErrors(['pin' => 'PIN kasir salah.']);
+        }
 
         if ($request->expectsJson() || $request->is('api/*')) {
             $token = $user->createToken('auth_token')->plainTextToken;
