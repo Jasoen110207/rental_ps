@@ -43,7 +43,7 @@ class ReportController extends Controller
         ]);
     }
 
-    public function exportCsv()
+    public function exportCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $data = PlaySession::with(['tv', 'user'])
             ->where('status', 'completed')
@@ -84,7 +84,7 @@ class ReportController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    public function exportPdf()
+    public function exportPdf(): \Illuminate\Http\Response
     {
         $data = PlaySession::with(['tv', 'user'])
             ->where('status', 'completed')
