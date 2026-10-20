@@ -57,6 +57,11 @@ class KasirController extends Controller
             'activeShift', 'products'
         ));
     }
+    
+    public function payroll()
+        {
+            return view('payroll.index'); // Sesuaikan dengan lokasi file view payroll kamu
+        }
 
     public function apiStatus()
     {
@@ -698,5 +703,52 @@ class KasirController extends Controller
         $tv->update(['status' => $tv->status === 'maintenance' ? 'available' : 'maintenance']);
 
         return back()->with('success', 'Status '.$tv->name.' menjadi '.$tv->status);
+    }
+
+    /* ================= BOOKING ================= */
+    public function booking(Request $request)
+    {
+        $tvs = Tv::orderBy('name')->get();
+        $bookings = \App\Models\Booking::with('tv')->latest()->get()->map(function ($booking) {
+            return [
+                'id' => 'BK-' . str_pad($booking->id, 4, '0', STR_PAD_LEFT),
+                'customer_name' => $booking->customer_name,
+                'phone' => $booking->phone,
+                'unit_name' => $booking->tv?->name ?? '—',
+                'start_datetime' => $booking->start_datetime->format('Y-m-d H:i'),
+                'duration_hours' => $booking->duration_hours,
+                'status' => $booking->status,
+                'amount' => $booking->total_amount,
+            ];
+        });
+
+        return view('kasir.booking', compact('tvs', 'bookings'));
+    }
+
+    public function storeBooking(Request $request)
+    {
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:100',
+            'phone' => 'required|string|max:20',
+            'tv_id' => 'required|exists:tvs,id',
+            'start_datetime' => 'required|date',
+            'duration_hours' => 'required|integer|min:1|max:24',
+        ]);
+
+        $tv = Tv::findOrFail($validated['tv_id']);
+        $estimatedAmount = (int) round($validated['duration_hours'] * $tv->price_per_hour);
+
+        \App\Models\Booking::create([
+            'tv_id' => $tv->id,
+            'user_id' => Auth::id(),
+            'customer_name' => $validated['customer_name'],
+            'phone' => $validated['phone'],
+            'start_datetime' => $validated['start_datetime'],
+            'duration_hours' => $validated['duration_hours'],
+            'status' => 'Pending',
+            'total_amount' => $estimatedAmount,
+        ]);
+
+        return back()->with('success', 'Booking berhasil disimpan untuk ' . $tv->name . '.');
     }
 }

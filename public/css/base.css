@@ -93,3 +93,25 @@
 .scrollbar-none {
   scrollbar-width: none;
 }
+
+/* --- Main content scroll / custom scrollbar --- */
+.main-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(19, 27, 46, 0.45) transparent;
+}
+
+.main-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-scroll::-webkit-scrollbar-thumb {
+  background: rgba(19, 27, 46, 0.4);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.main-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}

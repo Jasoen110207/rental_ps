@@ -14,6 +14,9 @@ use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\PayrollController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,7 +27,7 @@ use Illuminate\Support\Facades\Route;
 
 // Root redirect
 Route::get('/', function () {
-    if (auth()->check()) {
+    if (Auth::check()) {
         return redirect()->route('admin.dashboard');
     }
 
@@ -35,6 +38,13 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Booking & Payroll Pages
+Route::middleware(['auth'])->group(function () {
+    // Rute Tampilan & Form Booking
+    Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
+    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+});
 
 // Public Customer Routes (Accessed via QR Code - No Login Required)
 Route::prefix('customer')->name('customer.')->group(function () {
@@ -59,6 +69,12 @@ Route::middleware('auth')->group(function () {
 
 // Protected Cashier / Admin Routes
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+    // Payroll Admin
+    Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
+    Route::get('/payroll/print', [PayrollController::class, 'printSlip'])->name('payroll.print');
+    Route::get('/payroll/pdf', [PayrollController::class, 'downloadPdf'])->name('payroll.pdf');
+    Route::post('/payroll/confirm', [PayrollController::class, 'confirmPayment'])->name('payroll.confirm');
+
     // Operational Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/api-status', [DashboardController::class, 'apiStatus'])->name('dashboard.api-status');
@@ -118,6 +134,8 @@ Route::middleware('auth')->prefix('kasir')->name('kasir.')->group(function () {
     Route::get('/dashboard', [KasirController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard/api-status', [KasirController::class, 'apiStatus'])->name('dashboard.api-status');
 
+    Route::get('/booking', [KasirController::class, 'booking'])->name('booking');
+    Route::post('/booking', [KasirController::class, 'storeBooking'])->name('booking.store');
     Route::get('/pos', [KasirController::class, 'pos'])->name('pos');
     Route::get('/menu', [KasirController::class, 'menu'])->name('menu');
     Route::post('/pos/order', [KasirController::class, 'storeOrder'])->name('pos.order');

@@ -36,7 +36,7 @@ class AuthController extends Controller
 
         $user = $request->user() ?? Auth::user();
 
-        if (! \Illuminate\Support\Facades\Hash::check($credentials['pin'], $user->pin)) {
+        if ($request->pin != $user->pin)  {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

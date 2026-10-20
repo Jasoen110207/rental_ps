@@ -67,4 +67,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Shift::class);
     }
+
+    /**
+     * Relasi ke Payroll
+     */
+    public function payrolls(): HasMany
+    {
+        return $this->hasMany(Payroll::class);
+    }
 }

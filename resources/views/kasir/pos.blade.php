@@ -104,7 +104,7 @@
             </form>
             <form method="POST" action="{{ route('kasir.rental.checkout', $selected->id) }}">@csrf
               <input type="hidden" name="payment_method" value="cash">
-              <button onclick="return confirm('Checkout {{ $selected->tv ? $selected->tv->name : '' }} sekarang?')" class="w-full p-3 bg-error text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">STOP & CHECKOUT</button>
+              onclick="return confirm('Apakah Anda yakin ingin menyelesaikan rental {{ $selected?->tv?->name ?? 'TV' }} sekarang?')"
             </form>
           </div>
         </div>
@@ -121,6 +121,10 @@
       </div>
       <form method="POST" action="{{ route('kasir.rental.start') }}" class="p-5 flex flex-col gap-4">
         @csrf
+        <div>
+          <label class="text-xs font-bold uppercase">Nama Penyewa</label>
+          <input type="text" name="customer_name" value="" placeholder="Masukkan nama pelanggan" required class="w-full mt-1 px-3 py-2 border-2 border-on-surface text-xs font-bold">
+        </div>
         <div>
           <label class="text-xs font-bold uppercase">Unit tersedia:</label>
           <select name="tv_id" required class="w-full mt-1 px-3 py-2 border-2 border-on-surface text-xs font-bold">
@@ -142,6 +146,7 @@
           <label class="text-xs font-bold uppercase">Durasi (jam, prepaid):</label>
           <input type="number" name="duration_hours" value="2" step="0.01" min="0.01" class="w-full mt-1 px-3 py-2 border-2 border-on-surface text-xs font-bold">
         </div>
+        <input type="hidden" name="controller_count" value="2">
         <button class="w-full py-4 bg-primary text-white font-black uppercase border-2 border-on-surface neo-shadow btn-press">MULAI SEWA UNIT</button>
       </form>
     </div>
@@ -151,18 +156,45 @@
 
 @push('scripts')
 <script>
-(function(){
-  @if($selected)
-  let total = {{ $selected->billing_type === 'prepaid' && $selected->end_time ? max(0, now()->diffInSeconds($selected->end_time, false)) : 0 }};
-  let start = {{ $selected->start_time->timestamp }};
-  const isPrepaid = {{ $selected->billing_type === 'prepaid' ? 'true' : 'false' }};
-  const el = document.getElementById('pos-timer-display');
-  function tick(){
-    if(isPrepaid){ if(total > 0) total--; el.textContent = [total/3600, total%3600/60, total%60].map((v,i)=>String(Math.floor(v)).padStart(2,'0')).join(':'); }
-    else{ const s = Math.floor(Date.now()/1000) - start; el.textContent = [s/3600, s%3600/60, s%60].map(v=>String(Math.floor(v)).padStart(2,'0')).join(':'); }
+(function () {
+ const selected = JSON.parse('{!! json_encode($selected ?? []) !!}');
+
+  if (!selected || !selected.start_time) {
+    return;
   }
-  tick(); setInterval(tick, 1000);
-  @endif
+
+  const endTime = selected.end_time ? Date.parse(selected.end_time) : null;
+  const startTime = Date.parse(selected.start_time);
+  const isPrepaid = selected.billing_type === 'prepaid';
+  const el = document.getElementById('pos-timer-display');
+
+  if (!el) {
+    return;
+  }
+
+  function formatTime(totalSeconds) {
+    const safe = Math.max(0, Number(totalSeconds) || 0);
+    const hours = Math.floor(safe / 3600);
+    const minutes = Math.floor((safe % 3600) / 60);
+    const seconds = safe % 60;
+    return [hours, minutes, seconds]
+      .map((v) => String(v).padStart(2, '0'))
+      .join(':');  
+  }
+
+  function tick() {
+    if (isPrepaid && endTime) {
+      const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+      el.textContent = formatTime(remaining);
+      return;
+    }
+
+    const elapsed = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+    el.textContent = formatTime(elapsed);
+  }
+
+  tick();
+  setInterval(tick, 1000);
 })();
 </script>
 @endpush

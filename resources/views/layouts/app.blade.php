@@ -42,198 +42,207 @@
     </div>
   </div>
 
-  <!-- LEFT PERSISTENT SIDEBAR (Fixed w-64) — struktur sama dengan admin -->
-  <aside class="fixed left-0 top-0 h-screen w-64 flex flex-col justify-between p-4 z-40 bg-surface-container-lowest border-r-2 border-on-surface neo-shadow">
-    <div class="flex flex-col gap-4">
-      <!-- Brand Emblem & Title -->
-      <a href="{{ route('kasir.dashboard') }}" class="flex items-center gap-3 pb-3 border-b-2 border-on-surface hover:opacity-90 transition">
-        <div class="w-10 h-10 bg-primary text-on-primary border-2 border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
-          <span class="material-symbols-outlined text-2xl">sports_esports</span>
-        </div>
-        <div class="min-w-0">
-          <h1 class="text-lg font-headline-md font-extrabold uppercase tracking-tight text-on-surface leading-none">TAMBAHBANG</h1>
-          <p class="text-[10px] font-label-sm text-secondary uppercase font-bold tracking-wider mt-1">PS Rental & POS Hub</p>
-        </div>
-      </a>
-
-      <!-- Quick Action / Start Button (fitur kasir: buka modal rental) -->
-      <button onclick="toggleModal(true)" class="w-full py-2.5 bg-secondary-container text-on-secondary font-headline-sm text-sm tracking-wider border-2 border-on-surface neo-shadow btn-press flex items-center justify-center gap-2 hover:bg-secondary transition-all">
-        <span class="material-symbols-outlined text-xl">add_circle</span>
-        <span>NEW RENTAL +</span>
-      </button>
-
-      <!-- Navigation Menu (fitur kasir dipertahankan, gaya mengikuti admin) -->
-      <nav class="flex flex-col gap-1.5 mt-1">
-        <a href="{{ route('kasir.dashboard') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.dashboard') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg">dashboard</span>
-            <span>Dashboard</span>
-          </div>
-          <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
-        </a>
-
-        <a href="{{ route('kasir.pos') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.pos') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg">sports_esports</span>
-            <span>Rental / POS</span>
-          </div>
-          <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
-        </a>
-
-        <a href="{{ route('kasir.request') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.request') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg">notifications_active</span>
-            <span>Requests</span>
-          </div>
-          <span id="nav-requests-badge" class="px-1.5 py-0.5 text-[10px] font-label-sm font-bold bg-secondary-container text-on-secondary border border-on-surface {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'hidden' }}">{{ auth()->user()->unreadNotifications->count() }}</span>
-        </a>
-
-        <a href="{{ route('kasir.menu') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.menu') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg">restaurant</span>
-            <span>F&B Menu</span>
-          </div>
-          <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
-        </a>
-
-        <a href="{{ route('kasir.transaksi') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.transaksi') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg">receipt_long</span>
-            <span>Transactions</span>
-          </div>
-          <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
-        </a>
-
-        <a href="{{ route('kasir.sift') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.sift') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg">schedule</span>
-            <span>Shifts</span>
-          </div>
-          <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
-        </a>
-
-        <a href="{{ route('kasir.unit') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.unit') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-outlined text-lg">tv</span>
-            <span>Units</span>
-          </div>
-          <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
-        </a>
-
-
-      </nav>
-    </div>
-
-    <!-- Bottom Sidebar: Cashier Identity & Actions -->
-    <div class="pt-3 border-t-2 border-on-surface flex flex-col gap-2">
-      <div class="p-2.5 bg-surface-container-high border-2 border-on-surface flex items-center justify-between neo-shadow-sm">
-        <div class="flex items-center gap-2 min-w-0">
-          <div class="w-7 h-7 bg-primary text-on-primary border border-on-surface flex items-center justify-center font-bold text-xs">
-            {{ strtoupper(substr(auth()->user()->name ?? 'K', 0, 1)) }}
+  <div class="flex h-screen overflow-hidden">
+    <!-- LEFT PERSISTENT SIDEBAR (Fixed w-64) — struktur sama dengan admin -->
+    <aside class="w-64 h-full overflow-y-auto flex-shrink-0 flex flex-col justify-between p-4 z-40 bg-surface-container-lowest border-r-2 border-on-surface neo-shadow scrollbar-none">
+      <div class="flex flex-col gap-4">
+        <!-- Brand Emblem & Title -->
+        <a href="{{ route('kasir.dashboard') }}" class="flex items-center gap-3 pb-3 border-b-2 border-on-surface hover:opacity-90 transition">
+          <div class="w-10 h-10 bg-primary text-on-primary border-2 border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl">sports_esports</span>
           </div>
           <div class="min-w-0">
-            <p class="font-headline-sm text-xs font-bold truncate">{{ auth()->user()->name ?? 'Kasir' }}</p>
-            <p class="text-[10px] font-label-sm uppercase text-on-surface-variant font-bold">
-              {{ auth()->user()->role ?? 'kasir' }} • Online
-            </p>
+            <h1 class="text-lg font-headline-md font-extrabold uppercase tracking-tight text-on-surface leading-none">TAMBAHBANG</h1>
+            <p class="text-[10px] font-label-sm text-secondary uppercase font-bold tracking-wider mt-1">PS Rental & POS Hub</p>
           </div>
-        </div>
-        <form method="POST" action="{{ route('logout') }}">
-          @csrf
-          <button type="submit" title="Logout" class="p-1.5 bg-error text-white border border-on-surface hover:bg-red-700 btn-press flex items-center justify-center">
-            <span class="material-symbols-outlined text-base">logout</span>
-          </button>
-        </form>
-      </div>
-
-      <!-- Quick Sound Alert Toggle (sama seperti admin) -->
-      <button onclick="toggleAudioAlerts()" id="audio-toggle-btn" class="w-full py-1.5 px-2 bg-surface border-2 border-on-surface text-[10px] font-label-sm font-bold uppercase flex items-center justify-center gap-1.5 hover:bg-surface-container-high">
-        <span class="material-symbols-outlined text-sm" id="audio-icon">volume_up</span>
-        <span id="audio-label">Sound Alert: ON</span>
-      </button>
-    </div>
-  </aside>
-
-  <!-- MAIN WRAPPER (Offset by sidebar w-64) -->
-  <div class="ml-64 flex flex-col min-h-screen bg-background">
-
-    <!-- TOP HEADER BAR (struktur sama dengan admin) -->
-    <header class="h-16 bg-surface-container-lowest border-b-2 border-on-surface px-6 flex items-center justify-between sticky top-0 z-30 neo-shadow-sm">
-      <div class="flex items-center gap-4">
-        <h2 class="text-xl font-headline-md font-extrabold uppercase tracking-tight text-on-surface">
-          @yield('page_title', 'Operational Matrix & Monitoring')
-        </h2>
-        <!-- Live status indicator pill -->
-        <div class="flex items-center gap-2 px-2.5 py-1 bg-surface-container-high border-2 border-on-surface font-label-sm text-xs font-bold neo-shadow-sm">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping inline-block"></span>
-          <span class="text-on-surface uppercase tracking-wider">LIVE SYNC</span>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <!-- Live Clock -->
-        <div class="px-3 py-1.5 bg-surface border-2 border-on-surface font-timer-display text-xs font-bold neo-shadow-sm text-on-surface" id="live-clock">
-          {{ now()->isoFormat('dddd, D MMMM YYYY • HH:mm:ss') }}
-        </div>
-
-        <!-- Shift Info Badge -->
-        @php $kasirShift = \App\Models\Shift::where('status', 'active')->latest()->first(); @endphp
-        <a href="{{ route('kasir.sift') }}" class="px-3 py-1.5 bg-primary-fixed border-2 border-on-surface font-label-sm text-xs font-bold neo-shadow-sm hover:bg-surface-container-high transition flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-base text-primary">schedule</span>
-          <span>Shift: {{ $kasirShift ? 'Aktif (#'.$kasirShift->id.')' : 'Belum Ada' }}</span>
         </a>
 
-        <!-- Notifications Slide-over Button -->
-        <button onclick="toggleNotificationDrawer()" class="relative p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high">
-          <span class="material-symbols-outlined text-xl">notifications</span>
-          <span id="top-notif-badge" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-secondary-container text-on-secondary border border-on-surface rounded-full text-[10px] font-bold flex items-center justify-center {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'hidden' }}">{{ auth()->user()->unreadNotifications->count() }}</span>
+        <!-- Quick Action / Start Button (fitur kasir: buka modal rental) -->
+        <button onclick="toggleModal(true)" class="w-full py-2.5 bg-secondary-container text-on-secondary font-headline-sm text-sm tracking-wider border-2 border-on-surface neo-shadow btn-press flex items-center justify-center gap-2 hover:bg-secondary transition-all">
+          <span class="material-symbols-outlined text-xl">add_circle</span>
+          <span>NEW RENTAL +</span>
+        </button>
+
+        <!-- Navigation Menu (fitur kasir dipertahankan, gaya mengikuti admin) -->
+        <nav class="flex flex-col gap-1.5 mt-1">
+          <a href="{{ route('kasir.dashboard') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.dashboard') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-lg">dashboard</span>
+              <span>Dashboard</span>
+            </div>
+            <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+          </a>
+
+          <a href="{{ route('kasir.booking') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.booking') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-lg">event_available</span>
+              <span>Booking</span>
+            </div>
+            <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+          </a>
+
+          <a href="{{ route('kasir.pos') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.pos') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-lg">sports_esports</span>
+              <span>Rental / POS</span>
+            </div>
+            <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+          </a>
+
+          <a href="{{ route('kasir.request') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.request') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-lg">notifications_active</span>
+              <span>Requests</span>
+            </div>
+            <span id="nav-requests-badge" class="px-1.5 py-0.5 text-[10px] font-label-sm font-bold bg-secondary-container text-on-secondary border border-on-surface {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'hidden' }}">{{ auth()->user()->unreadNotifications->count() }}</span>
+          </a>
+
+          <a href="{{ route('kasir.menu') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.menu') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-lg">restaurant</span>
+              <span>F&B Menu</span>
+            </div>
+            <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+          </a>
+
+          <a href="{{ route('kasir.transaksi') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.transaksi') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-lg">receipt_long</span>
+              <span>Transactions</span>
+            </div>
+            <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+          </a>
+
+          <a href="{{ route('kasir.sift') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.sift') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-lg">schedule</span>
+              <span>Shifts</span>
+            </div>
+            <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+          </a>
+
+          <a href="{{ route('kasir.unit') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.unit') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-lg">tv</span>
+              <span>Units</span>
+            </div>
+            <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+          </a>
+
+
+        </nav>
+      </div>
+
+      <!-- Bottom Sidebar: Cashier Identity & Actions -->
+      <div class="pt-3 border-t-2 border-on-surface flex flex-col gap-2">
+        <div class="p-2.5 bg-surface-container-high border-2 border-on-surface flex items-center justify-between neo-shadow-sm">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 bg-primary text-on-primary border border-on-surface flex items-center justify-center font-bold text-xs">
+              {{ strtoupper(substr(auth()->user()->name ?? 'K', 0, 1)) }}
+            </div>
+            <div class="min-w-0">
+              <p class="font-headline-sm text-xs font-bold truncate">{{ auth()->user()->name ?? 'Kasir' }}</p>
+              <p class="text-[10px] font-label-sm uppercase text-on-surface-variant font-bold">
+                {{ auth()->user()->role ?? 'kasir' }} • Online
+              </p>
+            </div>
+          </div>
+          <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" title="Logout" class="p-1.5 bg-error text-white border border-on-surface hover:bg-red-700 btn-press flex items-center justify-center">
+              <span class="material-symbols-outlined text-base">logout</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Quick Sound Alert Toggle (sama seperti admin) -->
+        <button onclick="toggleAudioAlerts()" id="audio-toggle-btn" class="w-full py-1.5 px-2 bg-surface border-2 border-on-surface text-[10px] font-label-sm font-bold uppercase flex items-center justify-center gap-1.5 hover:bg-surface-container-high">
+          <span class="material-symbols-outlined text-sm" id="audio-icon">volume_up</span>
+          <span id="audio-label">Sound Alert: ON</span>
         </button>
       </div>
-    </header>
+    </aside>
 
-    <!-- FLASH MESSAGES (mengikuti admin) -->
-    <div class="px-6 pt-4">
-      @if (session('success'))
-        <div class="p-3.5 bg-emerald-100 border-2 border-on-surface text-emerald-950 font-headline-sm text-sm neo-shadow flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-xl text-emerald-700">check_circle</span>
-            <span>{{ session('success') }}</span>
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 h-full overflow-hidden flex flex-col">
+      <!-- TOP HEADER BAR (struktur sama dengan admin) -->
+      <header class="h-16 bg-surface-container-lowest border-b-2 border-on-surface px-6 flex items-center justify-between sticky top-0 z-30 neo-shadow-sm flex-shrink-0">
+        <div class="flex items-center gap-4">
+          <h2 class="text-xl font-headline-md font-extrabold uppercase tracking-tight text-on-surface">
+            @yield('page_title', 'Operational Matrix & Monitoring')
+          </h2>
+          <!-- Live status indicator pill -->
+          <div class="flex items-center gap-2 px-2.5 py-1 bg-surface-container-high border-2 border-on-surface font-label-sm text-xs font-bold neo-shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping inline-block"></span>
+            <span class="text-on-surface uppercase tracking-wider">LIVE SYNC</span>
           </div>
-          <button onclick="this.parentElement.remove()" class="font-bold text-lg">&times;</button>
         </div>
-      @endif
 
-      @if (session('error'))
-        <div class="p-3.5 bg-red-100 border-2 border-on-surface text-red-950 font-headline-sm text-sm neo-shadow flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-xl text-error">error</span>
-            <span>{{ session('error') }}</span>
+        <div class="flex items-center gap-3">
+          <!-- Live Clock -->
+          <div class="px-3 py-1.5 bg-surface border-2 border-on-surface font-timer-display text-xs font-bold neo-shadow-sm text-on-surface" id="live-clock">
+            {{ now()->isoFormat('dddd, D MMMM YYYY • HH:mm:ss') }}
           </div>
-          <button onclick="this.parentElement.remove()" class="font-bold text-lg">&times;</button>
-        </div>
-      @endif
 
-      @if ($errors->any())
-        <div class="p-3.5 bg-red-100 border-2 border-on-surface text-red-950 font-headline-sm text-sm neo-shadow mb-4">
-          <ul class="list-disc pl-5">
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
+          <!-- Shift Info Badge -->
+          @php $kasirShift = \App\Models\Shift::where('status', 'active')->latest()->first(); @endphp
+          <a href="{{ route('kasir.sift') }}" class="px-3 py-1.5 bg-primary-fixed border-2 border-on-surface font-label-sm text-xs font-bold neo-shadow-sm hover:bg-surface-container-high transition flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-base text-primary">schedule</span>
+            <span>Shift: {{ $kasirShift ? 'Aktif (#'.$kasirShift->id.')' : 'Belum Ada' }}</span>
+          </a>
+
+          <!-- Notifications Slide-over Button -->
+          <button onclick="toggleNotificationDrawer()" class="relative p-2 bg-surface border-2 border-on-surface neo-shadow-sm btn-press hover:bg-surface-container-high">
+            <span class="material-symbols-outlined text-xl">notifications</span>
+            <span id="top-notif-badge" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-secondary-container text-on-secondary border border-on-surface rounded-full text-[10px] font-bold flex items-center justify-center {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'hidden' }}">{{ auth()->user()->unreadNotifications->count() }}</span>
+          </button>
         </div>
-      @endif
+      </header>
+
+      <!-- FLASH MESSAGES (mengikuti admin) -->
+      <div class="px-6 pt-4 flex-shrink-0">
+        @if (session('success'))
+          <div class="p-3.5 bg-emerald-100 border-2 border-on-surface text-emerald-950 font-headline-sm text-sm neo-shadow flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-xl text-emerald-700">check_circle</span>
+              <span>{{ session('success') }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="font-bold text-lg">&times;</button>
+          </div>
+        @endif
+
+        @if (session('error'))
+          <div class="p-3.5 bg-red-100 border-2 border-on-surface text-red-950 font-headline-sm text-sm neo-shadow flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-xl text-error">error</span>
+              <span>{{ session('error') }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="font-bold text-lg">&times;</button>
+          </div>
+        @endif
+
+        @if ($errors->any())
+          <div class="p-3.5 bg-red-100 border-2 border-on-surface text-red-950 font-headline-sm text-sm neo-shadow mb-4">
+            <ul class="list-disc pl-5">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+      </div>
+
+      <!-- MAIN PAGE CONTENT -->
+      <main class="flex-1 h-full overflow-y-auto p-6 flex flex-col justify-start main-scroll">
+        @yield('content')
+      </main>
+
+      <!-- FOOTER (sama dengan admin) -->
+      <footer class="p-4 border-t-2 border-on-surface bg-surface-container-lowest text-xs text-on-surface-variant flex justify-between items-center flex-shrink-0">
+        <p class="font-bold uppercase tracking-wider">TambahBang PS Management System &copy; {{ date('Y') }}</p>
+        <p class="font-label-sm">Built with Laravel & Neo-Brutalism UI</p>
+      </footer>
     </div>
-
-    <!-- MAIN PAGE CONTENT -->
-    <main class="p-6 flex-1">
-      @yield('content')
-    </main>
-
-    <!-- FOOTER (sama dengan admin) -->
-    <footer class="p-4 border-t-2 border-on-surface bg-surface-container-lowest text-xs text-on-surface-variant flex justify-between items-center">
-      <p class="font-bold uppercase tracking-wider">TambahBang PS Management System &copy; {{ date('Y') }}</p>
-      <p class="font-label-sm">Built with Laravel & Neo-Brutalism UI</p>
-    </footer>
   </div>
 
   <!-- TOAST CONTAINER -->
