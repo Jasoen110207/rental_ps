@@ -238,6 +238,9 @@ class KasirController extends Controller
         if ($session->status !== 'active') {
             return back()->with('error', 'Sesi rental tidak aktif!');
         }
+        if ($session->billing_type === 'postpaid') {
+            return back()->with('error', 'Penambahan waktu tidak tersedia untuk sesi Postpaid (Open Billing)!');
+        }
 
         $addedMinutes = ! empty($validated['added_hours'])
             ? (int) round($validated['added_hours'] * 60)
@@ -274,6 +277,11 @@ class KasirController extends Controller
         $session = PlaySession::findOrFail($sessionId);
         if ($session->status !== 'active') {
             return back()->with('error', 'Sesi rental tidak aktif!');
+        }
+
+        $selectedItems = collect($validated['items'])->filter(fn ($item) => (int) ($item['quantity'] ?? 0) > 0);
+        if ($selectedItems->isEmpty()) {
+            return back()->with('error', 'Pilih minimal 1 item F&B dengan jumlah lebih dari 0!');
         }
 
         DB::transaction(function () use ($session, $validated) {
@@ -362,7 +370,7 @@ class KasirController extends Controller
         $tv = Tv::findOrFail($tvId);
         $tv->update(['is_buzzer_on' => ! $tv->is_buzzer_on]);
 
-        return back()->with('success', 'Buzzer '.$tv->name.' '.($tv->is_buzzer_on ? 'dimatikan' : 'diaktifkan'));
+        return back()->with('success', 'Buzzer '.$tv->name.' '.($tv->is_buzzer_on ? 'diaktifkan' : 'dimatikan'));
     }
 
     /* ================= POS / MENU ================= */
@@ -709,9 +717,9 @@ class KasirController extends Controller
     /* ================= BOOKING ================= */
     public function booking(Request $request)
     {
-        $tvs = Tv::withExists([
-            'bookings as is_booked' => fn ($q) => $q->whereIn('status', ['Pending', 'Active']),
-            'playSessions as has_active_session' => fn ($q) => $q->where('status', 'active'),
+        $tvs = Tv::with([
+            'bookings' => fn ($q) => $q->whereIn('status', ['Pending', 'Active']),
+            'playSessions' => fn ($q) => $q->where('status', 'active'),
         ])->orderBy('name')->get();
         $bookings = Booking::with('tv')->latest()->get()->map(function ($booking) {
             return [
@@ -740,17 +748,19 @@ class KasirController extends Controller
         ]);
 
         $tv = Tv::findOrFail($validated['tv_id']);
+        $startDatetime = $validated['start_datetime'];
+        $durationHours = (int) $validated['duration_hours'];
 
-        if ($tv->isInUse()) {
+        if ($tv->isInUse($startDatetime, $durationHours)) {
             return back()
                 ->withInput()
-                ->with('error', 'Peringatan: Unit '.$tv->name.' sedang digunakan (dimainkan) dan tidak dapat dibooking!');
+                ->with('error', 'Peringatan: Unit '.$tv->name.' sedang digunakan (dimainkan) pada waktu tersebut dan tidak dapat dibooking!');
         }
 
-        if ($tv->hasOpenBooking()) {
+        if ($tv->hasOpenBooking($startDatetime, $durationHours)) {
             return back()
                 ->withInput()
-                ->with('error', 'Peringatan: Unit '.$tv->name.' sudah dibooking!');
+                ->with('error', 'Peringatan: Unit '.$tv->name.' sudah dibooking pada waktu tersebut!');
         }
 
         $estimatedAmount = (int) round($validated['duration_hours'] * $tv->price_per_hour);

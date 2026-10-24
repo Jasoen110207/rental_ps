@@ -12,9 +12,9 @@ class BookingController extends Controller
 {
     public function index()
     {
-        $tvs = Tv::withExists([
-            'bookings as is_booked' => fn ($q) => $q->whereIn('status', ['Pending', 'Active']),
-            'playSessions as has_active_session' => fn ($q) => $q->where('status', 'active'),
+        $tvs = Tv::with([
+            'bookings' => fn ($q) => $q->whereIn('status', ['Pending', 'Active']),
+            'playSessions' => fn ($q) => $q->where('status', 'active'),
         ])->orderBy('name')->get();
         $bookings = Booking::with('tv')->latest()->get();
 
@@ -32,17 +32,19 @@ class BookingController extends Controller
         ]);
 
         $tv = Tv::findOrFail($validated['tv_id']);
+        $startDatetime = $validated['start_datetime'];
+        $durationHours = (int) $validated['duration_hours'];
 
-        if ($tv->isInUse()) {
+        if ($tv->isInUse($startDatetime, $durationHours)) {
             return back()
                 ->withInput()
-                ->with('error', 'Peringatan: Unit '.$tv->name.' sedang digunakan (dimainkan) dan tidak dapat dibooking!');
+                ->with('error', 'Peringatan: Unit '.$tv->name.' sedang digunakan (dimainkan) pada waktu tersebut dan tidak dapat dibooking!');
         }
 
-        if ($tv->hasOpenBooking()) {
+        if ($tv->hasOpenBooking($startDatetime, $durationHours)) {
             return back()
                 ->withInput()
-                ->with('error', 'Peringatan: Unit '.$tv->name.' sudah dibooking!');
+                ->with('error', 'Peringatan: Unit '.$tv->name.' sudah dibooking pada waktu tersebut!');
         }
 
         $estimatedAmount = (int) round($validated['duration_hours'] * $tv->price_per_hour);

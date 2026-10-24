@@ -45,7 +45,7 @@
           <div class="border-2 border-on-surface">
             <div class="p-3 bg-surface-container border-b-2 border-on-surface flex items-center justify-between">
               <h3 class="font-bold uppercase text-sm">F&B Meja Ini ({{ $selected->sessionOrders->sum('quantity') }} item)</h3>
-              <button onclick="document.getElementById('pos-fnb-box').classList.toggle('hidden')" class="px-3 py-1 bg-surface-container-lowest border-2 border-on-surface text-xs font-bold btn-press">+ Tambah</button>
+              <button type="button" onclick="togglePosFnbBox()" class="px-3 py-1 bg-surface-container-lowest border-2 border-on-surface text-xs font-bold btn-press">+ Tambah</button>
             </div>
             <div id="pos-fnb-box" class="hidden p-4 border-b-2 border-on-surface bg-surface">
               <form method="POST" action="{{ route('kasir.rental.add-fnb', $selected->id) }}" class="flex flex-col gap-3">
@@ -94,17 +94,43 @@
           </div>
 
           {{-- Aksi --}}
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <form method="POST" action="{{ route('kasir.rental.extend', $selected->id) }}">@csrf<input type="hidden" name="added_hours" value="1">
-              <button class="w-full p-3 bg-secondary-container text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">+ 1 JAM</button>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 items-stretch">
+            @if ($selected->billing_type !== 'postpaid')
+              <form method="POST" action="{{ route('kasir.rental.extend', $selected->id) }}" class="flex">
+                @csrf
+                <input type="hidden" name="added_hours" value="1">
+                <button type="submit" class="w-full p-3 bg-secondary-container text-on-secondary text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press flex items-center justify-center gap-1.5">
+                  <span class="material-symbols-outlined text-base">more_time</span>
+                  <span>+ 1 JAM</span>
+                </button>
+              </form>
+            @else
+              <button type="button" disabled title="Tidak tersedia untuk Postpaid" class="w-full p-3 bg-surface-container-high text-on-surface-variant text-xs uppercase font-black border-2 border-on-surface opacity-60 cursor-not-allowed flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-base">more_time</span>
+                <span>+ 1 JAM</span>
+              </button>
+            @endif
+
+            <button type="button" onclick="togglePosFnbBox(true)" class="w-full p-3 bg-surface-container-lowest text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-base">restaurant</span>
+              <span>+ F&B</span>
+            </button>
+
+            <form method="POST" action="{{ route('kasir.rental.toggle-buzzer', $selected->tv_id) }}" class="flex">
+              @csrf
+              <button type="submit" class="w-full p-3 {{ $selected->tv?->is_buzzer_on ? 'bg-error text-white animate-pulse' : 'bg-surface-container-lowest text-on-surface' }} text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-base">{{ $selected->tv?->is_buzzer_on ? 'notifications_off' : 'notifications_active' }}</span>
+                <span>{{ $selected->tv?->is_buzzer_on ? 'MATIKAN BUZZER' : 'BUZZER' }}</span>
+              </button>
             </form>
-            <button onclick="document.getElementById('pos-fnb-box').classList.remove('hidden')" class="p-3 bg-surface-container-lowest text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">+ F&B</button>
-            <form method="POST" action="{{ route('kasir.rental.toggle-buzzer', $selected->tv_id) }}">@csrf
-              <button class="w-full p-3 bg-surface-container-lowest text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">BUZZER</button>
-            </form>
-            <form method="POST" action="{{ route('kasir.rental.checkout', $selected->id) }}">@csrf
+
+            <form method="POST" action="{{ route('kasir.rental.checkout', $selected->id) }}" class="flex">
+              @csrf
               <input type="hidden" name="payment_method" value="cash">
-              onclick="return confirm('Apakah Anda yakin ingin menyelesaikan rental {{ $selected?->tv?->name ?? 'TV' }} sekarang?')"
+              <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menyelesaikan rental {{ $selected?->tv?->name ?? 'TV' }} sekarang?')" class="w-full p-3 bg-error text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-base">stop_circle</span>
+                <span>SELESAIKAN RENTAL</span>
+              </button>
             </form>
           </div>
         </div>
@@ -196,5 +222,20 @@
   tick();
   setInterval(tick, 1000);
 })();
+
+window.togglePosFnbBox = function (forceOpen = false) {
+  const box = document.getElementById('pos-fnb-box');
+  if (!box) return;
+  if (forceOpen) {
+    box.classList.remove('hidden');
+  } else {
+    box.classList.toggle('hidden');
+  }
+  if (!box.classList.contains('hidden')) {
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const firstInput = box.querySelector('input[type="number"]');
+    if (firstInput) firstInput.focus();
+  }
+};
 </script>
 @endpush

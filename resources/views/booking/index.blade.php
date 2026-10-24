@@ -35,21 +35,35 @@
             <option value="">-- Pilih unit --</option>
             @foreach ($tvs as $tv)
               @php
-                $isPlaying = $tv->status === 'playing' || ($tv->has_active_session ?? false);
-                $isBooked = (bool) ($tv->is_booked ?? false);
+                $activeSessionsData = $tv->playSessions->map(fn ($s) => [
+                    'start' => ($s->start_time ?? now())->toIso8601String(),
+                    'end' => ($s->end_time && $s->end_time->gt(now()) ? $s->end_time : now())->toIso8601String(),
+                ])->values();
+
+                if ($activeSessionsData->isEmpty() && $tv->status === 'playing') {
+                    $activeSessionsData = collect([[
+                        'start' => now()->toIso8601String(),
+                        'end' => now()->toIso8601String(),
+                    ]]);
+                }
+
+                $openBookingsData = $tv->bookings->map(fn ($b) => [
+                    'start' => \Carbon\Carbon::parse($b->start_datetime)->toIso8601String(),
+                    'end' => \Carbon\Carbon::parse($b->start_datetime)->addHours(max(1, (int) $b->duration_hours))->toIso8601String(),
+                ])->values();
+
+                $isCurrentlyPlaying = $tv->status === 'playing' || $tv->playSessions->isNotEmpty();
               @endphp
               <option
                 value="{{ $tv->id }}"
                 data-name="{{ $tv->name }}"
-                data-playing="{{ $isPlaying ? '1' : '0' }}"
-                data-booked="{{ $isBooked ? '1' : '0' }}"
+                data-sessions='@json($activeSessionsData)'
+                data-bookings='@json($openBookingsData)'
                 {{ old('tv_id') == $tv->id ? 'selected' : '' }}
               >
                 {{ $tv->name }} — {{ strtoupper($tv->type) }}
-                @if ($isPlaying)
-                  (Sedang Digunakan)
-                @elseif ($isBooked)
-                  (Sudah Dibooking)
+                @if ($isCurrentlyPlaying)
+                  (Sedang Dimainkan Saat Ini)
                 @endif
               </option>
             @endforeach
@@ -156,23 +170,50 @@
   document.addEventListener('DOMContentLoaded', function () {
     const bookingForm = document.querySelector('form[action="{{ route('booking.store') }}"]');
     const unitSelect = bookingForm?.querySelector('select[name="tv_id"]');
+    const startInput = bookingForm?.querySelector('input[name="start_datetime"]');
+    const durationField = bookingForm?.querySelector('input[name="duration_hours"]');
 
-    if (!bookingForm || !unitSelect) {
+    if (!bookingForm || !unitSelect || !startInput || !durationField) {
       return;
     }
 
     bookingForm.addEventListener('submit', function () {
       const selectedOption = unitSelect.options[unitSelect.selectedIndex];
-      if (!selectedOption || !selectedOption.value) {
+      if (!selectedOption || !selectedOption.value || !startInput.value) {
         return;
       }
 
       const unitName = selectedOption.dataset.name || 'Unit ini';
+      const bookingStartMs = new Date(startInput.value).getTime();
+      const durationHours = Math.max(1, Number(durationField.value || 1));
+      const bookingEndMs = bookingStartMs + durationHours * 3600 * 1000;
 
-      if (selectedOption.dataset.playing === '1') {
-        alert(`Peringatan: Unit ${unitName} sedang digunakan (dimainkan) dan tidak dapat dibooking!`);
-      } else if (selectedOption.dataset.booked === '1') {
-        alert(`Peringatan: Unit ${unitName} sudah dibooking!`);
+      if (Number.isNaN(bookingStartMs)) {
+        return;
+      }
+
+      const sessions = JSON.parse(selectedOption.dataset.sessions || '[]');
+      const bookings = JSON.parse(selectedOption.dataset.bookings || '[]');
+
+      const isPlayingConflict = sessions.some((s) => {
+        const sStart = new Date(s.start).getTime();
+        const sEnd = new Date(s.end).getTime();
+        return bookingStartMs <= sEnd && bookingEndMs >= sStart;
+      });
+
+      if (isPlayingConflict) {
+        alert(`Peringatan: Unit ${unitName} sedang digunakan (dimainkan) pada waktu tersebut dan tidak dapat dibooking!`);
+        return;
+      }
+
+      const isBookingConflict = bookings.some((b) => {
+        const bStart = new Date(b.start).getTime();
+        const bEnd = new Date(b.end).getTime();
+        return bookingStartMs < bEnd && bookingEndMs > bStart;
+      });
+
+      if (isBookingConflict) {
+        alert(`Peringatan: Unit ${unitName} sudah dibooking pada waktu tersebut!`);
       }
     });
   });
