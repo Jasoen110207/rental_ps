@@ -34,8 +34,23 @@
           <select name="tv_id" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
             <option value="">-- Pilih unit --</option>
             @foreach ($tvs as $tv)
-              <option value="{{ $tv->id }}" {{ old('tv_id') == $tv->id ? 'selected' : '' }}>
+              @php
+                $isPlaying = $tv->status === 'playing' || ($tv->has_active_session ?? false);
+                $isBooked = (bool) ($tv->is_booked ?? false);
+              @endphp
+              <option
+                value="{{ $tv->id }}"
+                data-name="{{ $tv->name }}"
+                data-playing="{{ $isPlaying ? '1' : '0' }}"
+                data-booked="{{ $isBooked ? '1' : '0' }}"
+                {{ old('tv_id') == $tv->id ? 'selected' : '' }}
+              >
                 {{ $tv->name }} — {{ strtoupper($tv->type) }}
+                @if ($isPlaying)
+                  (Sedang Digunakan)
+                @elseif ($isBooked)
+                  (Sudah Dibooking)
+                @endif
               </option>
             @endforeach
           </select>
@@ -135,3 +150,31 @@
   </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const bookingForm = document.querySelector('form[action="{{ route('booking.store') }}"]');
+    const unitSelect = bookingForm?.querySelector('select[name="tv_id"]');
+
+    if (!bookingForm || !unitSelect) {
+      return;
+    }
+
+    bookingForm.addEventListener('submit', function () {
+      const selectedOption = unitSelect.options[unitSelect.selectedIndex];
+      if (!selectedOption || !selectedOption.value) {
+        return;
+      }
+
+      const unitName = selectedOption.dataset.name || 'Unit ini';
+
+      if (selectedOption.dataset.playing === '1') {
+        alert(`Peringatan: Unit ${unitName} sedang digunakan (dimainkan) dan tidak dapat dibooking!`);
+      } else if (selectedOption.dataset.booked === '1') {
+        alert(`Peringatan: Unit ${unitName} sudah dibooking!`);
+      }
+    });
+  });
+</script>
+@endpush

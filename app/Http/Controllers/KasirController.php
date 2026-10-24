@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Booking;
 use App\Models\CustomerRequest;
 use App\Models\PlaySession;
 use App\Models\Product;
@@ -57,11 +58,11 @@ class KasirController extends Controller
             'activeShift', 'products'
         ));
     }
-    
+
     public function payroll()
-        {
-            return view('payroll.index'); // Sesuaikan dengan lokasi file view payroll kamu
-        }
+    {
+        return view('payroll.index'); // Sesuaikan dengan lokasi file view payroll kamu
+    }
 
     public function apiStatus()
     {
@@ -708,10 +709,13 @@ class KasirController extends Controller
     /* ================= BOOKING ================= */
     public function booking(Request $request)
     {
-        $tvs = Tv::orderBy('name')->get();
-        $bookings = \App\Models\Booking::with('tv')->latest()->get()->map(function ($booking) {
+        $tvs = Tv::withExists([
+            'bookings as is_booked' => fn ($q) => $q->whereIn('status', ['Pending', 'Active']),
+            'playSessions as has_active_session' => fn ($q) => $q->where('status', 'active'),
+        ])->orderBy('name')->get();
+        $bookings = Booking::with('tv')->latest()->get()->map(function ($booking) {
             return [
-                'id' => 'BK-' . str_pad($booking->id, 4, '0', STR_PAD_LEFT),
+                'id' => 'BK-'.str_pad($booking->id, 4, '0', STR_PAD_LEFT),
                 'customer_name' => $booking->customer_name,
                 'phone' => $booking->phone,
                 'unit_name' => $booking->tv?->name ?? '—',
@@ -736,9 +740,22 @@ class KasirController extends Controller
         ]);
 
         $tv = Tv::findOrFail($validated['tv_id']);
+
+        if ($tv->isInUse()) {
+            return back()
+                ->withInput()
+                ->with('error', 'Peringatan: Unit '.$tv->name.' sedang digunakan (dimainkan) dan tidak dapat dibooking!');
+        }
+
+        if ($tv->hasOpenBooking()) {
+            return back()
+                ->withInput()
+                ->with('error', 'Peringatan: Unit '.$tv->name.' sudah dibooking!');
+        }
+
         $estimatedAmount = (int) round($validated['duration_hours'] * $tv->price_per_hour);
 
-        \App\Models\Booking::create([
+        Booking::create([
             'tv_id' => $tv->id,
             'user_id' => Auth::id(),
             'customer_name' => $validated['customer_name'],
@@ -749,6 +766,6 @@ class KasirController extends Controller
             'total_amount' => $estimatedAmount,
         ]);
 
-        return back()->with('success', 'Booking berhasil disimpan untuk ' . $tv->name . '.');
+        return back()->with('success', 'Booking berhasil disimpan untuk '.$tv->name.'.');
     }
 }

@@ -21,12 +21,12 @@
         @csrf
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wide text-on-surface-variant mb-2">Nama Pelanggan</label>
-          <input type="text" name="customer_name" placeholder="Masukkan nama pelanggan" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
+          <input type="text" name="customer_name" value="{{ old('customer_name') }}" placeholder="Masukkan nama pelanggan" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
         </div>
 
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wide text-on-surface-variant mb-2">Nomor HP</label>
-          <input type="tel" name="phone" placeholder="08xxxxxxxxxx" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
+          <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="08xxxxxxxxxx" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
         </div>
 
         <div>
@@ -34,8 +34,24 @@
           <select name="tv_id" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
             <option value="">-- Pilih unit --</option>
             @foreach ($tvs as $tv)
-              <option value="{{ $tv->id }}" data-price="{{ (float) ($tv->price_per_hour ?? $tv->hourly_rate ?? 15000) }}">
+              @php
+                $isPlaying = $tv->status === 'playing' || ($tv->has_active_session ?? false);
+                $isBooked = (bool) ($tv->is_booked ?? false);
+              @endphp
+              <option
+                value="{{ $tv->id }}"
+                data-price="{{ (float) ($tv->price_per_hour ?? $tv->hourly_rate ?? 15000) }}"
+                data-name="{{ $tv->name }}"
+                data-playing="{{ $isPlaying ? '1' : '0' }}"
+                data-booked="{{ $isBooked ? '1' : '0' }}"
+                {{ old('tv_id') == $tv->id ? 'selected' : '' }}
+              >
                 {{ $tv->name }} — {{ strtoupper($tv->type) }}
+                @if ($isPlaying)
+                  (Sedang Digunakan)
+                @elseif ($isBooked)
+                  (Sudah Dibooking)
+                @endif
               </option>
             @endforeach
           </select>
@@ -44,12 +60,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wide text-on-surface-variant mb-2">Tanggal & Jam Mulai</label>
-            <input type="datetime-local" name="start_datetime" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
+            <input type="datetime-local" name="start_datetime" value="{{ old('start_datetime') }}" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
           </div>
 
           <div>
             <label class="block text-[11px] font-bold uppercase tracking-wide text-on-surface-variant mb-2">Durasi (Jam)</label>
-            <input type="number" name="duration_hours" min="1" max="12" value="2" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
+            <input type="number" name="duration_hours" min="1" max="12" value="{{ old('duration_hours', 2) }}" class="w-full px-3 py-2.5 border-2 border-on-surface bg-surface text-sm font-body-md focus:outline-none neo-shadow-sm" required>
           </div>
         </div>
 
@@ -163,6 +179,24 @@
     }
 
     updateEstimate();
+
+    const bookingForm = document.querySelector('form[action="{{ route('kasir.booking.store') }}"]');
+    if (bookingForm && unitSelect) {
+      bookingForm.addEventListener('submit', function () {
+        const selectedOption = unitSelect.options[unitSelect.selectedIndex];
+        if (!selectedOption || !selectedOption.value) {
+          return;
+        }
+
+        const unitName = selectedOption.dataset.name || 'Unit ini';
+
+        if (selectedOption.dataset.playing === '1') {
+          alert(`Peringatan: Unit ${unitName} sedang digunakan (dimainkan) dan tidak dapat dibooking!`);
+        } else if (selectedOption.dataset.booked === '1') {
+          alert(`Peringatan: Unit ${unitName} sudah dibooking!`);
+        }
+      });
+    }
   });
 </script>
 @endpush

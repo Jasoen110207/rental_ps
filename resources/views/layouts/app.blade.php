@@ -57,12 +57,6 @@
           </div>
         </a>
 
-        <!-- Quick Action / Start Button (fitur kasir: buka modal rental) -->
-        <button onclick="toggleModal(true)" class="w-full py-2.5 bg-secondary-container text-on-secondary font-headline-sm text-sm tracking-wider border-2 border-on-surface neo-shadow btn-press flex items-center justify-center gap-2 hover:bg-secondary transition-all">
-          <span class="material-symbols-outlined text-xl">add_circle</span>
-          <span>NEW RENTAL +</span>
-        </button>
-
         <!-- Navigation Menu (fitur kasir dipertahankan, gaya mengikuti admin) -->
         <nav class="flex flex-col gap-1.5 mt-1">
           <a href="{{ route('kasir.dashboard') }}" class="flex items-center justify-between px-3 py-2.5 font-headline-sm text-xs uppercase tracking-wider border-2 border-on-surface transition-all {{ request()->routeIs('kasir.dashboard') ? 'bg-primary text-on-primary neo-shadow' : 'bg-surface hover:bg-surface-container-high' }}">
