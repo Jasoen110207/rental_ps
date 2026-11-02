@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payroll;
 use App\Models\PlaySession;
 use App\Models\Shift;
 use App\Services\ShiftService;
@@ -90,7 +91,7 @@ class ShiftController extends Controller
             'end_time' => Carbon::now(),
         ]);
 
-        Shift::create([
+        $newShift = Shift::create([
             'user_id' => Auth::id() ?? 1,
             'shift_type' => $validated['shift_type'],
             'start_time' => Carbon::now(),
@@ -102,6 +103,10 @@ class ShiftController extends Controller
             'notes' => $validated['notes'] ?? 'Shift baru dibuka.',
             'status' => 'active',
         ]);
+
+        if ($newShift->user) {
+            Payroll::syncForUser($newShift->user);
+        }
 
         return back()->with('success', 'Shift baru ('.($validated['shift_type'] === 'pagi' ? 'Pagi' : 'Sore').') berhasil dimulai.');
     }
@@ -136,6 +141,10 @@ class ShiftController extends Controller
             'notes' => $validated['notes'] ?? $shift->notes,
             'status' => 'closed',
         ]);
+
+        if ($shift->user) {
+            Payroll::syncForUser($shift->user);
+        }
 
         return back()->with('success', 'Shift kasir berhasil ditutup dan diserahkan.');
     }

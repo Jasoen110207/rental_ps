@@ -15,13 +15,14 @@ class UserController extends Controller
     {
         $search = $request->get('search', '');
         $query = User::query();
-        
-        if (!empty($search)) {
+
+        if (! empty($search)) {
             $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                ->orWhere('email', 'like', "%{$search}%");
         }
-        
+
         $users = $query->orderBy('name')->paginate(10)->withQueryString();
+
         return view('admin.users.index', compact('users', 'search'));
     }
 
@@ -47,10 +48,10 @@ class UserController extends Controller
         ]);
 
         User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'pin' => Hash::make($validated['pin']),
+            'name' => trim($validated['name']),
+            'email' => strtolower(trim($validated['email'])),
+            'password' => $validated['password'],
+            'pin' => Hash::make(trim($validated['pin'])),
             'role' => $validated['role'],
         ]);
 
@@ -87,17 +88,17 @@ class UserController extends Controller
         ]);
 
         $data = [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+            'name' => trim($validated['name']),
+            'email' => strtolower(trim($validated['email'])),
             'role' => $validated['role'],
         ];
 
-        if (!empty($validated['password'])) {
-            $data['password'] = Hash::make($validated['password']);
+        if (! empty($validated['password'])) {
+            $data['password'] = $validated['password'];
         }
 
-        if (!empty($validated['pin'])) {
-            $data['pin'] = Hash::make($validated['pin']);
+        if (! empty($validated['pin'])) {
+            $data['pin'] = Hash::make(trim($validated['pin']));
         }
 
         $user->update($data);
@@ -113,8 +114,9 @@ class UserController extends Controller
         if (auth()->id() === $user->id) {
             return redirect()->route('admin.users.index')->with('error', 'Tidak bisa menghapus akun Anda sendiri.');
         }
-        
+
         $user->delete();
+
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
     }
 }
