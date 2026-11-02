@@ -8,6 +8,7 @@ use Database\Factories\TvFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Tv extends Model
 {
@@ -15,6 +16,15 @@ class Tv extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Tv $tv) {
+            if (empty($tv->access_token)) {
+                $tv->access_token = Str::random(32);
+            }
+        });
+    }
 
     protected function casts(): array
     {

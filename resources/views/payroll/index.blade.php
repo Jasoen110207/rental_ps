@@ -50,10 +50,10 @@
 
       <div class="p-4 bg-amber-50 border-2 border-on-surface neo-shadow">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] uppercase font-bold text-amber-900">Hari Kerja</span>
+          <span class="text-[11px] uppercase font-bold text-amber-900">Total Absen Shift</span>
           <span class="material-symbols-outlined text-xl text-amber-600">calendar_month</span>
         </div>
-        <div class="mt-2 font-headline-lg font-black text-amber-950 text-lg">{{ $kasir['total_work_days'] }} Hari</div>
+        <div class="mt-2 font-headline-lg font-black text-amber-950 text-lg">{{ $kasir['total_shifts'] ?? $kasir['total_work_days'] }} Shift</div>
       </div>
 
       <div class="p-4 bg-primary-fixed border-2 border-on-surface neo-shadow">
@@ -77,18 +77,18 @@
 
         <div class="p-5 flex flex-col gap-4">
           <div class="flex items-center justify-between p-3 border-2 border-on-surface bg-surface-container-low">
-            <span class="text-[11px] uppercase font-bold text-on-surface-variant">Gaji Pokok</span>
-            <span class="font-headline-lg font-black text-on-surface">Rp {{ number_format($kasir['base_salary'], 0, ',', '.') }}</span>
+            <span class="text-[11px] uppercase font-bold text-on-surface-variant">Upah per Shift</span>
+            <span class="font-headline-lg font-black text-on-surface">Rp {{ number_format($kasir['shift_rate'] ?? 50000, 0, ',', '.') }}</span>
           </div>
 
           <div class="flex items-center justify-between p-3 border-2 border-on-surface bg-surface-container-low">
-            <span class="text-[11px] uppercase font-bold text-on-surface-variant">Bonus / Komisi Transaksi</span>
-            <span class="font-headline-lg font-black text-on-surface">Rp {{ number_format($kasir['transaction_bonus'], 0, ',', '.') }}</span>
+            <span class="text-[11px] uppercase font-bold text-on-surface-variant">Total Absen Shift Bulan Ini</span>
+            <span class="font-headline-lg font-black text-on-surface">{{ $kasir['total_shifts'] ?? $kasir['total_work_days'] }} Shift</span>
           </div>
 
           <div class="flex items-center justify-between p-3 border-2 border-on-surface bg-surface-container-low">
-            <span class="text-[11px] uppercase font-bold text-on-surface-variant">Potongan</span>
-            <span class="font-headline-lg font-black text-error">- Rp {{ number_format($kasir['deductions'], 0, ',', '.') }}</span>
+            <span class="text-[11px] uppercase font-bold text-on-surface-variant">Perhitungan Gaji</span>
+            <span class="font-headline-lg font-black text-primary">{{ $kasir['total_shifts'] ?? $kasir['total_work_days'] }} Shift × Rp {{ number_format($kasir['shift_rate'] ?? 50000, 0, ',', '.') }}</span>
           </div>
 
           <div class="p-4 border-2 border-on-surface bg-primary text-on-primary neo-shadow">
@@ -109,7 +109,7 @@
         <div class="p-5 flex flex-col gap-4">
           <div class="p-4 border-2 border-on-surface bg-surface-container-low">
             <p class="text-[11px] uppercase font-bold text-on-surface-variant">Status</p>
-            <div class="mt-2 inline-flex items-center px-2.5 py-1 border-2 border-amber-900 bg-amber-100 text-amber-900 font-black text-[10px] uppercase tracking-wide neo-shadow-sm">
+            <div class="mt-2 inline-flex items-center px-2.5 py-1 border-2 {{ !empty($kasir['is_paid']) ? 'border-emerald-900 bg-emerald-100 text-emerald-900' : 'border-amber-900 bg-amber-100 text-amber-900' }} font-black text-[10px] uppercase tracking-wide neo-shadow-sm">
               {{ $kasir['status'] }}
             </div>
           </div>

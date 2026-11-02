@@ -7,14 +7,22 @@ use App\Models\PlaySession;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\Tv;
+use App\Models\User;
+use App\Notifications\CustomerRequestNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class CustomerController extends Controller
 {
-    public function index($tvId)
+    protected function findTvByToken(string $token): Tv
     {
-        $tv = Tv::findOrFail($tvId);
+        return Tv::where('access_token', $token)->firstOrFail();
+    }
+
+    public function index(string $token)
+    {
+        $tv = $this->findTvByToken($token);
 
         $activeSession = PlaySession::with('sessionOrders.product')
             ->where('tv_id', $tv->id)
@@ -35,15 +43,14 @@ class CustomerController extends Controller
                 ->get();
         }
 
-
         $storeName = Setting::get('store_name', 'TambahBang Rental PS');
 
         return view('customer.index', compact('tv', 'activeSession', 'products', 'requests', 'storeName'));
     }
 
-    public function requestAddTime(Request $request, $tvId)
+    public function requestAddTime(Request $request, string $token)
     {
-        $tv = Tv::findOrFail($tvId);
+        $tv = $this->findTvByToken($token);
 
         $validated = $request->validate([
             'duration_hours' => 'required|numeric|min:0.01|max:12',
@@ -64,20 +71,20 @@ class CustomerController extends Controller
             'payload' => [
                 'duration_hours' => $hours,
                 'price' => $estimatedPrice,
-                'note' => $validated['note'] ?? ('Tambah ' . ($hours == 1 ? '1 Jam' : ($hours . ' Jam'))),
+                'note' => $validated['note'] ?? ('Tambah '.($hours == 1 ? '1 Jam' : ($hours.' Jam'))),
             ],
             'status' => 'pending',
         ]);
 
-        $kasirAndAdmin = \App\Models\User::whereIn('role', ['kasir', 'admin'])->get();
-        \Illuminate\Support\Facades\Notification::send($kasirAndAdmin, new \App\Notifications\CustomerRequestNotification($customerRequest));
+        $kasirAndAdmin = User::whereIn('role', ['kasir', 'admin'])->get();
+        Notification::send($kasirAndAdmin, new CustomerRequestNotification($customerRequest));
 
         return back()->with('success', 'Permintaan tambah waktu berhasil dikirim ke kasir! Mohon tunggu konfirmasi.');
     }
 
-    public function requestFood(Request $request, $tvId)
+    public function requestFood(Request $request, string $token)
     {
-        $tv = Tv::findOrFail($tvId);
+        $tv = $this->findTvByToken($token);
 
         $validated = $request->validate([
             'items' => 'required|array|min:1',
@@ -87,10 +94,10 @@ class CustomerController extends Controller
         ]);
 
         $activeSession = PlaySession::where('tv_id', $tv->id)->where('status', 'active')->first();
-        if (!$activeSession) {
+        if (! $activeSession) {
             return back()->with('error', 'Tidak ada sesi bermain yang aktif! Anda tidak dapat memesan F&B.');
         }
-        
+
         if ($activeSession->billing_type === 'prepaid' && $activeSession->end_time && $activeSession->end_time->isPast()) {
             return back()->with('error', 'Waktu bermain sudah habis! Anda tidak dapat memesan makanan & minuman.');
         }
@@ -121,7 +128,7 @@ class CustomerController extends Controller
         foreach ($orderItems as $oi) {
             $product = Product::find($oi['product_id']);
             if (! $product || $product->stock < $oi['quantity']) {
-                return back()->with('error', 'Stok "' . ($product->name ?? 'menu') . '" tidak mencukupi (sisa ' . ($product->stock ?? 0) . ').');
+                return back()->with('error', 'Stok "'.($product->name ?? 'menu').'" tidak mencukupi (sisa '.($product->stock ?? 0).').');
             }
         }
 
@@ -136,27 +143,18 @@ class CustomerController extends Controller
             'status' => 'pending',
         ]);
 
-        $kasirAndAdmin = \App\Models\User::whereIn('role', ['kasir', 'admin'])->get();
-        \Illuminate\Support\Facades\Notification::send($kasirAndAdmin, new \App\Notifications\CustomerRequestNotification($customerRequest));
+        $kasirAndAdmin = User::whereIn('role', ['kasir', 'admin'])->get();
+        Notification::send($kasirAndAdmin, new CustomerRequestNotification($customerRequest));
 
         return back()->with('success', 'Pesanan makanan & minuman berhasil dikirim ke kasir!');
     }
 
     /**
      * Halaman order cepat (satu menu sekali klik) — dinamis per meja.
-     * Bisa diakses via /customer/order?tv_id=.. agar sinkron ke database.
      */
-    public function order(Request $request)
+    public function order(Request $request, string $token)
     {
-        $tv = null;
-        if ($request->filled('tv_id')) {
-            $tv = Tv::find($request->get('tv_id'));
-        }
-        if (! $tv) {
-            // Prioritas: meja yang sedang ada sesi aktif, lalu meja pertama
-            $activeTvId = PlaySession::where('status', 'active')->orderBy('start_time')->value('tv_id');
-            $tv = $activeTvId ? Tv::find($activeTvId) : Tv::orderBy('id')->firstOrFail();
-        }
+        $tv = $this->findTvByToken($token);
 
         $activeSession = PlaySession::with('sessionOrders.product')
             ->where('tv_id', $tv->id)
@@ -176,18 +174,17 @@ class CustomerController extends Controller
             ->take(5)
             ->get();
 
-        $tvs = Tv::orderBy('id')->get();
         $storeName = Setting::get('store_name', 'TambahBang Rental PS');
 
-        return view('customer.order', compact('tv', 'activeSession', 'products', 'requests', 'tvs', 'storeName'));
+        return view('customer.order', compact('tv', 'activeSession', 'products', 'requests', 'storeName'));
     }
 
     /**
      * Panggil kasir ke meja (service call). Disetujui kasir tanpa mengubah tagihan.
      */
-    public function callCashier(Request $request, $tvId)
+    public function callCashier(Request $request, string $token)
     {
-        $tv = Tv::findOrFail($tvId);
+        $tv = $this->findTvByToken($token);
 
         $validated = $request->validate([
             'note' => 'nullable|string|max:255',
@@ -212,15 +209,15 @@ class CustomerController extends Controller
             'status' => 'pending',
         ]);
 
-        $kasirAndAdmin = \App\Models\User::whereIn('role', ['kasir', 'admin'])->get();
-        \Illuminate\Support\Facades\Notification::send($kasirAndAdmin, new \App\Notifications\CustomerRequestNotification($customerRequest));
+        $kasirAndAdmin = User::whereIn('role', ['kasir', 'admin'])->get();
+        Notification::send($kasirAndAdmin, new CustomerRequestNotification($customerRequest));
 
-        return back()->with('success', 'Kasir sedang menuju ke meja ' . $tv->name . '!');
+        return back()->with('success', 'Kasir sedang menuju ke meja '.$tv->name.'!');
     }
 
-    public function apiStatus($tvId)
+    public function apiStatus(string $token)
     {
-        $tv = Tv::findOrFail($tvId);
+        $tv = $this->findTvByToken($token);
 
         $activeSession = PlaySession::with('sessionOrders.product')
             ->where('tv_id', $tv->id)

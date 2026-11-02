@@ -3,9 +3,9 @@
 @section('title', 'Order ' . $tv->name . ' - TambahBang')
 
 @section('content')
-<div class="flex flex-col" id="order-page" data-tv-id="{{ $tv->id }}">
+<div class="flex flex-col" id="order-page" data-tv-token="{{ $tv->access_token }}">
 
-    {{-- Unit bar + pemilih meja --}}
+    {{-- Unit bar --}}
     <header class="w-full flex flex-col gap-2.5 pb-3 mb-3 border-b-2 border-dashed border-on-surface">
         <div class="inline-flex items-center gap-1.5 px-2.5 py-1 {{ $activeSession ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-surface-container text-on-surface-variant' }} neo-border-2 neo-shadow-sm self-start">
             <span class="w-2.5 h-2.5 rounded-full {{ $activeSession ? 'bg-tertiary' : 'bg-outline' }} inline-block pulse-dot"></span>
@@ -23,15 +23,6 @@
                 Rp {{ number_format($tv->price_per_hour, 0, ',', '.') }}/JAM
             </div>
         </div>
-
-        <form method="GET" action="{{ route('customer.order') }}" class="flex items-center gap-2">
-            <label class="font-label-sm text-[10px] font-bold uppercase text-on-surface-variant">Pindah meja:</label>
-            <select name="tv_id" onchange="this.form.submit()" class="flex-1 px-2 py-1.5 bg-surface-container-lowest neo-border-2 font-label-sm text-xs font-bold">
-                @foreach ($tvs as $t)
-                    <option value="{{ $t->id }}" {{ $t->id === $tv->id ? 'selected' : '' }}>{{ $t->name }} — {{ $t->status === 'playing' ? 'Aktif' : ucfirst($t->status) }}</option>
-                @endforeach
-            </select>
-        </form>
     </header>
 
     @if(session('error'))
@@ -189,7 +180,7 @@
                 <span class="material-symbols-outlined text-primary font-bold text-lg">restaurant_menu</span>
                 <h3 class="font-headline-sm text-xs sm:text-sm font-black tracking-tight uppercase">MENU CEPAT POPULER</h3>
             </div>
-            <a href="{{ route('customer.index', $tv->id) }}" class="font-label-sm text-[10px] bg-secondary-fixed font-bold px-2 py-0.5 neo-border-2">KATALOG LENGKAP</a>
+            <a href="{{ route('customer.index', $tv->access_token) }}" class="font-label-sm text-[10px] bg-secondary-fixed font-bold px-2 py-0.5 neo-border-2">KATALOG LENGKAP</a>
         </div>
         <div class="grid grid-cols-2 gap-2">
             @forelse ($products as $p)
@@ -198,7 +189,7 @@
                         <div class="font-headline-sm text-xs font-bold leading-snug line-clamp-2">{{ $p->name }}</div>
                         <div class="font-label-sm text-xs text-primary font-bold mt-1">Rp {{ number_format($p->price, 0, ',', '.') }} • Stok {{ $p->stock }}</div>
                     </div>
-                    <form method="POST" action="{{ route('customer.order-food', $tv->id) }}">
+                    <form method="POST" action="{{ route('customer.order-food', $tv->access_token) }}">
                         @csrf
                         <input type="hidden" name="items[0][product_id]" value="{{ $p->id }}">
                         <input type="hidden" name="items[0][quantity]" value="1">
@@ -228,7 +219,7 @@
     </section>
 
     <footer class="w-full mt-auto flex flex-col gap-2.5 pt-1">
-        <form method="POST" action="{{ route('customer.call-cashier', $tv->id) }}">
+        <form method="POST" action="{{ route('customer.call-cashier', $tv->access_token) }}">
             @csrf
             <button class="neo-btn w-full min-h-[48px] bg-surface-container-lowest p-3 neo-border-2 neo-shadow-md flex items-center justify-center gap-2 font-headline-sm text-xs sm:text-sm font-extrabold uppercase">
                 <span class="material-symbols-outlined text-primary text-xl">support_agent</span>
@@ -243,7 +234,7 @@
 
     {{-- Modal extend → POST real ke DB --}}
     <div class="fixed inset-0 bg-on-surface/60 z-50 hidden flex-col justify-end backdrop-blur-[1px]" id="order-modal-extend">
-        <form method="POST" action="{{ route('customer.add-time', $tv->id) }}" class="w-full max-w-md mx-auto bg-surface-container-lowest neo-border-3 border-b-0 p-4 neo-shadow-lg flex flex-col gap-3.5">
+        <form method="POST" action="{{ route('customer.add-time', $tv->access_token) }}" class="w-full max-w-md mx-auto bg-surface-container-lowest neo-border-3 border-b-0 p-4 neo-shadow-lg flex flex-col gap-3.5">
             @csrf
             <div class="flex items-center justify-between border-b-2 border-on-surface pb-2.5">
                 <h3 class="font-headline-sm text-sm font-extrabold uppercase">TAMBAH WAKTU SEWA</h3>
@@ -267,7 +258,7 @@
 @push('scripts')
 <script>
 (function(){
-  const tvId = document.getElementById('order-page').dataset.tvId;
+  const tvToken = document.getElementById('order-page').dataset.tvToken;
   const timerEl = document.getElementById('order-countdown');
   function fmt(s){ s = Math.max(0, s); return [s/3600, (s%3600)/60, s%60].map(v => String(Math.floor(v)).padStart(2,'0')).join(':'); }
   function tick(){
@@ -283,7 +274,7 @@
 
   async function pollOrder(){
     try{
-      const res = await fetch(`/customer/${tvId}/status`);
+      const res = await fetch(`/customer/${tvToken}/status`);
       if(!res.ok) return;
       const data = await res.json();
       if(data.session){

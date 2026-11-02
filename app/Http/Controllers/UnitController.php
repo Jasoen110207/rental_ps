@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tv;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class UnitController extends Controller
 {
@@ -45,7 +46,7 @@ class UnitController extends Controller
 
         $tv->update($validated);
 
-        return back()->with('success', 'Unit ' . $tv->name . ' berhasil diperbarui!');
+        return back()->with('success', 'Unit '.$tv->name.' berhasil diperbarui!');
     }
 
     public function toggleStatus($id)
@@ -54,13 +55,16 @@ class UnitController extends Controller
         $newStatus = $tv->status === 'maintenance' ? 'available' : 'maintenance';
         $tv->update(['status' => $newStatus]);
 
-        return back()->with('success', 'Status unit ' . $tv->name . ' diubah menjadi ' . $newStatus);
+        return back()->with('success', 'Status unit '.$tv->name.' diubah menjadi '.$newStatus);
     }
 
     public function qr($id)
     {
         $tv = Tv::findOrFail($id);
-        $customerUrl = route('customer.index', ['tv_id' => $tv->id]);
+        if (empty($tv->access_token)) {
+            $tv->update(['access_token' => Str::random(32)]);
+        }
+        $customerUrl = route('customer.index', ['token' => $tv->access_token]);
 
         return view('admin.units.qr', compact('tv', 'customerUrl'));
     }
@@ -75,6 +79,6 @@ class UnitController extends Controller
 
         $tv->delete();
 
-        return back()->with('success', 'Unit ' . $tv->name . ' berhasil dihapus.');
+        return back()->with('success', 'Unit '.$tv->name.' berhasil dihapus.');
     }
 }

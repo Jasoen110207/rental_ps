@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\ReportController;
@@ -14,8 +16,6 @@ use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\PayrollController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -48,16 +48,16 @@ Route::middleware(['auth'])->group(function () {
 
 // Public Customer Routes (Accessed via QR Code - No Login Required)
 Route::prefix('customer')->name('customer.')->group(function () {
-    Route::get('/order', [CustomerController::class, 'order'])->name('order');
-    Route::get('/{tv_id}', [CustomerController::class, 'index'])->name('index');
-    Route::post('/{tv_id}/add-time', [CustomerController::class, 'requestAddTime'])->name('add-time');
-    Route::post('/{tv_id}/order-food', [CustomerController::class, 'requestFood'])->name('order-food');
-    Route::post('/{tv_id}/call-cashier', [CustomerController::class, 'callCashier'])->name('call-cashier');
-    Route::get('/{tv_id}/status', [CustomerController::class, 'apiStatus'])->name('status');
+    Route::get('/order/{token}', [CustomerController::class, 'order'])->name('order');
+    Route::get('/{token}', [CustomerController::class, 'index'])->name('index');
+    Route::post('/{token}/add-time', [CustomerController::class, 'requestAddTime'])->name('add-time');
+    Route::post('/{token}/order-food', [CustomerController::class, 'requestFood'])->name('order-food');
+    Route::post('/{token}/call-cashier', [CustomerController::class, 'callCashier'])->name('call-cashier');
+    Route::get('/{token}/status', [CustomerController::class, 'apiStatus'])->name('status');
 });
 // QR short url alias
-Route::get('/scan/{tv_id}', function ($tv_id) {
-    return redirect()->route('customer.index', ['tv_id' => $tv_id]);
+Route::get('/scan/{token}', function (string $token) {
+    return redirect()->route('customer.index', ['token' => $token]);
 });
 
 // Notifications API (Shared Auth)

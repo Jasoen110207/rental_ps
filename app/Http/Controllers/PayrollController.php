@@ -8,12 +8,13 @@ use App\Models\Shift;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PayrollController extends Controller
 {
+    public const SHIFT_RATE = 50000;
+
     protected function resolveSelectedKasir(?User $fallbackUser = null): ?User
     {
         $kasirList = User::where('role', 'kasir')->get();
@@ -36,32 +37,32 @@ class PayrollController extends Controller
         $monthStart = Carbon::createFromFormat('Y-m', $periodMonth)->startOfMonth();
         $monthEnd = Carbon::createFromFormat('Y-m', $periodMonth)->endOfMonth();
 
-        $baseSalary = 2500000;
+        $shiftRate = self::SHIFT_RATE;
+        $totalShifts = Shift::where('user_id', $user->id)
+            ->whereBetween('start_time', [$monthStart, $monthEnd])
+            ->count();
+
         $totalRevenue = (int) PlaySession::where('user_id', $user->id)
             ->whereBetween('created_at', [$monthStart, $monthEnd])
             ->sum('total_amount');
-
-        $bonus = (int) floor($totalRevenue * 0.1);
-        $deductions = 150000;
-        $workDays = Shift::where('user_id', $user->id)
-            ->whereBetween('start_time', [$monthStart, $monthEnd])
-            ->count();
 
         $workHours = (int) Shift::where('user_id', $user->id)
             ->whereBetween('start_time', [$monthStart, $monthEnd])
             ->sum(DB::raw('TIMESTAMPDIFF(HOUR, start_time, COALESCE(end_time, NOW()))'));
 
-        $netSalary = $baseSalary + $bonus - $deductions;
+        $netSalary = $totalShifts * $shiftRate;
 
         return [
             'user' => $user,
             'period_month' => $periodMonth,
-            'base_salary' => $baseSalary,
-            'bonus' => $bonus,
-            'deductions' => $deductions,
+            'shift_rate' => $shiftRate,
+            'total_shifts' => $totalShifts,
+            'base_salary' => $netSalary,
+            'bonus' => 0,
+            'deductions' => 0,
             'total_revenue' => $totalRevenue,
             'work_hours' => $workHours,
-            'work_days' => $workDays,
+            'work_days' => $totalShifts,
             'net_salary' => $netSalary,
         ];
     }
@@ -82,6 +83,9 @@ class PayrollController extends Controller
             ->orderBy('period_month', 'desc')
             ->get();
 
+        $existingPayroll = $payroll->firstWhere('period_month', $periodMonth);
+        $isPaid = $existingPayroll && $existingPayroll->status === 'paid';
+
         $history = $payroll->map(function ($item) {
             return [
                 'period' => $item->period_month,
@@ -93,15 +97,18 @@ class PayrollController extends Controller
 
         $kasir = [
             'name' => $selectedKasir->name,
-            'position' => 'Kasir Senior',
-            'shift' => 'Shift Pagi',
-            'work_hours' => $summary['work_hours'] . ' jam',
+            'position' => 'Kasir',
+            'shift' => 'Per Shift (Rp '.number_format($summary['shift_rate'], 0, ',', '.').')',
+            'work_hours' => $summary['work_hours'].' jam',
             'total_work_days' => $summary['work_days'],
+            'total_shifts' => $summary['total_shifts'],
+            'shift_rate' => $summary['shift_rate'],
             'base_salary' => $summary['base_salary'],
             'transaction_bonus' => $summary['bonus'],
             'deductions' => $summary['deductions'],
             'net_salary' => $summary['net_salary'],
-            'status' => 'Menunggu Konfirmasi',
+            'status' => $isPaid ? 'Sudah Dibayar' : 'Menunggu Konfirmasi',
+            'is_paid' => $isPaid,
             'period' => Carbon::createFromFormat('Y-m', $periodMonth)->translatedFormat('F Y'),
         ];
 
@@ -120,9 +127,11 @@ class PayrollController extends Controller
         $summary = $this->calculatePayrollForUser($selectedKasir, $periodMonth);
         $payroll = [
             'name' => $selectedKasir->name,
-            'position' => 'Kasir Senior',
-            'shift' => 'Shift Pagi',
-            'work_hours' => $summary['work_hours'] . ' jam',
+            'position' => 'Kasir',
+            'shift' => 'Per Shift (Rp '.number_format($summary['shift_rate'], 0, ',', '.').')',
+            'work_hours' => $summary['work_hours'].' jam',
+            'total_shifts' => $summary['total_shifts'],
+            'shift_rate' => $summary['shift_rate'],
             'base_salary' => $summary['base_salary'],
             'transaction_bonus' => $summary['bonus'],
             'deductions' => $summary['deductions'],
@@ -145,9 +154,11 @@ class PayrollController extends Controller
         $summary = $this->calculatePayrollForUser($selectedKasir, $periodMonth);
         $payroll = [
             'name' => $selectedKasir->name,
-            'position' => 'Kasir Senior',
-            'shift' => 'Shift Pagi',
-            'work_hours' => $summary['work_hours'] . ' jam',
+            'position' => 'Kasir',
+            'shift' => 'Per Shift (Rp '.number_format($summary['shift_rate'], 0, ',', '.').')',
+            'work_hours' => $summary['work_hours'].' jam',
+            'total_shifts' => $summary['total_shifts'],
+            'shift_rate' => $summary['shift_rate'],
             'base_salary' => $summary['base_salary'],
             'transaction_bonus' => $summary['bonus'],
             'deductions' => $summary['deductions'],
@@ -157,7 +168,7 @@ class PayrollController extends Controller
 
         $pdf = Pdf::loadView('payroll.slip', compact('payroll'));
 
-        return $pdf->download('slip-gaji-' . strtolower(str_replace(' ', '-', $selectedKasir->name)) . '-' . Carbon::createFromFormat('Y-m', $periodMonth)->format('Ym') . '.pdf');
+        return $pdf->download('slip-gaji-'.strtolower(str_replace(' ', '-', $selectedKasir->name)).'-'.Carbon::createFromFormat('Y-m', $periodMonth)->format('Ym').'.pdf');
     }
 
     public function confirmPayment()
@@ -186,10 +197,10 @@ class PayrollController extends Controller
                 'net_salary' => $summary['net_salary'],
                 'status' => 'paid',
                 'paid_at' => Carbon::now(),
-                'notes' => 'Pembayaran gaji otomatis berdasarkan transaksi dan shift bulan ini.',
+                'notes' => 'Pembayaran gaji kasir berbasis shift ('.$summary['total_shifts'].' shift x Rp '.number_format($summary['shift_rate'], 0, ',', '.').').',
             ]
         );
 
-        return redirect()->route('payroll.index', ['kasir_id' => $selectedKasir->id])->with('success', 'Pembayaran gaji kasir ' . $selectedKasir->name . ' telah dikonfirmasi.');
+        return redirect()->route('admin.payroll.index', ['kasir_id' => $selectedKasir->id, 'month' => $periodMonth])->with('success', 'Pembayaran gaji kasir '.$selectedKasir->name.' telah dikonfirmasi.');
     }
 }

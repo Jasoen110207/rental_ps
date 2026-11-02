@@ -20,7 +20,10 @@
           </div>
           <div>
             <span class="text-xs font-label-sm text-secondary font-bold uppercase tracking-wider block">Petugas Kasir Berjaga</span>
-            <h2 class="text-2xl font-headline-lg font-black uppercase text-on-surface">{{ $activeShift->user ? $activeShift->user->name : 'Kasir' }}</h2>
+            <div class="flex items-center gap-2 mt-0.5">
+              <h2 class="text-2xl font-headline-lg font-black uppercase text-on-surface">{{ $activeShift->user ? $activeShift->user->name : 'Kasir' }}</h2>
+              <span class="px-2 py-0.5 text-[10px] font-bold uppercase border border-on-surface bg-secondary-fixed text-secondary">{{ $activeShift->shift_label }}</span>
+            </div>
             <p class="text-xs font-label-sm text-on-surface-variant font-bold mt-0.5">
               Mulai: {{ $activeShift->start_time->format('d M Y • H:i') }} ({{ $activeShift->start_time->diffForHumans() }})
             </p>
@@ -28,7 +31,7 @@
         </div>
 
         <!-- End Shift Action Button -->
-        <button onclick="openEndShiftModal({{ $activeShift->id }}, {{ $liveShiftRevenue }}, {{ $liveShiftTransactions }})" class="py-3 px-6 bg-secondary-container text-on-secondary font-headline-lg text-xs uppercase tracking-wider font-black border-2 border-on-surface neo-shadow btn-press hover:bg-secondary flex items-center justify-center gap-2">
+        <button onclick="openEndShiftModal({{ $activeShift->id }}, {{ $liveShiftRevenue }}, {{ $liveShiftTransactions }}, {{ $activeShift->starting_cash }})" class="py-3 px-6 bg-secondary-container text-on-secondary font-headline-lg text-xs uppercase tracking-wider font-black border-2 border-on-surface neo-shadow btn-press hover:bg-secondary flex items-center justify-center gap-2">
           <span class="material-symbols-outlined text-xl">logout</span>
           <span>Tutup Shift & Serah Terima</span>
         </button>
@@ -90,10 +93,13 @@
         <thead>
           <tr class="bg-surface-container-high border-b-2 border-on-surface font-headline-sm uppercase text-on-surface">
             <th class="p-3">Kasir</th>
+            <th class="p-3">Shift</th>
             <th class="p-3">Waktu Mulai</th>
             <th class="p-3">Waktu Selesai</th>
             <th class="p-3">Modal Awal</th>
-            <th class="p-3">Total Omset</th>
+            <th class="p-3">Omset Sistem</th>
+            <th class="p-3">Uang Dihasilkan</th>
+            <th class="p-3">Uang Tinggalan</th>
             <th class="p-3">Transaksi</th>
             <th class="p-3">Status</th>
             <th class="p-3">Catatan</th>
@@ -106,6 +112,11 @@
                 {{ $shift->user ? $shift->user->name : 'Kasir' }}
               </td>
               <td class="p-3 font-label-sm">
+                <span class="px-1.5 py-0.5 text-[9px] font-bold uppercase border border-on-surface {{ $shift->shift_type === 'pagi' ? 'bg-amber-100 text-amber-900' : 'bg-blue-100 text-blue-900' }}">
+                  {{ $shift->shift_type === 'pagi' ? 'Pagi (08:00-15:00)' : 'Sore (15:00-21:00)' }}
+                </span>
+              </td>
+              <td class="p-3 font-label-sm">
                 {{ $shift->start_time->format('d/m/Y H:i') }}
               </td>
               <td class="p-3 font-label-sm">
@@ -116,6 +127,12 @@
               </td>
               <td class="p-3 font-headline-sm font-black text-emerald-700">
                 Rp {{ number_format($shift->total_revenue, 0, ',', '.') }}
+              </td>
+              <td class="p-3 font-headline-sm font-black text-primary">
+                Rp {{ number_format($shift->reported_revenue, 0, ',', '.') }}
+              </td>
+              <td class="p-3 font-headline-sm font-black text-amber-800">
+                Rp {{ number_format($shift->leftover_cash, 0, ',', '.') }}
               </td>
               <td class="p-3 font-label-sm font-bold">
                 {{ $shift->transactions_count }}
@@ -131,7 +148,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="8" class="p-8 text-center text-on-surface-variant font-headline-sm uppercase font-bold">
+              <td colspan="11" class="p-8 text-center text-on-surface-variant font-headline-sm uppercase font-bold">
                 Belum ada riwayat shift tersimpan.
               </td>
             </tr>
@@ -166,8 +183,17 @@
       </div>
 
       <div>
+        <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1">Pilih Shift</label>
+        <select name="shift_type" required class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-headline-sm text-xs font-bold uppercase neo-shadow-sm">
+          <option value="pagi" {{ ($defaultShiftType ?? 'pagi') === 'pagi' ? 'selected' : '' }}>Shift Pagi (08:00 - 15:00)</option>
+          <option value="sore" {{ ($defaultShiftType ?? 'pagi') === 'sore' ? 'selected' : '' }}>Shift Sore (15:00 - 21:00)</option>
+        </select>
+      </div>
+
+      <div>
         <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1">Modal Kas Awal (Rp)</label>
-        <input type="number" name="starting_cash" required min="0" step="10000" value="200000" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-headline-sm text-sm font-bold text-primary neo-shadow-sm">
+        <input type="number" name="starting_cash" required min="0" step="any" value="{{ $suggestedStartingCash ?? 200000 }}" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-headline-sm text-sm font-bold text-primary neo-shadow-sm">
+        <p class="text-[10px] text-on-surface-variant mt-0.5">*Otomatis terisi dari Uang Tinggalan shift sebelumnya (Rp {{ number_format($suggestedStartingCash ?? 200000, 0, ',', '.') }}) sebagai modal kembalian.</p>
       </div>
 
       <div>
@@ -207,7 +233,7 @@
 
       <div class="p-3.5 bg-surface-container-high border-2 border-on-surface neo-shadow-sm flex flex-col gap-1.5 text-xs font-label-sm">
         <div class="flex justify-between">
-          <span>Total Omset Shift:</span>
+          <span>Omset Tercatat di Sistem:</span>
           <span class="font-bold text-emerald-700 text-sm" id="end-shift-revenue-display">Rp 0</span>
         </div>
         <div class="flex justify-between">
@@ -217,8 +243,20 @@
       </div>
 
       <div>
+        <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1">Total Uang Dihasilkan Shift Ini (Rp) *</label>
+        <input type="number" name="reported_revenue" id="end-shift-reported-input" required min="0" step="any" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-headline-sm text-sm font-bold text-primary neo-shadow-sm">
+        <p class="text-[10px] text-on-surface-variant mt-0.5">Total uang fisik hasil transaksi yang diperoleh pada shift ini.</p>
+      </div>
+
+      <div>
+        <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1">Uang Tinggalan / Modal Besok Pagi (Rp) *</label>
+        <input type="number" name="leftover_cash" id="end-shift-leftover-input" required min="0" step="any" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-headline-sm text-sm font-bold text-emerald-700 neo-shadow-sm">
+        <p class="text-[10px] text-on-surface-variant mt-0.5">Uang yang ditinggalkan di laci kasir sebagai modal kembalian untuk shift berikutnya / besok pagi.</p>
+      </div>
+
+      <div>
         <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1">Catatan Serah Terima (Handover)</label>
-        <textarea name="notes" rows="3" required placeholder="Contoh: Saldo kas sesuai, stok mie aman, serah terima ke shift malam." class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm"></textarea>
+        <textarea name="notes" rows="2" placeholder="Contoh: Saldo kas sesuai, stok mie aman, serah terima lancar." class="w-full px-3 py-1.5 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm"></textarea>
       </div>
 
       <div class="flex items-center justify-end gap-3 pt-3 border-t-2 border-on-surface mt-2">
@@ -238,10 +276,12 @@
     document.getElementById('modal-start-shift').classList.remove('hidden');
   }
 
-  function openEndShiftModal(shiftId, revenue, txCount) {
+  function openEndShiftModal(shiftId, revenue, txCount, startingCash) {
     document.getElementById('end-shift-form').action = '/admin/shifts/' + shiftId + '/end';
     document.getElementById('end-shift-revenue-display').innerText = 'Rp ' + revenue.toLocaleString('id-ID');
     document.getElementById('end-shift-tx-display').innerText = txCount + ' Transaksi Lunas';
+    document.getElementById('end-shift-reported-input').value = revenue;
+    document.getElementById('end-shift-leftover-input').value = startingCash || 200000;
     document.getElementById('modal-end-shift').classList.remove('hidden');
   }
 

@@ -34,7 +34,7 @@
           </div>
           <div class="my-3 px-3 py-2 bg-surface-container border border-on-surface text-xs flex justify-between">
             <span class="font-bold {{ $u->is_buzzer_on ? 'text-error' : 'text-tertiary' }}">{{ $u->is_buzzer_on ? 'Buzzer: MENYALA' : 'Buzzer: Normal' }}</span>
-            <a href="{{ route('customer.index', $u->id) }}" target="_blank" class="text-primary font-bold hover:underline">/customer/{{ $u->id }}</a>
+            <a href="{{ route('customer.index', $u->access_token) }}" target="_blank" class="text-primary font-bold hover:underline">/customer/{{ $u->access_token }}</a>
           </div>
           <div class="grid grid-cols-3 gap-2 pt-2 border-t-2 border-dashed border-on-surface">
             <a href="{{ route('kasir.unit', ['unit_id' => $u->id]) }}" class="py-1.5 px-2 text-[11px] font-bold border-2 border-on-surface text-center btn-press bg-surface-container-lowest">QR</a>
@@ -55,7 +55,7 @@
         <h3 class="font-black uppercase mt-2">Kontrol Sesi {{ $selected->name }}</h3>
         <div class="my-5 p-4 bg-surface-container-low border-2 border-on-surface flex flex-col items-center">
           <div class="bg-white border-2 border-on-surface p-2">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode(route('customer.index', $selected->id)) }}&margin=4" alt="QR {{ $selected->name }}" class="w-40 h-40">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode(route('customer.index', $selected->access_token)) }}&margin=4" alt="QR {{ $selected->name }}" class="w-40 h-40">
           </div>
           <span class="mt-3 font-mono text-xs font-bold bg-on-surface text-white px-2 py-0.5">BAY ID: {{ strtoupper($selected->name) }}</span>
         </div>

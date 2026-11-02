@@ -641,42 +641,57 @@ class KasirController extends Controller
         $shiftHistory = Shift::with('user')->orderBy('created_at', 'desc')->paginate(8);
         $activeSessions = PlaySession::with('tv')->where('status', 'active')->get();
 
+        $lastClosedShift = Shift::where('status', 'closed')->latest('end_time')->first();
+        $suggestedStartingCash = $lastClosedShift ? $lastClosedShift->leftover_cash : 200000;
+        $defaultShiftType = Shift::detectShiftType();
+
         return view('kasir.sift', compact(
             'activeShift', 'ongoingRentalsCount', 'liveShiftRevenue',
-            'liveShiftTransactions', 'shiftHistory', 'activeSessions'
+            'liveShiftTransactions', 'shiftHistory', 'activeSessions',
+            'lastClosedShift', 'suggestedStartingCash', 'defaultShiftType'
         ));
     }
 
     public function startShift(Request $request)
     {
         $validated = $request->validate([
+            'shift_type' => 'required|in:pagi,sore',
             'starting_cash' => 'required|numeric|min:0',
             'pin' => 'required|string',
             'notes' => 'nullable|string',
         ]);
 
-        if (! Hash::check($validated['pin'], Auth::user()->pin)) {
+        $userPin = (string) (Auth::user()->pin ?? '');
+        $pinValid = ($validated['pin'] === $userPin) || Hash::check($validated['pin'], $userPin);
+        if (! $pinValid) {
             return back()->with('error', 'PIN yang Anda masukkan salah!');
         }
 
         Shift::where('status', 'active')->update(['status' => 'closed', 'end_time' => Carbon::now()]);
         Shift::create([
             'user_id' => Auth::id() ?? 1,
+            'shift_type' => $validated['shift_type'],
             'start_time' => Carbon::now(),
-            'starting_cash' => $validated['starting_cash'],
+            'starting_cash' => (int) $validated['starting_cash'],
             'total_revenue' => 0,
+            'reported_revenue' => 0,
+            'leftover_cash' => 0,
             'transactions_count' => 0,
             'notes' => $validated['notes'] ?? 'Shift baru dibuka.',
             'status' => 'active',
         ]);
 
-        return back()->with('success', 'Shift baru berhasil dimulai.');
+        return back()->with('success', 'Shift baru ('.($validated['shift_type'] === 'pagi' ? 'Pagi' : 'Sore').') berhasil dimulai.');
     }
 
     public function endShift(Request $request, $id)
     {
         $shift = Shift::findOrFail($id);
-        $validated = $request->validate(['notes' => 'nullable|string']);
+        $validated = $request->validate([
+            'reported_revenue' => 'required|numeric|min:0',
+            'leftover_cash' => 'required|numeric|min:0',
+            'notes' => 'nullable|string',
+        ]);
         $revenue = PlaySession::where('status', 'completed')
             ->where('end_time', '>=', $shift->start_time)->sum('total_amount');
         $txCount = PlaySession::where('status', 'completed')
@@ -684,6 +699,8 @@ class KasirController extends Controller
         $shift->update([
             'end_time' => Carbon::now(),
             'total_revenue' => $revenue,
+            'reported_revenue' => (int) $validated['reported_revenue'],
+            'leftover_cash' => (int) $validated['leftover_cash'],
             'transactions_count' => $txCount,
             'notes' => $validated['notes'] ?? $shift->notes,
             'status' => 'closed',
@@ -693,7 +710,7 @@ class KasirController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Shift berhasil ditutup, silakan login kembali.');
+        return redirect()->route('login')->with('success', 'Shift berhasil ditutup dan diserahkan. Silakan login kembali.');
     }
 
     /* ================= UNIT ================= */

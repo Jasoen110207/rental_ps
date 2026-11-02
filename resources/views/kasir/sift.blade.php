@@ -11,7 +11,10 @@
       <div class="flex flex-col lg:flex-row justify-between gap-6 pb-6 border-b-2 border-on-surface">
         <div>
           <span class="text-xs font-bold uppercase text-secondary">Petugas Berjaga</span>
-          <h2 class="text-2xl font-black uppercase">{{ $activeShift->user ? $activeShift->user->name : 'Kasir' }}</h2>
+          <div class="flex items-center gap-2 mt-0.5">
+            <h2 class="text-2xl font-black uppercase">{{ $activeShift->user ? $activeShift->user->name : 'Kasir' }}</h2>
+            <span class="px-2 py-0.5 text-[10px] font-bold uppercase border border-on-surface bg-secondary-fixed text-secondary">{{ $activeShift->shift_label }}</span>
+          </div>
           <p class="text-xs font-bold text-on-surface-variant mt-0.5">Mulai: {{ $activeShift->start_time->format('d M Y • H:i') }} ({{ $activeShift->start_time->diffForHumans() }})</p>
         </div>
         <button onclick="document.getElementById('kasir-end-shift').classList.remove('hidden')" class="py-3 px-6 bg-secondary-container text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">Tutup Shift & Serah Terima</button>
@@ -26,12 +29,29 @@
     </section>
 
     <div id="kasir-end-shift" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-on-surface/50 p-4">
-      <form method="POST" action="{{ route('kasir.shifts.end', $activeShift->id) }}" class="w-full max-w-md bg-surface-container-lowest border-2 border-on-surface p-6 neo-shadow-lg flex flex-col gap-4">
+      <form method="POST" action="{{ route('kasir.shifts.end', $activeShift->id) }}" class="w-full max-w-md bg-surface-container-lowest border-2 border-on-surface p-6 neo-shadow-lg flex flex-col gap-3">
         @csrf
-        <h3 class="font-black uppercase">Tutup Shift #{{ $activeShift->id }}</h3>
-        <p class="text-xs text-on-surface-variant">Omset tercatat Rp {{ number_format($liveShiftRevenue, 0, ',', '.') }} dari {{ $liveShiftTransactions }} transaksi. {{ $ongoingRentalsCount }} sesi tetap berjalan.</p>
-        <textarea name="notes" placeholder="Catatan serah terima..." class="px-3 py-2 border-2 border-on-surface text-xs"></textarea>
-        <div class="flex justify-end gap-2">
+        <h3 class="font-black uppercase text-base text-secondary">Tutup Shift #{{ $activeShift->id }} & Handover</h3>
+        <p class="text-xs text-on-surface-variant">Omset sistem tercatat Rp {{ number_format($liveShiftRevenue, 0, ',', '.') }} dari {{ $liveShiftTransactions }} transaksi. {{ $ongoingRentalsCount }} sesi tetap berjalan.</p>
+        
+        <div>
+          <label class="block text-xs uppercase font-bold mb-1">Total Uang Dihasilkan Shift Ini (Rp) *</label>
+          <input type="number" name="reported_revenue" required min="0" step="any" value="{{ $liveShiftRevenue }}" class="w-full px-3 py-2 border-2 border-on-surface text-sm font-bold text-primary">
+          <p class="text-[10px] text-on-surface-variant mt-0.5">Total uang fisik hasil pendapatan transaksi pada shift ini.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase font-bold mb-1">Uang Tinggalan / Modal Besok Pagi (Rp) *</label>
+          <input type="number" name="leftover_cash" required min="0" step="any" value="{{ $activeShift->starting_cash }}" class="w-full px-3 py-2 border-2 border-on-surface text-sm font-bold text-emerald-700">
+          <p class="text-[10px] text-on-surface-variant mt-0.5">Uang yang ditinggalkan di laci kasir sebagai modal kembalian untuk shift berikutnya / besok pagi.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase font-bold mb-1">Catatan Serah Terima (Opsional)</label>
+          <textarea name="notes" rows="2" placeholder="Catatan serah terima kasir..." class="w-full px-3 py-1.5 border-2 border-on-surface text-xs"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t-2 border-on-surface mt-1">
           <button type="button" onclick="document.getElementById('kasir-end-shift').classList.add('hidden')" class="px-4 py-2 border-2 border-on-surface text-xs font-bold btn-press">BATAL</button>
           <button class="px-5 py-2 bg-secondary-container text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">TUTUP SHIFT</button>
         </div>
@@ -45,17 +65,35 @@
   @endif
 
   <div id="kasir-start-shift" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-on-surface/50 p-4">
-    <form method="POST" action="{{ route('kasir.shifts.start') }}" class="w-full max-w-md bg-surface-container-lowest border-2 border-on-surface p-6 neo-shadow-lg flex flex-col gap-4">
+    <form method="POST" action="{{ route('kasir.shifts.start') }}" class="w-full max-w-md bg-surface-container-lowest border-2 border-on-surface p-6 neo-shadow-lg flex flex-col gap-3">
       @csrf
-      <h3 class="font-black uppercase">Buka Shift Baru</h3>
-      <div><label class="text-xs font-bold uppercase">Modal kas awal (Rp)</label>
-      <input type="number" name="starting_cash" value="200000" min="0" required class="w-full mt-1 px-3 py-2 border-2 border-on-surface text-xs font-bold"></div>
+      <h3 class="font-black uppercase text-base">Buka Shift Kasir Baru</h3>
+
+      <div>
+        <label class="block text-xs uppercase font-bold mb-1">Pilih Shift</label>
+        <select name="shift_type" required class="w-full px-3 py-2 border-2 border-on-surface text-xs font-bold uppercase">
+          <option value="pagi" {{ ($defaultShiftType ?? 'pagi') === 'pagi' ? 'selected' : '' }}>Shift Pagi (08:00 - 15:00)</option>
+          <option value="sore" {{ ($defaultShiftType ?? 'pagi') === 'sore' ? 'selected' : '' }}>Shift Sore (15:00 - 21:00)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-xs font-bold uppercase block mb-1">Modal Kas Awal (Rp)</label>
+        <input type="number" name="starting_cash" value="{{ $suggestedStartingCash ?? 200000 }}" min="0" required class="w-full px-3 py-2 border-2 border-on-surface text-xs font-bold text-primary">
+        <p class="text-[10px] text-on-surface-variant mt-0.5">*Otomatis terisi dari Uang Tinggalan shift sebelumnya (Rp {{ number_format($suggestedStartingCash ?? 200000, 0, ',', '.') }}) sebagai modal kembalian.</p>
+      </div>
       
-      <div><label class="text-xs font-bold uppercase">PIN Kasir</label>
-      <input type="password" name="pin" placeholder="Masukkan 6 Digit PIN" required maxlength="6" minlength="4" class="w-full mt-1 px-3 py-2 border-2 border-on-surface text-xs font-bold"></div>
+      <div>
+        <label class="text-xs font-bold uppercase block mb-1">PIN Kasir</label>
+        <input type="password" name="pin" placeholder="Masukkan 6 Digit PIN" required maxlength="6" minlength="4" class="w-full px-3 py-2 border-2 border-on-surface text-xs font-bold">
+      </div>
       
-      <textarea name="notes" placeholder="Catatan..." class="px-3 py-2 border-2 border-on-surface text-xs"></textarea>
-      <div class="flex justify-end gap-2">
+      <div>
+        <label class="text-xs font-bold uppercase block mb-1">Catatan Pembukaan (Opsional)</label>
+        <textarea name="notes" rows="2" placeholder="Kondisi meja / stok awal..." class="w-full px-3 py-1.5 border-2 border-on-surface text-xs"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t-2 border-on-surface mt-1">
         <button type="button" onclick="document.getElementById('kasir-start-shift').classList.add('hidden')" class="px-4 py-2 border-2 border-on-surface text-xs font-bold btn-press">BATAL</button>
         <button class="px-5 py-2 bg-primary text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">MULAI SHIFT</button>
       </div>
@@ -78,13 +116,31 @@
     </div>
     <div class="xl:col-span-7 bg-surface-container-lowest border-2 border-on-surface neo-shadow overflow-x-auto">
       <table class="w-full text-left text-xs">
-        <thead><tr class="bg-surface-container-high border-b-2 border-on-surface uppercase"><th class="p-3">Shift</th><th class="p-3">Kasir</th><th class="p-3 text-right">Omset</th><th class="p-3 text-center">Status</th></tr></thead>
+        <thead>
+          <tr class="bg-surface-container-high border-b-2 border-on-surface uppercase font-headline-sm">
+            <th class="p-3">Shift</th>
+            <th class="p-3">Kasir</th>
+            <th class="p-3">Modal Awal</th>
+            <th class="p-3 text-right">Omset</th>
+            <th class="p-3 text-right">Dihasilkan</th>
+            <th class="p-3 text-right">Tinggalan</th>
+            <th class="p-3 text-center">Status</th>
+          </tr>
+        </thead>
         <tbody>
           @foreach ($shiftHistory as $sh)
             <tr class="border-b border-on-surface/20">
-              <td class="p-3 font-bold">#{{ $sh->id }} • {{ $sh->start_time->format('d M H:i') }}</td>
+              <td class="p-3 font-bold">
+                <div>#{{ $sh->id }} • {{ $sh->start_time->format('d M H:i') }}</div>
+                <span class="px-1.5 py-0.5 text-[9px] font-bold uppercase border border-on-surface {{ $sh->shift_type === 'pagi' ? 'bg-amber-100 text-amber-900' : 'bg-blue-100 text-blue-900' }}">
+                  {{ $sh->shift_type === 'pagi' ? 'Pagi (08:00-15:00)' : 'Sore (15:00-21:00)' }}
+                </span>
+              </td>
               <td class="p-3">{{ $sh->user ? $sh->user->name : '-' }}</td>
+              <td class="p-3">Rp {{ number_format($sh->starting_cash, 0, ',', '.') }}</td>
               <td class="p-3 text-right font-bold text-primary">Rp {{ number_format($sh->total_revenue, 0, ',', '.') }}</td>
+              <td class="p-3 text-right font-bold text-emerald-700">Rp {{ number_format($sh->reported_revenue, 0, ',', '.') }}</td>
+              <td class="p-3 text-right font-bold text-amber-800">Rp {{ number_format($sh->leftover_cash, 0, ',', '.') }}</td>
               <td class="p-3 text-center"><span class="px-2 py-0.5 text-[10px] font-bold uppercase border border-on-surface {{ $sh->status === 'active' ? 'bg-emerald-100 text-emerald-900' : 'bg-surface-container text-on-surface-variant' }}">{{ $sh->status }}</span></td>
             </tr>
           @endforeach

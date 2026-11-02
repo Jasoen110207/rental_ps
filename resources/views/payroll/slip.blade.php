@@ -72,14 +72,14 @@
         <div class="section">
             <div class="row"><span class="label">Nama</span><span>{{ $payroll['name'] }}</span></div>
             <div class="row"><span class="label">Jabatan</span><span>{{ $payroll['position'] }}</span></div>
+            <div class="row"><span class="label">Total Absen Shift</span><span>{{ $payroll['total_shifts'] ?? 0 }} Shift</span></div>
             <div class="row"><span class="label">Jam Kerja</span><span>{{ $payroll['work_hours'] }}</span></div>
         </div>
 
         <div class="section">
-            <div class="row"><span class="label">Gaji Pokok</span><span>Rp {{ number_format($payroll['base_salary'], 0, ',', '.') }}</span></div>
-            <div class="row"><span class="label">Bonus / Komisi</span><span>Rp {{ number_format($payroll['transaction_bonus'], 0, ',', '.') }}</span></div>
-            <div class="row"><span class="label">Potongan</span><span>- Rp {{ number_format($payroll['deductions'], 0, ',', '.') }}</span></div>
-            <div class="total row"><span class="label">Total Gaji Bersih</span><span>Rp {{ number_format($payroll['net_salary'], 0, ',', '.') }}</span></div>
+            <div class="row"><span class="label">Upah per Shift</span><span>Rp {{ number_format($payroll['shift_rate'] ?? 50000, 0, ',', '.') }}</span></div>
+            <div class="row"><span class="label">Jumlah Kehadiran Shift</span><span>{{ $payroll['total_shifts'] ?? 0 }} Shift</span></div>
+            <div class="total row"><span class="label">Total Gaji Diterima</span><span>Rp {{ number_format($payroll['net_salary'], 0, ',', '.') }}</span></div>
         </div>
     </div>
 </body>

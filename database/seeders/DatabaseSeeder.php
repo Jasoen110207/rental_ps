@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -46,6 +47,7 @@ class DatabaseSeeder extends Seeder
         $tvs = [
             [
                 'id' => 1,
+                'access_token' => Str::random(32),
                 'name' => 'PS 01 - PS3 VIP',
                 'type' => 'ps3',
                 'price_per_hour' => 8000,
@@ -57,6 +59,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'id' => 2,
+                'access_token' => Str::random(32),
                 'name' => 'PS 02 - PS4 Regular',
                 'type' => 'ps4',
                 'price_per_hour' => 12000,
@@ -68,6 +71,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'id' => 3,
+                'access_token' => Str::random(32),
                 'name' => 'PS 03 - PS4 Pro',
                 'type' => 'ps4',
                 'price_per_hour' => 15000,
@@ -79,6 +83,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'id' => 4,
+                'access_token' => Str::random(32),
                 'name' => 'PS 04 - PS5 Next-Gen',
                 'type' => 'ps5',
                 'price_per_hour' => 25000,
@@ -90,6 +95,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'id' => 5,
+                'access_token' => Str::random(32),
                 'name' => 'PS 05 - Sim Racing Cockpit',
                 'type' => 'sim_racing',
                 'price_per_hour' => 35000,
@@ -101,6 +107,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'id' => 6,
+                'access_token' => Str::random(32),
                 'name' => 'PS 06 - Nintendo Switch',
                 'type' => 'nintendo_switch',
                 'price_per_hour' => 15000,
@@ -112,6 +119,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'id' => 7,
+                'access_token' => Str::random(32),
                 'name' => 'PS 07 - PS5 VIP Arena',
                 'type' => 'ps5',
                 'price_per_hour' => 25000,
@@ -123,6 +131,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'id' => 8,
+                'access_token' => Str::random(32),
                 'name' => 'PS 08 - PS4 Pro Lounge',
                 'type' => 'ps4',
                 'price_per_hour' => 15000,
@@ -159,10 +168,13 @@ class DatabaseSeeder extends Seeder
             [
                 'id' => 1,
                 'user_id' => 2,
+                'shift_type' => 'pagi',
                 'start_time' => $now->copy()->subHours(4),
                 'end_time' => null,
                 'starting_cash' => 200000,
                 'total_revenue' => 145000,
+                'reported_revenue' => 0,
+                'leftover_cash' => 200000,
                 'transactions_count' => 3,
                 'notes' => 'Shift siang lancar, stok mie dan es teh aman.',
                 'status' => 'active',

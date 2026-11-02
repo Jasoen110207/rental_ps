@@ -145,7 +145,7 @@
         <span class="material-symbols-outlined text-xl">arrow_forward</span>
       </button>
     @else
-      <form method="POST" action="{{ route('customer.call-cashier', $tv->id) }}" class="m-0">
+      <form method="POST" action="{{ route('customer.call-cashier', $tv->access_token) }}" class="m-0">
         @csrf
         <button type="submit" onclick="return confirm('Panggil petugas ke meja Anda?')" class="w-full p-4 bg-tertiary text-on-tertiary border-2 border-on-surface neo-shadow btn-press hover:bg-tertiary-container flex items-center justify-between text-left transition">
           <div class="flex items-center gap-3">
@@ -253,7 +253,7 @@
       </button>
     </div>
 
-    <form method="POST" action="{{ route('customer.add-time', $tv->id) }}" class="flex flex-col gap-4">
+    <form method="POST" action="{{ route('customer.add-time', $tv->access_token) }}" class="flex flex-col gap-4">
       @csrf
 
       <div>
@@ -305,7 +305,7 @@
     </div>
 
     <!-- Product list -->
-    <form id="cust-food-form" method="POST" action="{{ route('customer.order-food', $tv->id) }}" class="flex-1 overflow-y-auto flex flex-col gap-3 pr-1">
+    <form id="cust-food-form" method="POST" action="{{ route('customer.order-food', $tv->access_token) }}" class="flex-1 overflow-y-auto flex flex-col gap-3 pr-1">
       @csrf
 
       <div class="flex flex-col gap-2.5 overflow-y-auto max-h-64 p-1">
@@ -453,7 +453,7 @@
   // Background Database Poll for Customer every 3s
   async function pollCustomerStatus() {
     try {
-      const res = await fetch('{{ route("customer.status", $tv->id) }}');
+      const res = await fetch('{{ route("customer.status", $tv->access_token) }}');
       if (!res.ok) return;
       const data = await res.json();
 
