@@ -1,432 +1,352 @@
-# Dokumen Perencanaan Implementasi Fitur (Issue & Action Plan)
+# Dokumen Perencanaan Implementasi (Implementation Plan) — Bugfix Login Kasir Baru & Otomatisasi Absensi ke Penggajian (Payroll)
 
-Dokumen ini disusun sebagai panduan teknis langkah demi langkah (*step-by-step implementation guide*) untuk **Junior Programmer** atau **AI Model**. Setiap tahapan sudah mencantumkan nama file, struktur database, logika bisnis, hingga potongan kode acuan agar tidak terjadi kesalahan atau kebingungan saat implementasi.
-
----
-
-## Ringkasan Kebutuhan (Overview)
-
-1. **Issue #1 — Keamanan URL Pelanggan (Customer Self-Service) dengan Access Token**
-   Mengganti parameter ID numerik (`/customer/1`, `/customer/2`) menjadi token acak unik (`/customer/{access_token}`) agar pelanggan tidak bisa mengganti angka di URL secara iseng untuk memesan F&B atau menambah waktu di meja orang lain.
-2. **Issue #2 — Perhitungan Gaji Kasir Berbasis Shift (Rp 50.000 / Shift)**
-   Menghapus sistem gaji pokok bulanan statis. Gaji kasir dihitung murni berdasarkan jumlah kehadiran (absen shift) dikalikan **Rp 50.000 per shift**.
-3. **Issue #3 — Input Uang Tinggalan & Total Uang Dihasilkan saat Tutup Shift (Sistem 2 Shift: Pagi & Sore)**
-   Menambahkan input wajib **Total Uang Dihasilkan** dan **Uang Tinggalan (Modal Besok Pagi / Shift Berikutnya)** ketika kasir menutup shift, serta mengotomatisasi nilai **Modal Kas Awal** pada pembukaan shift berikutnya dari uang tinggalan tersebut.
+> **Target Pembaca:** Junior Programmer / AI Coding Assistant (Model Hemat Biaya)
+> **Stack Proyek:** Laravel 12 (PHP 8.x), Blade + Tailwind CSS, MySQL/SQLite
+> **Penting:** Ikuti setiap langkah secara berurutan. Jangan melewati langkah analisis penyebab (*root cause*), modifikasi controller/model/view, maupun pengujian di bagian akhir.
 
 ---
 
-## ISSUE #1: Keamanan URL Customer Menggunakan Access Token
+## Ringkasan Masalah & Tujuan Perbaikan
 
-### 1. Masalah Saat Ini
-* Route pelanggan di `routes/web.php` masih menggunakan ID urutan database (`/{tv_id}`), contoh: `http://rental_ps.test/customer/1`.
-* Pelanggan yang usil dapat mengubah angka `1` menjadi `2`, `3`, dst. di browser HP mereka dan memesan F&B banyak-banyak ke meja pelanggan lain.
-* Di halaman `resources/views/customer/order.blade.php` (baris 27–34), terdapat dropdown **"Pindah meja"** yang memungkinkan pelanggan berpindah meja secara bebas.
+1. **Bug #1 — Akun Kasir Baru Tidak Bisa Login (Mismatch Hashing PIN & Password):**
+   Saat Admin membuat akun kasir baru melalui menu **Kelola Akun (Users)**, kasir tersebut **selalu gagal login** meskipun sudah memasukkan Email, Password, dan PIN yang 100% sesuai dengan yang dibuat Admin.
+2. **Bug #2 — Kasir Login / Absen Tidak Otomatis Masuk ke Penggajian Kasir (Payroll):**
+   Saat kasir berhasil login (atau melakukan absen/buka shift), data kehadirannya tidak otomatis tercatat atau tersinkronisasi ke halaman **Penggajian (Payroll)** milik kasir tersebut.
 
-### 2. File yang Terdampak
-1. `database/migrations/xxxx_xx_xx_xxxxxx_add_access_token_to_tvs_table.php` *(Buat Baru)*
-2. `app/Models/Tv.php`
-3. `database/seeders/DatabaseSeeder.php`
-4. `routes/web.php`
-5. `app/Http/Controllers/CustomerController.php`
-6. `app/Http/Controllers/UnitController.php`
-7. `resources/views/customer/index.blade.php`
-8. `resources/views/customer/order.blade.php`
-9. `resources/views/admin/units/index.blade.php`
-10. `resources/views/admin/units/qr.blade.php`
-11. `resources/views/kasir/unit.blade.php`
+---
 
-### 3. Tahapan Implementasi
+## FITUR / PERBAIKAN 1: Perbaikan Login Akun Kasir Baru (Email, Password, & PIN)
 
-#### Tahap 1.1: Buat Migration untuk Kolom `access_token` pada Tabel `tvs`
-Jalankan perintah Artisan:
-```bash
-php artisan make:migration add_access_token_to_tvs_table --table=tvs --no-interaction
-```
-Isi file migration:
-* Tambahkan kolom `access_token` bertipe `string(64)->unique()->nullable()->after('id')`.
-* Isi token secara otomatis untuk semua baris `tvs` yang sudah ada menggunakan `Str::random(32)`.
-* Setelah terisi, pastikan setiap unit memiliki `access_token` unik.
+### 1.1. Analisis Penyebab Utama (*Root Cause*)
+Kenapa akun kasir dari `DatabaseSeeder` bisa login, tetapi akun kasir baru yang dibuat Admin lewat menu `Users` tidak bisa login?
 
-Contoh kode di dalam method `up()`:
+1. **Ketidakcocokan Format PIN (`Hash::make` vs Plain Text):**
+   - Pada `app/Http/Controllers/UserController.php` di method `store()` (baris 53) dan `update()` (baris 100), PIN yang diinput Admin di-*hash* menggunakan Bcrypt:
+     ```php
+     'pin' => $validated['role'] === 'kasir' ? Hash::make($validated['pin']) : null,
+     ```
+     Sehingga di database, kolom `pin` berisi string hash seperti `$2y$12$abcdef...`.
+   - Sebaliknya, pada `app/Http/Controllers/AuthController.php` di method `login()` (baris 39), pengecekan PIN dilakukan menggunakan perbandingan teks biasa (*plain-text comparison*):
+     ```php
+     if ($request->pin != $user->pin) {
+         return back()->withErrors(['pin' => 'PIN kasir salah.']);
+     }
+     ```
+   - Akibatnya, saat kasir baru mengetik PIN `123456`, sistem membandingkan `'123456' != '$2y$12$abcdef...'` yang **selalu bernilai salah (mismatch)**! Itulah sebabnya akun kasir baru tidak pernah bisa login.
+
+2. **Potensi Double-Hashing / Inkonsistensi Password & Input Spasi:**
+   - Pada `app/Models/User.php`, atribut `'password' => 'hashed'` sudah terdaftar di `casts()`.
+   - Selain itu, di `AuthController::login()`, jika ada spasi tidak sengaja pada input email atau PIN, validasi bisa gagal.
+
+---
+
+### 1.2. Tahapan Implementasi Perbaikan Bug #1
+
+#### Langkah 1: Perbaiki Validasi PIN di `app/Http/Controllers/AuthController.php`
+Buka file `app/Http/Controllers/AuthController.php`. Pada method `login(Request $request)`, ubah pengecekan PIN agar mendukung **PIN yang di-hash (`Hash::check`)** sekaligus **PIN teks biasa (*plain text* dari seeder lama)**:
+
 ```php
-Schema::table('tvs', function (Blueprint $table) {
-    $table->string('access_token', 64)->nullable()->unique()->after('id');
-});
+// Sebelumnya di app/Http/Controllers/AuthController.php:
+if ($user->role === 'kasir') {
+    if (! $request->filled('pin')) {
+        return back()->withErrors([
+            'pin' => 'Kasir wajib memasukkan PIN 6 digit.',
+        ])->onlyInput('email');
+    }
 
-// Generate token untuk data TV yang sudah ada di database
-$tvs = DB::table('tvs')->get();
-foreach ($tvs as $tv) {
-    DB::table('tvs')
-        ->where('id', $tv->id)
-        ->update(['access_token' => \Illuminate\Support\Str::random(32)]);
+    if ($request->pin != $user->pin) {
+        return back()->withErrors([
+            'pin' => 'PIN kasir salah.',
+        ])->onlyInput('email');
+    }
 }
 ```
 
-#### Tahap 1.2: Auto-Generate `access_token` di Model `Tv` & Seeder
-Buka `app/Models/Tv.php`:
-* Tambahkan event `booted()` agar setiap kali unit TV baru dibuat (`creating`), kolom `access_token` otomatis terisi dengan `Str::random(32)` jika belum ada:
+**Ubah menjadi:**
 ```php
-protected static function booted(): void
+if ($user->role === 'kasir') {
+    $inputPin = trim((string) $request->input('pin', ''));
+
+    if ($inputPin === '') {
+        return back()->withErrors([
+            'pin' => 'Kasir wajib memasukkan PIN 6 digit.',
+        ])->onlyInput('email');
+    }
+
+    $storedPin = (string) ($user->pin ?? '');
+
+    // Cek apakah storedPin adalah hash Bcrypt ($2y$ / $2a$ / $2b$) atau plain text
+    $isPinValid = false;
+    if (str_starts_with($storedPin, '$2y$') || str_starts_with($storedPin, '$2a$') || str_starts_with($storedPin, '$2b$')) {
+        $isPinValid = \Illuminate\Support\Facades\Hash::check($inputPin, $storedPin);
+    } else {
+        $isPinValid = hash_equals($storedPin, $inputPin);
+    }
+
+    if (! $isPinValid) {
+        return back()->withErrors([
+            'pin' => 'PIN kasir salah.',
+        ])->onlyInput('email');
+    }
+}
+```
+
+#### Langkah 2: Konsistensikan Penyimpanan PIN di `app/Http/Controllers/UserController.php`
+Buka file `app/Http/Controllers/UserController.php`:
+1. Pada method `store(Request $request)`:
+   - Pastikan email disimpan dalam huruf kecil dan tanpa spasi (`strtolower(trim($validated['email']))`).
+   - Simpan PIN dalam bentuk *plain text* 6 digit (`trim($validated['pin'])`) **ATAU** `Hash::make(trim($validated['pin']))` (karena Langkah 1 sudah mendukung keduanya). Namun, **disarankan menyimpan plain text 6 digit (`trim($validated['pin'])`)** jika Admin perlu melihat/mengingat kembali PIN kasir di halaman edit, atau tetap menggunakan `Hash::make` tetapi pastikan di-`trim()`.
+   - Contoh kode yang direkomendasikan pada `UserController::store()`:
+     ```php
+     User::create([
+         'name' => trim($validated['name']),
+         'email' => strtolower(trim($validated['email'])),
+         'role' => $validated['role'],
+         'password' => $validated['password'], // Otomatis di-hash oleh cast 'password' => 'hashed' di model User
+         'pin' => $validated['role'] === 'kasir' ? Hash::make(trim($validated['pin'])) : null,
+     ]);
+     ```
+2. Pada method `update(Request $request, User $user)`:
+   - Lakukan hal yang sama: gunakan `trim()` pada `pin` dan `strtolower(trim($validated['email']))`.
+   - Jika `password` diisi, cukup assign `$validated['password']` (atau `Hash::make($validated['password'])`).
+
+---
+
+## FITUR / PERBAIKAN 2: Otomatisasi Absen Kasir Saat Login & Sinkronisasi ke Penggajian (Payroll)
+
+### 2.1. Analisis Penyebab Utama (*Root Cause*)
+Kenapa saat kasir login atau absen, datanya tidak otomatis masuk ke halaman **Penggajian Kasir (`/payroll`)**?
+
+1. **Login Kasir Tidak Otomatis Mencatat Absensi Shift (`Shift`):**
+   - Di `PayrollController::calculatePayrollForUser()`, jumlah kehadiran kasir dihitung dari tabel `shifts` berdasarkan `user_id` pada bulan berjalan:
+     ```php
+     $totalShifts = Shift::where('user_id', $user->id)
+         ->whereBetween('start_time', [$monthStart, $monthEnd])
+         ->count();
+     ```
+   - Namun, saat kasir login di `AuthController::login()`, sistem **hanya melakukan `Auth::login($user)` lalu redirect ke `/kasir/dashboard`** tanpa membuat record absensi `Shift` untuk kasir tersebut!
+   - Lebih parah lagi: ketika di sistem sudah ada shift yang berstatus `'active'` (misalnya bawaan dari `DatabaseSeeder` milik Kasir 1, atau kasir shift sebelumnya lupa klik "Tutup Shift"), kasir yang baru login akan melihat tulisan **"SHIFT AKTIF"** di atas layar. Kasir mengira dirinya sudah terhitung absen, padahal `Shift` yang sedang aktif tersebut tercatat atas nama `user_id` kasir lain! Akibatnya, absen kasir yang baru login tetap `0` di halaman Payroll.
+
+2. **Tabel `payrolls` (Riwayat Gaji Per Bulan) Tidak Otomatis Ter-update Saat Kasir Absen:**
+   - Pada `PayrollController::index()`, tabel `Payroll` hanya dibuat ketika Admin menekan tombol **"Konfirmasi Pembayaran"** (`PayrollController::generate()`).
+   - Selama Admin belum menekan tombol tersebut, atau jika Admin sudah pernah membuat data `pending` di awal bulan, penambahan jumlah shift/absen kasir yang baru login **tidak otomatis memperbarui (`sync`)** record di tabel `payrolls`.
+
+---
+
+### 2.2. Tahapan Implementasi Perbaikan Bug #2
+
+#### Langkah 1: Buat Method Auto-Sync Payroll di Model `app/Models/Payroll.php`
+Buka file `app/Models/Payroll.php` dan tambahkan konstanta gaji per shift serta method statis `syncForUser(User $user, ?string $periodMonth = null)` agar setiap kali kasir absen (login / buka shift / tutup shift), data di tabel `payrolls` langsung ter-update otomatis.
+
+Tambahkan kode berikut di dalam class `Payroll` pada `app/Models/Payroll.php`:
+
+```php
+public const SHIFT_RATE = 50000;
+
+/**
+ * Sinkronisasi otomatis data penggajian kasir berdasarkan jumlah absen (shift) pada bulan terkait.
+ */
+public static function syncForUser(User $user, ?string $periodMonth = null): ?self
 {
-    static::creating(function (Tv $tv) {
-        if (empty($tv->access_token)) {
-            $tv->access_token = \Illuminate\Support\Str::random(32);
+    if ($user->role !== 'kasir') {
+        return null;
+    }
+
+    $now = \Carbon\Carbon::now();
+    $periodMonth = $periodMonth ?? $now->format('Y-m');
+
+    $monthStart = \Carbon\Carbon::createFromFormat('Y-m', $periodMonth)->startOfMonth();
+    $monthEnd = \Carbon\Carbon::createFromFormat('Y-m', $periodMonth)->endOfMonth();
+
+    $shifts = Shift::where('user_id', $user->id)
+        ->whereBetween('start_time', [$monthStart, $monthEnd])
+        ->get();
+
+    $totalShifts = $shifts->count();
+
+    $workHours = $shifts->sum(function ($shift) use ($now) {
+        $start = \Carbon\Carbon::parse($shift->start_time);
+        $end = $shift->end_time ? \Carbon\Carbon::parse($shift->end_time) : $now;
+
+        return max(0, $start->diffInMinutes($end) / 60);
+    });
+    $workHours = round($workHours, 1);
+
+    $totalShiftSalary = $totalShifts * self::SHIFT_RATE;
+
+    // Cari apakah sudah ada record payroll bulan ini
+    $existingPayroll = self::where('user_id', $user->id)
+        ->where('period_month', $periodMonth)
+        ->first();
+
+    // Jika sudah berstatus 'paid', kita tetap update jumlah hari/gaji atau biarkan sesuai kebijakan,
+    // namun jika belum ada atau masih 'pending', wajib di-upsert otomatis.
+    $bonus = $existingPayroll ? (float) $existingPayroll->bonus : 0;
+    $deduction = $existingPayroll ? (float) $existingPayroll->deduction : 0;
+    $netSalary = max(0, $totalShiftSalary + $bonus - $deduction);
+
+    return self::updateOrCreate(
+        [
+            'user_id' => $user->id,
+            'period_month' => $periodMonth,
+        ],
+        [
+            'work_days' => $totalShifts,
+            'work_hours' => $workHours,
+            'base_salary' => $totalShiftSalary,
+            'bonus' => $bonus,
+            'deduction' => $deduction,
+            'net_salary' => $netSalary,
+            'status' => $existingPayroll ? $existingPayroll->status : 'pending',
+        ]
+    );
+}
+```
+
+#### Langkah 2: Otomatisasi Pencatatan Absen (`Shift`) Saat Kasir Login di `app/Http/Controllers/AuthController.php`
+Ketika kasir berhasil login di `AuthController::login()`:
+1. Cek apakah sudah ada shift berstatus `'active'` di sistem:
+   - Jika belum ada shift `'active'` sama sekali, **ATAU** jika shift `'active'` saat ini adalah milik kasir lain (`$activeShift->user_id !== $user->id`), **ATAU** jika shift `'active'` tersebut adalah sisa dari hari sebelumnya (`!Carbon::parse($activeShift->start_time)->isToday()`):
+     - Tutup otomatis shift lama yang masih menggantung (`status => 'closed'`, `end_time => Carbon::now()`).
+     - Cek apakah kasir `$user->id` sudah memiliki catatan shift pada tipe shift saat ini (`Shift::detectShiftType()`) di hari ini (`Carbon::today()`).
+     - Jika sudah ada shift milik kasir tersebut hari ini pada tipe shift yang sama, aktifkan kembali shift tersebut (`status => 'active'`, `end_time => null`).
+     - Jika belum ada, **buatkan record `Shift` baru secara otomatis** untuk `$user->id` dengan modal awal diambil dari `leftover_cash` shift terakhir yang ditutup!
+2. Panggil `\App\Models\Payroll::syncForUser($user)` agar absensi tersebut langsung masuk ke tabel `payrolls` detik itu juga!
+
+**Contoh kode yang ditambahkan di `AuthController::login()` tepat sebelum `return redirect()->route('kasir.dashboard')`:**
+
+```php
+if ($user->role === 'kasir') {
+    $now = \Carbon\Carbon::now();
+    $currentShiftType = \App\Models\Shift::detectShiftType();
+
+    // 1. Cek shift aktif saat ini
+    $activeShift = \App\Models\Shift::where('status', 'active')->first();
+
+    // Jika ada shift aktif tapi milik kasir lain atau dari hari kemarin, tutup shift tersebut
+    if ($activeShift && ($activeShift->user_id !== $user->id || ! \Carbon\Carbon::parse($activeShift->start_time)->isToday())) {
+        $activeShift->update([
+            'status' => 'closed',
+            'end_time' => $now,
+            'notes' => trim(($activeShift->notes ?? '') . ' (Ditutup otomatis saat pergantian login kasir)'),
+        ]);
+        \App\Models\Payroll::syncForUser($activeShift->user);
+        $activeShift = null;
+    }
+
+    // 2. Jika belum ada shift aktif untuk kasir yang baru login ini
+    if (! $activeShift) {
+        // Cek apakah kasir ini sudah pernah absen di hari & tipe shift yang sama
+        $existingTodayShift = \App\Models\Shift::where('user_id', $user->id)
+            ->whereDate('start_time', $now->toDateString())
+            ->where('shift_type', $currentShiftType)
+            ->first();
+
+        if ($existingTodayShift) {
+            $existingTodayShift->update([
+                'status' => 'active',
+                'end_time' => null,
+            ]);
+        } else {
+            $lastClosedShift = \App\Models\Shift::where('status', 'closed')
+                ->latest('end_time')
+                ->first();
+
+            $defaultStartingCash = $lastClosedShift ? (float) $lastClosedShift->leftover_cash : 200000;
+
+            \App\Models\Shift::create([
+                'user_id' => $user->id,
+                'shift_type' => $currentShiftType,
+                'start_time' => $now,
+                'starting_cash' => $defaultStartingCash,
+                'status' => 'active',
+                'notes' => 'Absen otomatis saat login kasir.',
+            ]);
         }
-    });
+    }
+
+    // 3. Sinkronkan langsung ke Penggajian (Payroll)
+    \App\Models\Payroll::syncForUser($user);
+
+    return redirect()->route('kasir.dashboard');
 }
 ```
-* Opsional tapi direkomendasikan: Gunakan `access_token` untuk pencarian helper atau Route Model Binding.
-* Buka `database/seeders/DatabaseSeeder.php`: Tambahkan `'access_token' => \Illuminate\Support\Str::random(32)` pada setiap item array `$tvs` (Meja 1 s/d 8).
 
-#### Tahap 1.3: Ubah Parameter Route di `routes/web.php`
-Buka `routes/web.php` (baris 50–61) dan ubah parameter `{tv_id}` menjadi `{token}`:
-```php
-// Public Customer Routes (Accessed via QR Code - No Login Required)
-Route::prefix('customer')->name('customer.')->group(function () {
-    Route::get('/order/{token}', [CustomerController::class, 'order'])->name('order');
-    Route::get('/{token}', [CustomerController::class, 'index'])->name('index');
-    Route::post('/{token}/add-time', [CustomerController::class, 'requestAddTime'])->name('add-time');
-    Route::post('/{token}/order-food', [CustomerController::class, 'requestFood'])->name('order-food');
-    Route::post('/{token}/call-cashier', [CustomerController::class, 'callCashier'])->name('call-cashier');
-    Route::get('/{token}/status', [CustomerController::class, 'apiStatus'])->name('status');
-});
-
-// QR short url alias
-Route::get('/scan/{token}', function (string $token) {
-    return redirect()->route('customer.index', ['token' => $token]);
-});
-```
-
-#### Tahap 1.4: Update `CustomerController.php` & `UnitController.php`
-1. Buka `app/Http/Controllers/CustomerController.php`:
-   * Buat helper method privat di dalam `CustomerController`:
+#### Langkah 3: Panggil `Payroll::syncForUser()` Saat Buka/Tutup Shift Manual
+Agar data penggajian selalu sinkron baik saat kasir login maupun saat buka/tutup shift manual:
+1. Buka `app/Http/Controllers/KasirController.php`:
+   - Di akhir method `startShift(Request $request)` (sebelum `return redirect`), tambahkan:
      ```php
-     protected function findTvByToken(string $token): Tv
-     {
-         return Tv::where('access_token', $token)->firstOrFail();
+     \App\Models\Payroll::syncForUser(Auth::user());
+     ```
+   - Di akhir method `endShift(Request $request)` (sebelum `return redirect`), tambahkan:
+     ```php
+     if ($activeShift->user) {
+         \App\Models\Payroll::syncForUser($activeShift->user);
      }
      ```
-   * Pada method `index($token)`, `requestAddTime(Request $request, $token)`, `requestFood(Request $request, $token)`, `callCashier(Request $request, $token)`, `apiStatus($token)`, dan `order(Request $request, $token)`:
-     Ganti `Tv::findOrFail($tvId)` menjadi `$tv = $this->findTvByToken($token);`.
-   * Pada method `order(Request $request, string $token)`:
-     Hapus logika pencarian `tv_id` dari query string dan hapus pengiriman seluruh `$tvs` untuk pindah meja agar pelanggan terkunci hanya pada meja sesuai token QR yang di-scan.
-2. Buka `app/Http/Controllers/UnitController.php`:
-   * Pada method `qr($id)` (baris 60–66):
-     Ubah pembuatan URL QR menjadi menggunakan `access_token`:
+2. Buka `app/Http/Controllers/ShiftController.php`:
+   - Di akhir method `startShift(Request $request)`, tambahkan:
      ```php
-     public function qr($id)
-     {
-         $tv = Tv::findOrFail($id);
-         if (empty($tv->access_token)) {
-             $tv->update(['access_token' => \Illuminate\Support\Str::random(32)]);
-         }
-         $customerUrl = route('customer.index', ['token' => $tv->access_token]);
-
-         return view('admin.units.qr', compact('tv', 'customerUrl'));
+     $shiftUser = \App\Models\User::find($userId);
+     if ($shiftUser) {
+         \App\Models\Payroll::syncForUser($shiftUser);
+     }
+     ```
+   - Di akhir method `endShift(Request $request, Shift $shift)`, tambahkan:
+     ```php
+     if ($shift->user) {
+         \App\Models\Payroll::syncForUser($shift->user);
      }
      ```
 
-#### Tahap 1.5: Update Seluruh View yang Memanggil Route `customer.*`
-1. `resources/views/customer/index.blade.php`:
-   * Ganti semua pemanggilan `route('customer.call-cashier', $tv->id)` menjadi `route('customer.call-cashier', $tv->access_token)` (baris 148).
-   * Ganti `route('customer.add-time', $tv->id)` menjadi `route('customer.add-time', $tv->access_token)` (baris 256).
-   * Ganti `route('customer.order-food', $tv->id)` menjadi `route('customer.order-food', $tv->access_token)` (baris 308).
-   * Ganti `route("customer.status", $tv->id)` menjadi `route("customer.status", $tv->access_token)` (baris 456).
-2. `resources/views/customer/order.blade.php`:
-   * **PENTING**: Hapus form `<form method="GET" ...> Pindah meja <select name="tv_id">` pada baris 27–34! Pelanggan tidak boleh pindah meja dari halaman order.
-   * Ubah `data-tv-id="{{ $tv->id }}"` pada baris 6 menjadi `data-tv-token="{{ $tv->access_token }}"`.
-   * Ganti semua `route('customer.index', $tv->id)`, `route('customer.order-food', $tv->id)`, `route('customer.call-cashier', $tv->id)`, `route('customer.add-time', $tv->id)` agar menggunakan `$tv->access_token`.
-   * Pada script JS baris 270 & 286, ganti `fetch('/customer/' + tvId + '/status')` menjadi menggunakan URL dari `{{ route('customer.status', $tv->access_token) }}`.
-3. `resources/views/admin/units/index.blade.php` (baris 48–50):
-   * Ganti `route('customer.index', $unit->id)` menjadi `route('customer.index', $unit->access_token)`.
-4. `resources/views/kasir/unit.blade.php` (baris 37 & 58):
-   * Ganti `route('customer.index', $u->id)` menjadi `route('customer.index', $u->access_token)`.
-   * Ganti `route('customer.index', $selected->id)` pada generator QR image menjadi `route('customer.index', $selected->access_token)`.
+#### Langkah 4: Sinkronkan Otomatis di `PayrollController::index()`
+Buka `app/Http/Controllers/PayrollController.php`.
+Pada method `index(Request $request)`:
+1. Sebelum mengambil `$payrollHistory`, panggil `Payroll::syncForUser($selectedUser, $periodMonth)` untuk kasir yang sedang dipilih (atau untuk seluruh kasir jika `$users` di-loop).
+2. Dengan demikian, begitu Admin atau Kasir membuka menu **Penggajian (`/payroll`)**, data gaji bulan berjalan **sudah otomatis muncul di Rincian Perhitungan Gaji dan di tabel Riwayat Gaji Per Bulan** tanpa harus menunggu Admin mengklik tombol manual!
+3. Ambil juga daftar riwayat absensi shift (`$attendanceShifts`) milik kasir pada bulan tersebut untuk ditampilkan di halaman Payroll sebagai bukti kehadiran:
+   ```php
+   $attendanceShifts = Shift::where('user_id', $selectedUser->id)
+       ->whereBetween('start_time', [$monthStart, $monthEnd])
+       ->orderBy('start_time', 'desc')
+       ->get();
+   ```
+   Lalu kirimkan `'attendanceShifts'` ke `view('payroll.index', compact(...))`.
+
+#### Langkah 5: Tampilkan Tabel Bukti Absensi Shift di `resources/views/payroll/index.blade.php`
+Buka `resources/views/payroll/index.blade.php`:
+- Tambahkan bagian/tabel **"Riwayat Kehadiran / Absen Shift Bulan Ini"** di atas atau di bawah tabel *Riwayat Gaji Per Bulan* yang menampilkan:
+  - Tanggal & Jam Masuk (`start_time`)
+  - Jam Selesai (`end_time` atau badge `SEDANG AKTIF`)
+  - Tipe Shift (`Pagi` / `Sore`)
+  - Upah Shift (`Rp 50.000`)
+- Dengan adanya tabel ini, Admin maupun Kasir bisa melihat secara transparan setiap kali kasir login/absen, lengkap dengan jam masuknya dan perhitungannya ke dalam penggajian.
 
 ---
 
-## ISSUE #2: Perhitungan Gaji Kasir Rp 50.000 per Shift (Tanpa Gaji Pokok)
+## Tahap Pengujian & Verifikasi (Testing Checklist)
 
-### 1. Masalah Saat Ini
-* Di `app/Http/Controllers/PayrollController.php` (baris 39–55):
-  * `$baseSalary` masih di-hardcode `2500000` (Rp 2.500.000).
-  * Ada perhitungan `$bonus` 10% dari omset dan `$deductions` Rp 150.000.
-* Padahal aturan bisnis yang diinginkan adalah: **Gaji kasir dihitung murni Rp 50.000 setiap shift (berdasarkan absen/kehadiran shift kasir tersebut), tanpa gaji pokok bulanan.**
-* Selain itu, di `PayrollController::confirmPayment()` (baris 193) terdapat bug redirect ke `route('payroll.index')` yang seharusnya `route('admin.payroll.index')`.
+Setelah mengimplementasikan seluruh langkah di atas, jalankan pengujian berikut:
 
-### 2. File yang Terdampak
-1. `app/Http/Controllers/PayrollController.php`
-2. `resources/views/payroll/index.blade.php`
-3. `resources/views/payroll/slip.blade.php`
+### 1. Automated Test (PHPUnit)
+Buat atau perbarui feature test (misal di `tests/Feature/KasirLoginAndPayrollTest.php`) untuk menguji:
+1. **Test Login Kasir Baru:**
+   - Admin membuat akun kasir baru via `POST /users` dengan `email`, `password`, dan `pin` (`123456`).
+   - Kasir baru melakukan `POST /login` menggunakan `email`, `password`, dan `pin` tersebut.
+   - Pastikan response redirect ke `/kasir/dashboard` dan `Auth::check()` bernilai `true`.
+2. **Test Otomatis Absen & Masuk Payroll Saat Kasir Login:**
+   - Saat kasir baru login via `POST /login`, pastikan otomatis tercipta 1 record di tabel `shifts` untuk `user_id` kasir tersebut dengan `status = 'active'`.
+   - Pastikan tabel `payrolls` untuk `user_id` kasir tersebut otomatis memiliki record bulan berjalan dengan `work_days = 1`, `base_salary = 50000`, dan `net_salary = 50000`.
+   - Buka halaman `GET /payroll?user_id={id}` dan pastikan angka `1 Shift` serta gaji `Rp 50.000` langsung tampil.
 
-### 3. Tahapan Implementasi
-
-#### Tahap 2.1: Ubah Logika Kalkulasi di `PayrollController.php`
-Buka `app/Http/Controllers/PayrollController.php`:
-1. Tambahkan konstanta tarif per shift di dalam class `PayrollController`:
-   ```php
-   public const SHIFT_RATE = 50000;
-   ```
-2. Ubah method `calculatePayrollForUser(User $user, ?string $periodMonth = null): array`:
-   * Hitung jumlah shift (`$totalShifts`) dari tabel `shifts` milik `$user->id` pada bulan `$periodMonth` (gunakan shift yang ada pada rentang `$monthStart` sampai `$monthEnd`).
-   * Set tarif per shift = `self::SHIFT_RATE` (`50000`).
-   * Hitung total gaji: `$netSalary = $totalShifts * self::SHIFT_RATE;`.
-   * Tidak menggunakan gaji pokok statis, bonus, atau potongan tetap:
-     * `'shift_rate' => self::SHIFT_RATE`
-     * `'total_shifts' => $totalShifts`
-     * `'work_days' => $totalShifts` *(kompatibilitas kolom database `payrolls.work_days`)*
-     * `'base_salary' => $netSalary` *(kompatibilitas kolom database `payrolls.base_salary`)*
-     * `'bonus' => 0`
-     * `'deductions' => 0`
-     * `'net_salary' => $netSalary`
-
-   Contoh implementasi `calculatePayrollForUser()`:
-   ```php
-   protected function calculatePayrollForUser(User $user, ?string $periodMonth = null): array
-   {
-       $periodMonth ??= Carbon::now()->format('Y-m');
-
-       $monthStart = Carbon::createFromFormat('Y-m', $periodMonth)->startOfMonth();
-       $monthEnd = Carbon::createFromFormat('Y-m', $periodMonth)->endOfMonth();
-
-       $shiftRate = self::SHIFT_RATE; // Rp 50.000 per shift
-
-       $totalShifts = Shift::where('user_id', $user->id)
-           ->whereBetween('start_time', [$monthStart, $monthEnd])
-           ->count();
-
-       $workHours = (int) Shift::where('user_id', $user->id)
-           ->whereBetween('start_time', [$monthStart, $monthEnd])
-           ->sum(DB::raw('TIMESTAMPDIFF(HOUR, start_time, COALESCE(end_time, NOW()))'));
-
-       $totalRevenue = (int) PlaySession::where('user_id', $user->id)
-           ->whereBetween('created_at', [$monthStart, $monthEnd])
-           ->sum('total_amount');
-
-       $netSalary = $totalShifts * $shiftRate;
-
-       return [
-           'user' => $user,
-           'period_month' => $periodMonth,
-           'shift_rate' => $shiftRate,
-           'total_shifts' => $totalShifts,
-           'base_salary' => $netSalary,
-           'bonus' => 0,
-           'deductions' => 0,
-           'total_revenue' => $totalRevenue,
-           'work_hours' => $workHours,
-           'work_days' => $totalShifts,
-           'net_salary' => $netSalary,
-       ];
-   }
-   ```
-3. Pada method `index()`, `printSlip()`, dan `downloadPdf()` di `PayrollController.php`:
-   * Sertakan `'shift_rate' => $summary['shift_rate']` dan `'total_shifts' => $summary['total_shifts']` ke dalam array `$kasir` dan `$payroll`.
-   * Cek apakah bulan tersebut sudah pernah dibayar (`Payroll::where('user_id', $selectedKasir->id)->where('period_month', $periodMonth)->where('status', 'paid')->exists()`) agar badge status menampilkan `'Sudah Dibayar'` jika sudah dikonfirmasi, atau `'Menunggu Konfirmasi'` jika belum.
-4. Pada method `confirmPayment()` (baris 193):
-   * Perbaiki nama route redirect dari `route('payroll.index', ...)` menjadi `route('admin.payroll.index', ['kasir_id' => $selectedKasir->id, 'month' => $periodMonth])`.
-
-#### Tahap 2.2: Sesuaikan Tampilan `resources/views/payroll/index.blade.php` & `slip.blade.php`
-1. Buka `resources/views/payroll/index.blade.php`:
-   * Pada kartu metrik atas (baris 51–57): Ubah label **"Hari Kerja"** menjadi **"Total Absen Shift"** dengan nilai `{{ $kasir['total_work_days'] }} Shift`.
-   * Pada bagian **"Rincian Komponen Gaji"** (baris 78–100):
-     * Ganti baris **Gaji Pokok**, **Bonus**, dan **Potongan** menjadi rincian berbasis shift yang jelas:
-       * **Tarif per Shift**: `Rp {{ number_format($kasir['shift_rate'] ?? 50000, 0, ',', '.') }} / shift`
-       * **Jumlah Kehadiran (Absen Shift)**: `{{ $kasir['total_work_days'] }} Shift`
-       * **Perhitungan Gaji**: `{{ $kasir['total_work_days'] }} Shift × Rp {{ number_format($kasir['shift_rate'] ?? 50000, 0, ',', '.') }}`
-       * **Total Gaji Bersih / Nett**: `Rp {{ number_format($kasir['net_salary'], 0, ',', '.') }}`
-2. Buka `resources/views/payroll/slip.blade.php`:
-   * Sesuaikan cetakan slip gaji & PDF agar menampilkan:
-     * **Jumlah Kehadiran Shift**: `{{ $payroll['total_shifts'] ?? 0 }} Shift`
-     * **Upah per Shift**: `Rp {{ number_format($payroll['shift_rate'] ?? 50000, 0, ',', '.') }}`
-     * **Total Gaji Diterima**: `Rp {{ number_format($payroll['net_salary'], 0, ',', '.') }}`
-
----
-
-## ISSUE #3: Input Uang Tinggalan & Total Uang Dihasilkan saat Tutup Shift (2 Shift: Pagi & Sore)
-
-### 1. Konteks Operasional & Masalah Saat Ini
-* Rental memiliki **2 Shift Operasional**:
-  * **Shift Pagi (Shift 1)**: `08:00 – 15:00`
-  * **Shift Sore (Shift 2)**: `15:00 – 21:00`
-* Saat ini, ketika kasir menutup shift (`ShiftController@endShift` dan `KasirController@endShift`), form hanya meminta `notes` (catatan).
-* Pemilik rental menginginkan:
-  1. Saat menutup shift, kasir **wajib** memasukkan:
-     * **Total uang yang dihasilkan pada shift tersebut** (`reported_revenue` — uang hasil pendapatan shift yang dihitung fisik oleh kasir).
-     * **Uang tinggalan** (`leftover_cash` — uang yang sengaja ditinggalkan di laci kasir sebagai modal kembalian untuk shift berikutnya / besok paginya).
-  2. Ketika kasir shift berikutnya (terutama **Shift Pagi besok paginya**) membuka shift baru, kolom **Modal Kas Awal (`starting_cash`)** otomatis terisi (*auto-filled*) dengan nominal **Uang Tinggalan (`leftover_cash`)** dari shift terakhir yang ditutup, sehingga kasir pagi tidak bingung mencari uang kembalian.
-
-### 2. File yang Terdampak
-1. `database/migrations/xxxx_xx_xx_xxxxxx_add_handover_fields_to_shifts_table.php` *(Buat Baru)*
-2. `app/Models/Shift.php`
-3. `app/Http/Controllers/ShiftController.php`
-4. `app/Http/Controllers/KasirController.php`
-5. `resources/views/admin/shifts/index.blade.php`
-6. `resources/views/kasir/sift.blade.php`
-7. `database/seeders/DatabaseSeeder.php`
-
-### 3. Tahapan Implementasi
-
-#### Tahap 3.1: Buat Migration untuk Kolom Baru pada Tabel `shifts`
-Jalankan perintah Artisan:
+Jalankan perintah test:
 ```bash
-php artisan make:migration add_handover_fields_to_shifts_table --table=shifts --no-interaction
-```
-Tambahkan kolom berikut pada tabel `shifts`:
-* `shift_type`: `enum('pagi', 'sore')` dengan default `'pagi'` (iletakkan setelah `user_id`).
-  * Shift Pagi: `08:00 - 15:00`
-  * Shift Sore: `15:00 - 21:00`
-* `reported_revenue`: `integer` dengan default `0` (diletakkan setelah `total_revenue`) — menyimpan total uang yang dihasilkan pada shift tersebut berdasarkan input kasir saat tutup shift.
-* `leftover_cash`: `integer` dengan default `0` (diletakkan setelah `reported_revenue`) — menyimpan uang tinggalan untuk modal kembalian shift berikutnya / besok pagi.
-
-Contoh kode migration:
-```php
-public function up(): void
-{
-    Schema::table('shifts', function (Blueprint $table) {
-        $table->enum('shift_type', ['pagi', 'sore'])->default('pagi')->after('user_id');
-        $table->integer('reported_revenue')->default(0)->after('total_revenue');
-        $table->integer('leftover_cash')->default(0)->after('reported_revenue');
-    });
-}
-
-public function down(): void
-{
-    Schema::table('shifts', function (Blueprint $table) {
-        $table->dropColumn(['shift_type', 'reported_revenue', 'leftover_cash']);
-    });
-}
+php artisan test --compact --filter=KasirLoginAndPayrollTest
 ```
 
-#### Tahap 3.2: Tambahkan Helper Penentu Shift Pagi / Sore di Model `Shift`
-Buka `app/Models/Shift.php`:
-* Tambahkan helper statis atau method untuk mendeteksi shift secara otomatis berdasarkan jam sekarang (08:00–14:59 = `pagi`, 15:00–21:00 = `sore`) serta label jamnya:
-```php
-public static function detectShiftType(?\Carbon\Carbon $time = null): string
-{
-    $time ??= \Carbon\Carbon::now();
-
-    return ($time->hour >= 8 && $time->hour < 15) ? 'pagi' : 'sore';
-}
-
-public function getShiftLabelAttribute(): string
-{
-    return $this->shift_type === 'sore'
-        ? 'Shift Sore (15:00 - 21:00)'
-        : 'Shift Pagi (08:00 - 15:00)';
-}
+### 2. Code Formatting
+Jalankan Laravel Pint sebelum menyelesaikan pekerjaan:
+```bash
+vendor/bin/pint --dirty --format agent
 ```
-
-#### Tahap 3.3: Update Logika Buka & Tutup Shift di `ShiftController.php` dan `KasirController.php`
-
-> **CATATAN PENTING (Bug Fix PIN Kasir):**
-> Di `AuthController.php` dan `DatabaseSeeder.php`, kolom `users.pin` disimpan sebagai teks biasa (`'123456'`), tetapi di `ShiftController@startShift` (baris 74) dan `KasirController@startShift` (baris 658) menggunakan `Hash::check()`. Pastikan pengecekan PIN mendukung keduanya agar tidak gagal saat buka shift:
-> ```php
-> $userPin = (string) auth()->user()->pin;
-> $pinValid = ($validated['pin'] === $userPin) || \Illuminate\Support\Facades\Hash::check($validated['pin'], $userPin);
-> if (! $pinValid) {
->     return back()->with('error', 'PIN yang Anda masukkan salah!');
-> }
-> ```
-
-1. **Pada Method Tampilan Shift (`ShiftController@index` dan `KasirController@sift`)**:
-   * Ambil data shift terakhir yang sudah ditutup (`status = 'closed'`):
-     ```php
-     $lastClosedShift = Shift::where('status', 'closed')->latest('end_time')->first();
-     $suggestedStartingCash = $lastClosedShift ? $lastClosedShift->leftover_cash : 200000;
-     $defaultShiftType = Shift::detectShiftType();
-     ```
-   * Kirimkan `$lastClosedShift`, `$suggestedStartingCash`, dan `$defaultShiftType` ke view (`admin.shifts.index` dan `kasir.sift`).
-
-2. **Pada Method Buka Shift (`ShiftController@startShift` dan `KasirController@startShift`)**:
-   * Validasi input:
-     ```php
-     $validated = $request->validate([
-         'shift_type' => 'required|in:pagi,sore',
-         'starting_cash' => 'required|numeric|min:0',
-         'pin' => 'required|string',
-         'notes' => 'nullable|string',
-     ]);
-     ```
-   * Simpan `'shift_type' => $validated['shift_type']` dan `'starting_cash' => (int) $validated['starting_cash']` saat `Shift::create(...)`.
-
-3. **Pada Method Tutup Shift (`ShiftController@endShift` dan `KasirController@endShift`)**:
-   * Ubah validasi agar **wajib** mengisi `reported_revenue` (total uang yang dihasilkan pada shift tersebut) dan `leftover_cash` (uang tinggalan untuk modal besok pagi / shift berikutnya):
-     ```php
-     $validated = $request->validate([
-         'reported_revenue' => 'required|numeric|min:0',
-         'leftover_cash' => 'required|numeric|min:0',
-         'notes' => 'nullable|string',
-     ]);
-     ```
-   * Hitung omset sistem (`$systemRevenue`) dari `PlaySession` yang selesai selama shift berlangsung (atau gunakan nilai yang sudah terakumulasi).
-   * Update record `$shift`:
-     ```php
-     $shift->update([
-         'end_time' => Carbon::now(),
-         'total_revenue' => $systemRevenue,
-         'reported_revenue' => (int) $validated['reported_revenue'],
-         'leftover_cash' => (int) $validated['leftover_cash'],
-         'transactions_count' => $txCount,
-         'notes' => $validated['notes'] ?? $shift->notes,
-         'status' => 'closed',
-     ]);
-     ```
-
-#### Tahap 3.4: Update Modal & Tabel di `resources/views/admin/shifts/index.blade.php` dan `resources/views/kasir/sift.blade.php`
-Lakukan perubahan UI pada kedua file Blade tersebut:
-
-1. **Pada Modal Buka Shift Baru (`modal-start-shift` & `kasir-start-shift`)**:
-   * Tambahkan pilihan **Pilih Shift**:
-     * `Shift Pagi (08:00 - 15:00)` (`value="pagi"`)
-     * `Shift Sore (15:00 - 21:00)` (`value="sore"`)
-     * Otomatis terpilih (`selected`) sesuai `$defaultShiftType`.
-   * Pada input **Modal Kas Awal (`starting_cash`)**:
-     * Set `value="{{ $suggestedStartingCash }}"`.
-     * Tambahkan keterangan kecil di bawah input:
-       *"Otomatis terisi dari Uang Tinggalan shift sebelumnya (Rp {{ number_format($suggestedStartingCash, 0, ',', '.') }}) untuk modal kembalian."*
-
-2. **Pada Modal Tutup Shift (`modal-end-shift` & `kasir-end-shift`)**:
-   * Tampilkan informasi ringkas:
-     * **Modal Awal Shift Ini**: `Rp {{ number_format($activeShift->starting_cash, 0, ',', '.') }}`
-     * **Omset Tercatat di Sistem**: `Rp {{ number_format($liveShiftRevenue, 0, ',', '.') }}`
-   * Tambahkan 2 input wajib (`required`):
-     1. **Total Uang yang Dihasilkan pada Shift Ini (Rp)** (`name="reported_revenue"`):
-        ```html
-        <div>
-          <label class="block text-xs uppercase font-bold mb-1">Total Uang Dihasilkan Shift Ini (Rp) *</label>
-          <input type="number" name="reported_revenue" required min="0" step="1000" value="{{ $liveShiftRevenue }}" class="w-full px-3 py-2 border-2 border-on-surface text-sm font-bold">
-          <p class="text-[10px] text-on-surface-variant mt-0.5">Masukkan total pendapatan uang dari hasil transaksi pada shift ini.</p>
-        </div>
-        ```
-     2. **Uang Tinggalan / Modal untuk Shift Besok Pagi (Rp)** (`name="leftover_cash"`):
-        ```html
-        <div>
-          <label class="block text-xs uppercase font-bold mb-1">Uang Tinggalan / Modal Kembalian Besok Pagi (Rp) *</label>
-          <input type="number" name="leftover_cash" required min="0" step="1000" value="{{ $activeShift->starting_cash }}" class="w-full px-3 py-2 border-2 border-on-surface text-sm font-bold">
-          <p class="text-[10px] text-on-surface-variant mt-0.5">Uang yang ditinggalkan di laci kasir sebagai modal kembalian untuk shift berikutnya / besok pagi.</p>
-        </div>
-        ```
-
-3. **Pada Tabel Riwayat Shift**:
-   * Tampilkan badge jenis shift (`Pagi 08:00-15:00` / `Sore 15:00-21:00`).
-   * Tampilkan kolom **Modal Awal (`starting_cash`)**, **Uang Dihasilkan (`reported_revenue` / `total_revenue`)**, dan **Uang Tinggalan (`leftover_cash`)** agar admin maupun kasir shift pagi berikutnya bisa melihat jelas berapa uang tinggalan yang ditinggalkan.
-
----
-
-## Urutan Eksekusi & Checklist Verifikasi (Untuk Junior Programmer / AI)
-
-Ikuti urutan langkah ini saat mulai mengerjakan:
-
-- [ ] **Langkah 1**: Buat dan jalankan kedua migration (`add_access_token_to_tvs_table` dan `add_handover_fields_to_shifts_table`) menggunakan `php artisan migrate`.
-- [ ] **Langkah 2**: Kerjakan **Issue #1** (Model `Tv`, `routes/web.php`, `CustomerController`, `UnitController`, dan view customer/unit).
-  - *Cara Test*: Buka `/admin/units`, klik **Cetak QR**, pastikan URL QR bukan lagi `/customer/1` melainkan `/customer/{32_karakter_token}`. Coba akses `/customer/1` dan pastikan menghasilkan `404 Not Found`.
-- [ ] **Langkah 3**: Kerjakan **Issue #2** (`PayrollController`, `resources/views/payroll/index.blade.php`, dan `resources/views/payroll/slip.blade.php`).
-  - *Cara Test*: Buka `/admin/payroll`. Jika Kasir memiliki 3 shift pada bulan ini, pastikan total gajinya otomatis tertulis `3 Shift × Rp 50.000 = Rp 150.000` (tanpa gaji pokok Rp 2.500.000).
-- [ ] **Langkah 4**: Kerjakan **Issue #3** (Model `Shift`, `ShiftController`, `KasirController`, `resources/views/admin/shifts/index.blade.php`, dan `resources/views/kasir/sift.blade.php`).
-  - *Cara Test*:
-    1. Tutup shift aktif saat ini dan isi **Total Uang Dihasilkan** = `150000` serta **Uang Tinggalan** = `250000`.
-    2. Klik **Buka Shift Baru**, pastikan input **Modal Kas Awal** otomatis terisi `250000` (dari uang tinggalan tadi) dan pilihan **Shift Pagi (08:00 - 15:00)** / **Shift Sore (15:00 - 21:00)** muncul.
-- [ ] **Langkah 5**: Buat atau perbarui Feature Test di folder `tests/Feature/` untuk menguji ketiga fitur di atas, lalu jalankan `php artisan test --compact`.
-- [ ] **Langkah 6**: Jalankan `vendor/bin/pint --dirty` untuk merapikan format kode PHP sesuai standar Laravel.
-

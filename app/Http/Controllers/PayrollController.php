@@ -73,11 +73,27 @@ class PayrollController extends Controller
         $selectedKasir = $this->resolveSelectedKasir();
 
         if (! $selectedKasir) {
-            return view('payroll.index', ['kasirList' => $kasirList, 'selectedKasir' => null, 'kasir' => null, 'history' => collect()]);
+            return view('payroll.index', [
+                'kasirList' => $kasirList,
+                'selectedKasir' => null,
+                'kasir' => null,
+                'history' => collect(),
+                'attendanceShifts' => collect(),
+                'periodMonth' => request('month', Carbon::now()->format('Y-m')),
+            ]);
         }
 
         $periodMonth = request('month', Carbon::now()->format('Y-m'));
+        Payroll::syncForUser($selectedKasir, $periodMonth);
         $summary = $this->calculatePayrollForUser($selectedKasir, $periodMonth);
+
+        $monthStart = Carbon::createFromFormat('Y-m', $periodMonth)->startOfMonth();
+        $monthEnd = Carbon::createFromFormat('Y-m', $periodMonth)->endOfMonth();
+
+        $attendanceShifts = Shift::where('user_id', $selectedKasir->id)
+            ->whereBetween('start_time', [$monthStart, $monthEnd])
+            ->orderBy('start_time', 'desc')
+            ->get();
 
         $payroll = Payroll::where('user_id', $selectedKasir->id)
             ->orderBy('period_month', 'desc')
@@ -112,7 +128,7 @@ class PayrollController extends Controller
             'period' => Carbon::createFromFormat('Y-m', $periodMonth)->translatedFormat('F Y'),
         ];
 
-        return view('payroll.index', compact('kasirList', 'selectedKasir', 'kasir', 'history'));
+        return view('payroll.index', compact('kasirList', 'selectedKasir', 'kasir', 'history', 'attendanceShifts', 'periodMonth'));
     }
 
     public function printSlip()

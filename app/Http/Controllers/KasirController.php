@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\CustomerRequest;
+use App\Models\Payroll;
 use App\Models\PlaySession;
 use App\Models\Product;
 use App\Models\SessionOrder;
@@ -681,6 +682,10 @@ class KasirController extends Controller
             'status' => 'active',
         ]);
 
+        if (Auth::user()) {
+            Payroll::syncForUser(Auth::user());
+        }
+
         return back()->with('success', 'Shift baru ('.($validated['shift_type'] === 'pagi' ? 'Pagi' : 'Sore').') berhasil dimulai.');
     }
 
@@ -705,6 +710,10 @@ class KasirController extends Controller
             'notes' => $validated['notes'] ?? $shift->notes,
             'status' => 'closed',
         ]);
+
+        if ($shift->user) {
+            Payroll::syncForUser($shift->user);
+        }
 
         Auth::logout();
         $request->session()->invalidate();

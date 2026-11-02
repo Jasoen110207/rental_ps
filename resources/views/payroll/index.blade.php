@@ -12,19 +12,25 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <label for="kasir-select" class="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant">Kasir</label>
-      <form method="GET" action="{{ route('admin.payroll.index') }}" class="inline-block">
-        <select name="kasir_id" id="kasir-select" onchange="this.form.submit()" class="border-2 border-on-surface p-2">
-          @if($kasirList->isNotEmpty())
-            @foreach($kasirList as $kasirItem)
-              <option value="{{ $kasirItem->id }}" {{ ($selectedKasir?->id == $kasirItem->id) ? 'selected' : '' }}>
-                {{ $kasirItem->name }}
-              </option>
-            @endforeach
-          @else
-            <option value="">Belum ada kasir</option>
-          @endif
-        </select>
+      <form method="GET" action="{{ route('admin.payroll.index') }}" class="flex items-center gap-2">
+        <div>
+          <label for="kasir-select" class="sr-only">Kasir</label>
+          <select name="kasir_id" id="kasir-select" onchange="this.form.submit()" class="border-2 border-on-surface p-2 font-bold text-xs uppercase bg-surface-container-low">
+            @if($kasirList->isNotEmpty())
+              @foreach($kasirList as $kasirItem)
+                <option value="{{ $kasirItem->id }}" {{ ($selectedKasir?->id == $kasirItem->id) ? 'selected' : '' }}>
+                  {{ $kasirItem->name }}
+                </option>
+              @endforeach
+            @else
+              <option value="">Belum ada kasir</option>
+            @endif
+          </select>
+        </div>
+        <div>
+          <label for="month-select" class="sr-only">Bulan</label>
+          <input type="month" name="month" id="month-select" value="{{ $periodMonth ?? request('month', date('Y-m')) }}" onchange="this.form.submit()" class="border-2 border-on-surface p-2 font-bold text-xs uppercase bg-surface-container-low">
+        </div>
       </form>
     </div>
   </div>
@@ -121,13 +127,13 @@
           </div>
 
           <div class="flex flex-col gap-3">
-            <a href="{{ route('admin.payroll.print', ['kasir_id' => optional($selectedKasir)->id]) }}" class="w-full py-3 border-2 border-on-surface bg-secondary-container text-on-secondary font-black uppercase text-xs tracking-wide neo-shadow btn-press text-center">
+            <a href="{{ route('admin.payroll.print', ['kasir_id' => optional($selectedKasir)->id, 'month' => $periodMonth ?? request('month', date('Y-m'))]) }}" class="w-full py-3 border-2 border-on-surface bg-secondary-container text-on-secondary font-black uppercase text-xs tracking-wide neo-shadow btn-press text-center">
               Cetak Slip Gaji
             </a>
-            <a href="{{ route('admin.payroll.pdf', ['kasir_id' => optional($selectedKasir)->id]) }}" class="w-full py-3 border-2 border-on-surface bg-primary text-on-primary font-black uppercase text-xs tracking-wide neo-shadow btn-press text-center">
+            <a href="{{ route('admin.payroll.pdf', ['kasir_id' => optional($selectedKasir)->id, 'month' => $periodMonth ?? request('month', date('Y-m'))]) }}" class="w-full py-3 border-2 border-on-surface bg-primary text-on-primary font-black uppercase text-xs tracking-wide neo-shadow btn-press text-center">
               Download PDF
             </a>
-            <form method="POST" action="{{ route('admin.payroll.confirm', ['kasir_id' => optional($selectedKasir)->id]) }}">
+            <form method="POST" action="{{ route('admin.payroll.confirm', ['kasir_id' => optional($selectedKasir)->id, 'month' => $periodMonth ?? request('month', date('Y-m'))]) }}">
               @csrf
               <button type="submit" class="w-full py-3 border-2 border-on-surface bg-emerald-600 text-white font-black uppercase text-xs tracking-wide neo-shadow btn-press">
                 Konfirmasi Pembayaran
@@ -137,6 +143,57 @@
         </div>
       </aside>
     </div>
+
+    <section class="bg-surface-container-lowest border-2 border-on-surface neo-shadow">
+      <div class="p-4 border-b-2 border-on-surface bg-surface-container-high flex items-center justify-between">
+        <div>
+          <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant">Log Kehadiran</p>
+          <h2 class="font-headline-lg text-xl uppercase font-black">Riwayat Absen Shift Bulan Ini</h2>
+        </div>
+        <span class="px-2.5 py-1 border-2 border-on-surface bg-amber-400 text-on-surface text-[10px] font-black uppercase neo-shadow-sm">{{ isset($attendanceShifts) ? $attendanceShifts->count() : 0 }} shift</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-surface-container-high border-b-2 border-on-surface text-[11px] uppercase tracking-wide">
+            <tr>
+              <th class="py-3 px-4">Tipe Shift</th>
+              <th class="py-3 px-4">Jam Masuk (Absen)</th>
+              <th class="py-3 px-4">Jam Selesai</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4">Upah Shift</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse ($attendanceShifts ?? [] as $shiftItem)
+              <tr class="border-b border-on-surface/20 align-top">
+                <td class="py-3 px-4 font-bold">{{ $shiftItem->shift_label }}</td>
+                <td class="py-3 px-4 font-mono text-xs">{{ $shiftItem->start_time ? $shiftItem->start_time->format('d M Y, H:i') : '-' }}</td>
+                <td class="py-3 px-4 font-mono text-xs">
+                  {{ $shiftItem->end_time ? $shiftItem->end_time->format('d M Y, H:i') : 'Sedang Berjalan' }}
+                </td>
+                <td class="py-3 px-4">
+                  @if($shiftItem->status === 'active')
+                    <span class="inline-flex items-center px-2 py-0.5 border-2 border-emerald-900 bg-emerald-100 text-emerald-950 font-black text-[10px] uppercase tracking-wide">
+                      Aktif
+                    </span>
+                  @else
+                    <span class="inline-flex items-center px-2 py-0.5 border-2 border-on-surface/40 bg-surface-container text-on-surface font-black text-[10px] uppercase tracking-wide">
+                      Selesai
+                    </span>
+                  @endif
+                </td>
+                <td class="py-3 px-4 font-bold text-primary">Rp 50.000</td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="5" class="py-6 px-4 text-center text-on-surface-variant">Belum ada catatan absensi shift untuk bulan ini.</td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     <section class="bg-surface-container-lowest border-2 border-on-surface neo-shadow">
       <div class="p-4 border-b-2 border-on-surface bg-surface-container-high flex items-center justify-between">
