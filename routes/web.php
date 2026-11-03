@@ -16,7 +16,6 @@ use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,14 +24,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Root redirect
-Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('admin.dashboard');
-    }
-
-    return redirect()->route('login');
-});
+Route::get('/', \App\Http\Controllers\LandingController::class)->name('home');
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
