@@ -40,7 +40,7 @@
 
         <div>
           <label class="block font-headline-sm text-xs uppercase font-bold tracking-wider mb-1">Alamat Lengkap</label>
-          <input type="text" name="store_address" value="{{ $settings['store_address'] ?? 'Jl. Game Arena No. 42, Kota Digital' }}" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm">
+          <input type="text" name="store_address" value="{{ $settings['store_address'] ?? 'Jl. disana deh' }}" class="w-full px-3 py-2 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm">
         </div>
       </div>
     </div>
