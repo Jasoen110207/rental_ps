@@ -7,7 +7,6 @@
 .phpunit.result.cache
 AGENTS.md
 CLAUDE.md
-.gitignore
 .agents/
 .claude/
 /.codex
