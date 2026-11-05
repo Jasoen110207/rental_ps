@@ -36,7 +36,7 @@ npm install
 ```
 
 **2. Konfigurasi Environment**
-Gandakan file `.env.example` menjadi `.env`.
+Gandakan file `.env.example` menjadi `.env`
 ```bash
 cp .env.example .env
 ```
