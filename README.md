@@ -36,7 +36,7 @@ npm install
 ```
 
 **2. Konfigurasi Environment**
-Gandakan file `.env.example` menjadi `.env`
+Gandakan file `.env.example` menjadi `.env`.
 ```bash
 cp .env.example .env
 ```
@@ -64,7 +64,7 @@ php artisan migrate --seed
 **4. Jalankan Aplikasi (Server, Vite, dan WebSocket)**
 Karena aplikasi ini menggunakan Vite untuk kompilasi Alpine.js/Tailwind dan Reverb untuk *real-time WebSocket*, Anda perlu membuka **3 tab terminal berbeda** dan menjalankan perintah berikut di masing-masing terminal:
 
-*Terminal 1 (Server PHP):*
+*Terminal 1 (Start Laravel):*
 ```bash
 php artisan serve
 ```
