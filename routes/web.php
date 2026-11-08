@@ -49,10 +49,8 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::post('/{token}/call-cashier', [CustomerController::class, 'callCashier'])->name('call-cashier');
     Route::get('/{token}/status', [CustomerController::class, 'apiStatus'])->name('status');
 });
-// QR short url alias
-Route::get('/scan/{token}', function (string $token) {
-    return redirect()->route('customer.index', ['token' => $token]);
-});
+// QR short url alias (Pintu Gerbang Scan QR Fisik Meja)
+Route::get('/scan/{token}', [CustomerController::class, 'scan'])->name('customer.scan');
 
 // Midtrans Webhook Notification Route (Public & CSRF exempt)
 Route::post('/midtrans/webhook', [MidtransController::class, 'webhook'])->name('midtrans.webhook');

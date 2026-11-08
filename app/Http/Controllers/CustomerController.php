@@ -12,22 +12,101 @@ use App\Notifications\CustomerRequestNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
-    protected function findTvByToken(string $token): Tv
+    /**
+     * Pintu gerbang saat pelanggan men-scan QR Code fisik di meja (/scan/{tv_token}).
+     */
+    public function scan(Request $request, string $token)
     {
-        return Tv::where('access_token', $token)->firstOrFail();
-    }
+        $storeName = Setting::get('store_name', 'TambahBang Rental PS');
+        $tv = Tv::where('access_token', $token)->first();
 
-    public function index(string $token)
-    {
-        $tv = $this->findTvByToken($token);
+        if (! $tv) {
+            return response()
+                ->view('customer.expired', [
+                    'storeName' => $storeName,
+                    'title' => 'QR CODE TIDAK VALID',
+                    'message' => 'Kode QR meja tidak dikenali. Silakan hubungi petugas kasir.',
+                ], 404)
+                ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
 
-        $activeSession = PlaySession::with('sessionOrders.product')
-            ->where('tv_id', $tv->id)
+        $activeSession = PlaySession::where('tv_id', $tv->id)
             ->where('status', 'active')
             ->first();
+
+        if (! $activeSession) {
+            return response()
+                ->view('customer.expired', [
+                    'tv' => $tv,
+                    'storeName' => $storeName,
+                    'title' => 'MEJA BELUM AKTIF',
+                    'message' => 'Unit '.$tv->name.' saat ini belum memiliki sesi bermain aktif. Silakan mulai rental di kasir terlebih dahulu lalu scan kembali QR Code ini.',
+                ], 403)
+                ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        if (empty($activeSession->session_token)) {
+            $activeSession->update(['session_token' => Str::random(40)]);
+        }
+
+        // Tandai bahwa browser HP ini masuk melalui scan QR fisik yang sah untuk sesi ini
+        $request->session()->put('qr_verified_'.$activeSession->session_token, true);
+
+        return redirect()
+            ->route('customer.index', ['token' => $activeSession->session_token])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    }
+
+    /**
+     * Validasi session_token dan pastikan sesi masih aktif serta telah melalui scan QR.
+     */
+    protected function resolveValidActiveSession(Request $request, string $token): ?PlaySession
+    {
+        $session = PlaySession::with(['tv', 'sessionOrders.product'])
+            ->where('session_token', $token)
+            ->first();
+
+        if (! $session || $session->status !== 'active') {
+            return null;
+        }
+
+        // Pastikan waktu prepaid belum habis
+        if ($session->billing_type === 'prepaid' && $session->end_time && $session->end_time->isPast()) {
+            return null;
+        }
+
+        // Pastikan browser memiliki penanda sesi hasil scan QR (/scan/{tv_token})
+        if (! $request->session()->get('qr_verified_'.$session->session_token, false)) {
+            return null;
+        }
+
+        return $session;
+    }
+
+    public function index(Request $request, string $token)
+    {
+        $storeName = Setting::get('store_name', 'TambahBang Rental PS');
+
+        $activeSession = $this->resolveValidActiveSession($request, $token);
+
+        if (! $activeSession) {
+            $pastSession = PlaySession::with('tv')->where('session_token', $token)->first();
+
+            return response()
+                ->view('customer.expired', [
+                    'tv' => $pastSession?->tv,
+                    'storeName' => $storeName,
+                    'title' => 'SESI RENTAL TELAH BERAKHIR',
+                    'message' => 'Halaman ini sudah tidak berlaku karena sesi bermain telah selesai atau dibuka melalui riwayat browser. Silakan scan ulang QR Code di meja TV.',
+                ], 403)
+                ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        $tv = $activeSession->tv;
 
         $products = Product::where('is_available', true)
             ->where('stock', '>', 0)
@@ -35,30 +114,32 @@ class CustomerController extends Controller
             ->orderBy('name')
             ->get();
 
-        $requests = collect();
-        if ($activeSession) {
-            $requests = CustomerRequest::where('tv_id', $tv->id)
-                ->where('created_at', '>=', $activeSession->start_time)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
+        $requests = CustomerRequest::where('tv_id', $tv->id)
+            ->where('created_at', '>=', $activeSession->start_time)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        $storeName = Setting::get('store_name', 'TambahBang Rental PS');
-
-        return view('customer.index', compact('tv', 'activeSession', 'products', 'requests', 'storeName'));
+        return response()
+            ->view('customer.index', compact('tv', 'activeSession', 'products', 'requests', 'storeName'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     public function requestAddTime(Request $request, string $token)
     {
-        $tv = $this->findTvByToken($token);
+        $activeSession = $this->resolveValidActiveSession($request, $token);
+        if (! $activeSession) {
+            return redirect()->route('customer.index', ['token' => $token])
+                ->with('error', 'Sesi bermain sudah berakhir atau tidak valid. Silakan scan ulang QR Code di meja.');
+        }
+
+        $tv = $activeSession->tv;
 
         $validated = $request->validate([
             'duration_hours' => 'required|numeric|min:0.01|max:12',
             'note' => 'nullable|string|max:255',
         ]);
 
-        $activeSession = PlaySession::where('tv_id', $tv->id)->where('status', 'active')->first();
-        if ($activeSession && $activeSession->billing_type === 'postpaid') {
+        if ($activeSession->billing_type === 'postpaid') {
             return back()->with('error', 'Tidak dapat menambah waktu untuk sesi Open Billing (Postpaid).');
         }
 
@@ -84,7 +165,13 @@ class CustomerController extends Controller
 
     public function requestFood(Request $request, string $token)
     {
-        $tv = $this->findTvByToken($token);
+        $activeSession = $this->resolveValidActiveSession($request, $token);
+        if (! $activeSession) {
+            return redirect()->route('customer.index', ['token' => $token])
+                ->with('error', 'Sesi bermain sudah berakhir atau tidak valid. Silakan scan ulang QR Code di meja.');
+        }
+
+        $tv = $activeSession->tv;
 
         $validated = $request->validate([
             'items' => 'required|array|min:1',
@@ -92,15 +179,6 @@ class CustomerController extends Controller
             'items.*.quantity' => 'required|integer|min:0|max:20',
             'note' => 'nullable|string|max:255',
         ]);
-
-        $activeSession = PlaySession::where('tv_id', $tv->id)->where('status', 'active')->first();
-        if (! $activeSession) {
-            return back()->with('error', 'Tidak ada sesi bermain yang aktif! Anda tidak dapat memesan F&B.');
-        }
-
-        if ($activeSession->billing_type === 'prepaid' && $activeSession->end_time && $activeSession->end_time->isPast()) {
-            return back()->with('error', 'Waktu bermain sudah habis! Anda tidak dapat memesan makanan & minuman.');
-        }
 
         $orderItems = [];
         $totalPrice = 0;
@@ -124,7 +202,6 @@ class CustomerController extends Controller
             return back()->with('error', 'Pilih minimal satu menu!');
         }
 
-        // Tolak item yang stoknya tidak mencukupi (sinkron ke DB produk)
         foreach ($orderItems as $oi) {
             $product = Product::find($oi['product_id']);
             if (! $product || $product->stock < $oi['quantity']) {
@@ -150,16 +227,24 @@ class CustomerController extends Controller
     }
 
     /**
-     * Halaman order cepat (satu menu sekali klik) — dinamis per meja.
+     * Halaman order cepat (satu menu sekali klik) — dinamis per sesi meja.
      */
     public function order(Request $request, string $token)
     {
-        $tv = $this->findTvByToken($token);
+        $storeName = Setting::get('store_name', 'TambahBang Rental PS');
+        $activeSession = $this->resolveValidActiveSession($request, $token);
 
-        $activeSession = PlaySession::with('sessionOrders.product')
-            ->where('tv_id', $tv->id)
-            ->where('status', 'active')
-            ->first();
+        if (! $activeSession) {
+            return response()
+                ->view('customer.expired', [
+                    'storeName' => $storeName,
+                    'title' => 'SESI RENTAL TELAH BERAKHIR',
+                    'message' => 'Halaman ini sudah tidak berlaku karena sesi bermain telah selesai atau dibuka melalui riwayat browser. Silakan scan ulang QR Code di meja TV.',
+                ], 403)
+                ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        }
+
+        $tv = $activeSession->tv;
 
         $products = Product::where('is_available', true)
             ->where('stock', '>', 0)
@@ -169,14 +254,14 @@ class CustomerController extends Controller
             ->get();
 
         $requests = CustomerRequest::where('tv_id', $tv->id)
-            ->where('created_at', '>=', Carbon::now()->subHours(12))
+            ->where('created_at', '>=', $activeSession->start_time)
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
-        $storeName = Setting::get('store_name', 'TambahBang Rental PS');
-
-        return view('customer.order', compact('tv', 'activeSession', 'products', 'requests', 'storeName'));
+        return response()
+            ->view('customer.order', compact('tv', 'activeSession', 'products', 'requests', 'storeName'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     /**
@@ -184,7 +269,13 @@ class CustomerController extends Controller
      */
     public function callCashier(Request $request, string $token)
     {
-        $tv = $this->findTvByToken($token);
+        $activeSession = $this->resolveValidActiveSession($request, $token);
+        if (! $activeSession) {
+            return redirect()->route('customer.index', ['token' => $token])
+                ->with('error', 'Sesi bermain sudah berakhir atau tidak valid. Silakan scan ulang QR Code di meja.');
+        }
+
+        $tv = $activeSession->tv;
 
         $validated = $request->validate([
             'note' => 'nullable|string|max:255',
@@ -215,64 +306,63 @@ class CustomerController extends Controller
         return back()->with('success', 'Kasir sedang menuju ke meja '.$tv->name.'!');
     }
 
-    public function apiStatus(string $token)
+    public function apiStatus(Request $request, string $token)
     {
-        $tv = $this->findTvByToken($token);
+        $activeSession = $this->resolveValidActiveSession($request, $token);
 
-        $activeSession = PlaySession::with('sessionOrders.product')
-            ->where('tv_id', $tv->id)
-            ->where('status', 'active')
-            ->first();
+        if (! $activeSession) {
+            return response()->json([
+                'expired' => true,
+                'session' => null,
+                'requests' => [],
+            ]);
+        }
 
+        $tv = $activeSession->tv;
         $now = Carbon::now();
-        $sessionInfo = null;
 
-        if ($activeSession) {
-            $elapsedSeconds = $activeSession->start_time->diffInSeconds($now);
-            $remainingSeconds = 0;
-            $isTimeUp = false;
+        $elapsedSeconds = $activeSession->start_time->diffInSeconds($now);
+        $remainingSeconds = 0;
+        $isTimeUp = false;
 
-            if ($activeSession->billing_type === 'prepaid' && $activeSession->end_time) {
-                if ($activeSession->end_time->isPast()) {
-                    $remainingSeconds = 0;
-                    $isTimeUp = true;
-                } else {
-                    $remainingSeconds = $now->diffInSeconds($activeSession->end_time, false);
-                }
+        if ($activeSession->billing_type === 'prepaid' && $activeSession->end_time) {
+            if ($activeSession->end_time->isPast()) {
+                $remainingSeconds = 0;
+                $isTimeUp = true;
+            } else {
+                $remainingSeconds = $now->diffInSeconds($activeSession->end_time, false);
             }
-
-            $sessionInfo = [
-                'id' => $activeSession->id,
-                'billing_type' => $activeSession->billing_type,
-                'start_time' => $activeSession->start_time->format('H:i'),
-                'end_time' => $activeSession->end_time ? $activeSession->end_time->format('H:i') : null,
-                'elapsed_seconds' => $elapsedSeconds,
-                'remaining_seconds' => max(0, $remainingSeconds),
-                'is_time_up' => $isTimeUp,
-                'rental_amount' => $activeSession->rental_amount,
-                'fnb_amount' => $activeSession->fnb_amount,
-                'total_amount' => $activeSession->total_amount,
-            ];
         }
 
-        $recentRequests = collect();
-        if ($activeSession) {
-            $recentRequests = CustomerRequest::where('tv_id', $tv->id)
-                ->where('created_at', '>=', $activeSession->start_time)
-                ->orderBy('created_at', 'desc')
-                ->get()
-                ->map(function ($req) {
-                    return [
-                        'id' => $req->id,
-                        'type' => $req->type,
-                        'payload' => $req->payload,
-                        'status' => $req->status,
-                        'time' => $req->created_at->format('H:i'),
-                    ];
-                });
-        }
+        $sessionInfo = [
+            'id' => $activeSession->id,
+            'billing_type' => $activeSession->billing_type,
+            'start_time' => $activeSession->start_time->format('H:i'),
+            'end_time' => $activeSession->end_time ? $activeSession->end_time->format('H:i') : null,
+            'elapsed_seconds' => $elapsedSeconds,
+            'remaining_seconds' => max(0, $remainingSeconds),
+            'is_time_up' => $isTimeUp,
+            'rental_amount' => $activeSession->rental_amount,
+            'fnb_amount' => $activeSession->fnb_amount,
+            'total_amount' => $activeSession->total_amount,
+        ];
+
+        $recentRequests = CustomerRequest::where('tv_id', $tv->id)
+            ->where('created_at', '>=', $activeSession->start_time)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($req) {
+                return [
+                    'id' => $req->id,
+                    'type' => $req->type,
+                    'payload' => $req->payload,
+                    'status' => $req->status,
+                    'time' => $req->created_at->format('H:i'),
+                ];
+            });
 
         return response()->json([
+            'expired' => false,
             'tv' => [
                 'id' => $tv->id,
                 'name' => $tv->name,

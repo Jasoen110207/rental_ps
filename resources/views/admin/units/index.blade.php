@@ -45,8 +45,8 @@
           <div class="py-4 flex flex-col gap-2">
             <div class="p-2.5 bg-surface border border-on-surface text-xs font-label-sm flex items-center justify-between">
               <span class="text-on-surface-variant font-bold">QR Customer URL:</span>
-              <a href="{{ route('customer.index', $unit->access_token) }}" target="_blank" class="text-primary font-bold hover:underline truncate max-w-[150px]">
-                /customer/{{ $unit->access_token }}
+              <a href="{{ route('customer.scan', $unit->access_token) }}" target="_blank" class="text-primary font-bold hover:underline truncate max-w-[150px]">
+                /scan/{{ $unit->access_token }}
               </a>
             </div>
 
