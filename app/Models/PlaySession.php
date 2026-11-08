@@ -2,17 +2,28 @@
 
 namespace App\Models;
 
+use Database\Factories\PlaySessionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class PlaySession extends Model
 {
-    /** @use HasFactory<\Database\Factories\PlaySessionFactory> */
+    /** @use HasFactory<PlaySessionFactory> */
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (PlaySession $session) {
+            if (empty($session->session_token)) {
+                $session->session_token = Str::random(40);
+            }
+        });
+    }
 
     protected function casts(): array
     {

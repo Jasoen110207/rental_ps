@@ -3,7 +3,7 @@
 @section('title', 'Order ' . $tv->name . ' - TambahBang')
 
 @section('content')
-<div class="flex flex-col" id="order-page" data-tv-token="{{ $tv->access_token }}">
+<div class="flex flex-col" id="order-page" data-tv-token="{{ $activeSession->session_token }}">
 
     {{-- Unit bar --}}
     <header class="w-full flex flex-col gap-2.5 pb-3 mb-3 border-b-2 border-dashed border-on-surface">
@@ -180,7 +180,7 @@
                 <span class="material-symbols-outlined text-primary font-bold text-lg">restaurant_menu</span>
                 <h3 class="font-headline-sm text-xs sm:text-sm font-black tracking-tight uppercase">MENU CEPAT POPULER</h3>
             </div>
-            <a href="{{ route('customer.index', $tv->access_token) }}" class="font-label-sm text-[10px] bg-secondary-fixed font-bold px-2 py-0.5 neo-border-2">KATALOG LENGKAP</a>
+            <a href="{{ route('customer.index', $activeSession->session_token) }}" class="font-label-sm text-[10px] bg-secondary-fixed font-bold px-2 py-0.5 neo-border-2">KATALOG LENGKAP</a>
         </div>
         <div class="grid grid-cols-2 gap-2">
             @forelse ($products as $p)
@@ -189,7 +189,7 @@
                         <div class="font-headline-sm text-xs font-bold leading-snug line-clamp-2">{{ $p->name }}</div>
                         <div class="font-label-sm text-xs text-primary font-bold mt-1">Rp {{ number_format($p->price, 0, ',', '.') }} • Stok {{ $p->stock }}</div>
                     </div>
-                    <form method="POST" action="{{ route('customer.order-food', $tv->access_token) }}">
+                    <form method="POST" action="{{ route('customer.order-food', $activeSession->session_token) }}">
                         @csrf
                         <input type="hidden" name="items[0][product_id]" value="{{ $p->id }}">
                         <input type="hidden" name="items[0][quantity]" value="1">
@@ -219,7 +219,7 @@
     </section>
 
     <footer class="w-full mt-auto flex flex-col gap-2.5 pt-1">
-        <form method="POST" action="{{ route('customer.call-cashier', $tv->access_token) }}">
+        <form method="POST" action="{{ route('customer.call-cashier', $activeSession->session_token) }}">
             @csrf
             <button class="neo-btn w-full min-h-[48px] bg-surface-container-lowest p-3 neo-border-2 neo-shadow-md flex items-center justify-center gap-2 font-headline-sm text-xs sm:text-sm font-extrabold uppercase">
                 <span class="material-symbols-outlined text-primary text-xl">support_agent</span>
@@ -234,7 +234,7 @@
 
     {{-- Modal extend → POST real ke DB --}}
     <div class="fixed inset-0 bg-on-surface/60 z-50 hidden flex-col justify-end backdrop-blur-[1px]" id="order-modal-extend">
-        <form method="POST" action="{{ route('customer.add-time', $tv->access_token) }}" class="w-full max-w-md mx-auto bg-surface-container-lowest neo-border-3 border-b-0 p-4 neo-shadow-lg flex flex-col gap-3.5">
+        <form method="POST" action="{{ route('customer.add-time', $activeSession->session_token) }}" class="w-full max-w-md mx-auto bg-surface-container-lowest neo-border-3 border-b-0 p-4 neo-shadow-lg flex flex-col gap-3.5">
             @csrf
             <div class="flex items-center justify-between border-b-2 border-on-surface pb-2.5">
                 <h3 class="font-headline-sm text-sm font-extrabold uppercase">TAMBAH WAKTU SEWA</h3>
@@ -277,6 +277,10 @@
       const res = await fetch(`/customer/${tvToken}/status`);
       if(!res.ok) return;
       const data = await res.json();
+      if(data.expired){
+        window.location.reload();
+        return;
+      }
       if(data.session){
         if(timerEl){
           timerEl.dataset.type = data.session.billing_type;
