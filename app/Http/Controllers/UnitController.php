@@ -64,7 +64,7 @@ class UnitController extends Controller
         if (empty($tv->access_token)) {
             $tv->update(['access_token' => Str::random(32)]);
         }
-        $customerUrl = route('customer.index', ['token' => $tv->access_token]);
+        $customerUrl = route('customer.scan', ['token' => $tv->access_token]);
 
         return view('admin.units.qr', compact('tv', 'customerUrl'));
     }
