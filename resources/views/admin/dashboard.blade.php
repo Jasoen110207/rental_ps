@@ -516,7 +516,7 @@
       </button>
     </div>
 
-    <form id="checkout-form" method="POST" action="" class="flex flex-col gap-4">
+    <form id="checkout-form" method="POST" action="" class="flex flex-col gap-4" onsubmit="handleAdminCheckout(event)">
       @csrf
 
       <!-- Session Billing Summary Table -->
@@ -573,9 +573,9 @@
         <button type="button" onclick="closeModal('modal-checkout')" class="py-2 px-4 border-2 border-on-surface font-headline-sm text-xs uppercase font-bold neo-shadow-sm btn-press hover:bg-surface-container-high">
           Batal
         </button>
-        <button type="submit" class="py-2.5 px-6 bg-emerald-600 text-white font-headline-lg text-xs uppercase tracking-wider font-black border-2 border-on-surface neo-shadow btn-press hover:bg-emerald-700 flex items-center gap-1.5">
+        <button type="submit" id="checkout-submit-btn" class="py-2.5 px-6 bg-emerald-600 text-white font-headline-lg text-xs uppercase tracking-wider font-black border-2 border-on-surface neo-shadow btn-press hover:bg-emerald-700 flex items-center gap-1.5">
           <span class="material-symbols-outlined text-lg">check_circle</span>
-          <span>SELESAIKAN PEMBAYARAN LUNAS</span>
+          <span id="checkout-submit-text">SELESAIKAN PEMBAYARAN LUNAS</span>
         </button>
       </div>
     </form>
@@ -585,7 +585,10 @@
 @endsection
 
 @push('scripts')
+<script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
+  let currentCheckoutSessionId = null;
+  let isMidtransPaid = false;
   // Product pricing reference for JS calculations
   const productPrices = {
     @foreach ($products as $p)
@@ -744,13 +747,78 @@
 
   // 4. Checkout Modal Handlers
   function openCheckoutModal(sessionId, tvName, billingType, rate, rentalAmt, fnbAmt, totalAmt, startFormatted, endFormatted) {
+    currentCheckoutSessionId = sessionId;
+    isMidtransPaid = false;
     document.getElementById('checkout-modal-title').innerText = 'Checkout — ' + tvName;
     document.getElementById('checkout-form').action = '/admin/rental/' + sessionId + '/checkout';
     document.getElementById('checkout-duration-display').innerText = startFormatted + ' s/d ' + (endFormatted || 'Sekarang');
     document.getElementById('checkout-rental-amount').innerText = 'Rp ' + rentalAmt.toLocaleString('id-ID');
     document.getElementById('checkout-fnb-amount').innerText = 'Rp ' + fnbAmt.toLocaleString('id-ID');
     document.getElementById('checkout-grand-total').innerText = 'Rp ' + totalAmt.toLocaleString('id-ID');
+    document.getElementById('checkout-submit-text').innerText = 'SELESAIKAN PEMBAYARAN LUNAS';
+    document.getElementById('checkout-submit-btn').disabled = false;
     document.getElementById('modal-checkout').classList.remove('hidden');
+  }
+
+  async function handleAdminCheckout(e) {
+    const methodEl = document.querySelector('#checkout-form input[name="payment_method"]:checked');
+    const method = methodEl ? methodEl.value : 'cash';
+
+    if (method === 'qris' && !isMidtransPaid) {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('checkout-submit-btn');
+      const submitText = document.getElementById('checkout-submit-text');
+      const originalText = submitText.innerText;
+
+      submitBtn.disabled = true;
+      submitText.innerText = 'MEMUAT QRIS MIDTRANS...';
+
+      try {
+        const res = await fetch(`/admin/rental/${currentCheckoutSessionId}/snap-token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({})
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          alert(data.message || 'Gagal memuat pembayaran Midtrans.');
+          submitBtn.disabled = false;
+          submitText.innerText = originalText;
+          return;
+        }
+
+        window.snap.pay(data.snap_token, {
+          onSuccess: function () {
+            isMidtransPaid = true;
+            document.getElementById('checkout-form').submit();
+          },
+          onPending: function () {
+            alert('Menunggu pembayaran diselesaikan.');
+            submitBtn.disabled = false;
+            submitText.innerText = originalText;
+          },
+          onError: function () {
+            alert('Pembayaran gagal! Silakan coba lagi.');
+            submitBtn.disabled = false;
+            submitText.innerText = originalText;
+          },
+          onClose: function () {
+            submitBtn.disabled = false;
+            submitText.innerText = originalText;
+          }
+        });
+      } catch (err) {
+        alert('Terjadi kesalahan jaringan saat menghubungi server.');
+        submitBtn.disabled = false;
+        submitText.innerText = originalText;
+      }
+    }
   }
 
   // ================= REAL-TIME TIMER TICK & LIVE SYNC =================

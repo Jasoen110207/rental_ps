@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\PlaySession;
 use App\Models\Product;
 use App\Models\SessionOrder;
-use App\Models\Shift;
 use App\Models\Tv;
+use App\Services\MidtransService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -182,7 +182,7 @@ class RentalController extends Controller
     /**
      * Checkout and finalize session
      */
-    public function checkout(Request $request, $sessionId)
+    public function checkout(Request $request, $sessionId, MidtransService $midtransService)
     {
         $validated = $request->validate([
             'payment_method' => 'required|in:cash,qris,transfer,other',
@@ -192,58 +192,16 @@ class RentalController extends Controller
 
         $session = PlaySession::with(['tv', 'sessionOrders.product'])->findOrFail($sessionId);
 
-        $now = Carbon::now();
-        $endTime = $now;
+        $customRentalAmount = isset($validated['custom_rental_amount']) && $validated['custom_rental_amount'] !== ''
+            ? (int) $validated['custom_rental_amount']
+            : null;
 
-        // Calculate rental amount
-        $rentalAmount = $session->rental_amount;
-        if ($session->billing_type === 'postpaid') {
-            $durationMinutes = max(1, $session->start_time->diffInMinutes($now));
-            $blokWaktu = ceil($durationMinutes / 5);
-            $tarifPerLimaMenit = ($session->tv->price_per_hour / 60) * 5;
-            if (isset($validated['custom_rental_amount']) && $validated['custom_rental_amount'] !== '') {
-                $rentalAmount = (int) $validated['custom_rental_amount'];
-            } else {
-                $rentalAmount = (int) ($blokWaktu * $tarifPerLimaMenit);
-            }
-        } elseif (isset($validated['custom_rental_amount']) && $validated['custom_rental_amount'] !== '') {
-            $rentalAmount = (int) $validated['custom_rental_amount'];
-        }
-
-        $fnbAmount = $session->sessionOrders->sum('subtotal');
-        $grandTotal = $rentalAmount + $fnbAmount;
-
-        DB::transaction(function () use ($session, $endTime, $rentalAmount, $fnbAmount, $grandTotal, $validated) {
-            $session->update([
-                'status' => 'completed',
-                'end_time' => $endTime,
-                'rental_amount' => $rentalAmount,
-                'fnb_amount' => $fnbAmount,
-                'total_amount' => $grandTotal,
-                'payment_method' => $validated['payment_method'],
-                'notes' => $validated['notes'] ?? $session->notes,
-            ]);
-
-            // Kembalikan stok untuk produk addon
-            foreach ($session->sessionOrders as $order) {
-                if ($order->product && $order->product->category === 'addon') {
-                    $order->product->increment('stock', $order->quantity);
-                }
-            }
-
-            // Set TV available and buzzer off
-            $session->tv->update([
-                'status' => 'available',
-                'is_buzzer_on' => false,
-            ]);
-
-            // Update active shift stats
-            $activeShift = Shift::where('status', 'active')->latest()->first();
-            if ($activeShift) {
-                $activeShift->increment('total_revenue', $grandTotal);
-                $activeShift->increment('transactions_count', 1);
-            }
-        });
+        $grandTotal = $midtransService->finalizeSessionCheckout(
+            $session,
+            $validated['payment_method'],
+            $validated['notes'] ?? null,
+            $customRentalAmount
+        );
 
         return redirect()->route('admin.dashboard')
             ->with('success', 'Checkout berhasil! Pembayaran '.$session->tv->name.' sebesar Rp '.number_format($grandTotal, 0, ',', '.').' telah lunas.');

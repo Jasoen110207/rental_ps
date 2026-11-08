@@ -339,11 +339,6 @@
         <div class="flex justify-between pt-1 font-black text-emerald-700 text-base"><span class="uppercase">TOTAL</span><span id="checkout-grand-total">Rp 0</span></div>
       </div>
 
-      <div id="qris-container" class="hidden border-2 border-on-surface p-4 bg-surface text-center">
-        <h4 class="font-bold text-xs uppercase mb-2">Scan QRIS untuk Membayar</h4>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=QRIS_RENTAL_PS_TAMBAHBANG" alt="QRIS Barcode" class="mx-auto w-48 h-48 border-2 border-on-surface">
-      </div>
-
       <div>
         <label class="block text-xs uppercase font-bold mb-2">Metode Pembayaran</label>
         <div class="grid grid-cols-4 gap-2">
@@ -363,7 +358,9 @@
 @endsection
 
 @push('scripts')
+<script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
+let currentCheckoutSessionId = null;
 const productPrices = { @foreach($products as $p) {{ $p->id }}: {{ $p->price }}, @endforeach };
 let currentTvRate = 0, currentExtendRate = 0;
 function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
@@ -445,30 +442,77 @@ function updateFnbTotalPreview(){
   document.getElementById('fnb-total-preview').innerText = 'Rp ' + total.toLocaleString('id-ID');
 }
 let qrisConfirmed = false;
-function handleCheckout(e) {
-  const method = document.querySelector('input[name="payment_method"]:checked').value;
+async function handleCheckout(e) {
+  const method = document.querySelector('#checkout-form input[name="payment_method"]:checked').value;
   if (method === 'qris' && !qrisConfirmed) {
     e.preventDefault();
-    document.getElementById('checkout-details').classList.add('hidden');
-    document.getElementById('qris-container').classList.remove('hidden');
-    document.getElementById('checkout-submit-btn').innerText = 'KONFIRMASI SUDAH DIBAYAR';
-    qrisConfirmed = true;
+
+    const submitBtn = document.getElementById('checkout-submit-btn');
+    const originalText = submitBtn.innerText;
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'MEMUAT QRIS...';
+
+    try {
+      const res = await fetch(`/kasir/rental/${currentCheckoutSessionId}/snap-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({})
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.message || 'Gagal membuat QRIS Midtrans.');
+        submitBtn.disabled = false;
+        submitBtn.innerText = originalText;
+        return false;
+      }
+
+      window.snap.pay(data.snap_token, {
+        onSuccess: function () {
+          qrisConfirmed = true;
+          document.getElementById('checkout-form').submit();
+        },
+        onPending: function () {
+          alert('Menunggu pembayaran diselesaikan.');
+          submitBtn.disabled = false;
+          submitBtn.innerText = originalText;
+        },
+        onError: function () {
+          alert('Pembayaran QRIS gagal.');
+          submitBtn.disabled = false;
+          submitBtn.innerText = originalText;
+        },
+        onClose: function () {
+          submitBtn.disabled = false;
+          submitBtn.innerText = originalText;
+        }
+      });
+    } catch (err) {
+      alert('Terjadi kesalahan jaringan.');
+      submitBtn.disabled = false;
+      submitBtn.innerText = originalText;
+    }
     return false;
   }
 }
 
 function openCheckoutModal(sessionId, tvName, rentalAmt, fnbAmt, totalAmt){
+  currentCheckoutSessionId = sessionId;
   document.getElementById('checkout-modal-title').innerText = 'Checkout — ' + tvName;
   document.getElementById('checkout-form').action = '/kasir/rental/' + sessionId + '/checkout';
   document.getElementById('checkout-rental-amount').innerText = 'Rp ' + rentalAmt.toLocaleString('id-ID');
   document.getElementById('checkout-fnb-amount').innerText = 'Rp ' + fnbAmt.toLocaleString('id-ID');
   document.getElementById('checkout-grand-total').innerText = 'Rp ' + totalAmt.toLocaleString('id-ID');
-  
+
   document.getElementById('checkout-details').classList.remove('hidden');
-  document.getElementById('qris-container').classList.add('hidden');
   document.getElementById('checkout-submit-btn').innerText = 'SELESAIKAN LUNAS';
+  document.getElementById('checkout-submit-btn').disabled = false;
   qrisConfirmed = false;
-  document.querySelector('input[name="payment_method"][value="cash"]').checked = true;
+  document.querySelector('#checkout-form input[name="payment_method"][value="cash"]').checked = true;
 
   document.getElementById('modal-checkout').classList.remove('hidden');
 }

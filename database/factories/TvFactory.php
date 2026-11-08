@@ -18,7 +18,11 @@ class TvFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => 'TV-'.fake()->unique()->numberBetween(1, 99),
+            'type' => fake()->randomElement(['ps3', 'ps4', 'ps5', 'sim_racing', 'nintendo_switch']),
+            'price_per_hour' => 15000,
+            'status' => 'available',
+            'is_buzzer_on' => false,
         ];
     }
 }

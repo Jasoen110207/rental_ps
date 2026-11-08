@@ -5,6 +5,8 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KasirController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PosController;
@@ -24,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', \App\Http\Controllers\LandingController::class)->name('home');
+Route::get('/', LandingController::class)->name('home');
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -52,6 +54,9 @@ Route::get('/scan/{token}', function (string $token) {
     return redirect()->route('customer.index', ['token' => $token]);
 });
 
+// Midtrans Webhook Notification Route (Public & CSRF exempt)
+Route::post('/midtrans/webhook', [MidtransController::class, 'webhook'])->name('midtrans.webhook');
+
 // Notifications API (Shared Auth)
 Route::middleware('auth')->group(function () {
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
@@ -76,6 +81,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/rental/{sessionId}/extend', [RentalController::class, 'extend'])->name('rental.extend');
     Route::post('/rental/{sessionId}/add-fnb', [RentalController::class, 'addFnb'])->name('rental.add-fnb');
     Route::post('/rental/{sessionId}/checkout', [RentalController::class, 'checkout'])->name('rental.checkout');
+    Route::post('/rental/{sessionId}/snap-token', [MidtransController::class, 'createSnapToken'])->name('rental.snap-token');
     Route::post('/rental/{tvId}/toggle-buzzer', [RentalController::class, 'toggleBuzzer'])->name('rental.toggle-buzzer');
 
     // Customer Requests Center
@@ -150,5 +156,6 @@ Route::middleware('auth')->prefix('kasir')->name('kasir.')->group(function () {
     Route::post('/rental/{sessionId}/extend', [KasirController::class, 'extendRental'])->name('rental.extend');
     Route::post('/rental/{sessionId}/add-fnb', [KasirController::class, 'addFnb'])->name('rental.add-fnb');
     Route::post('/rental/{sessionId}/checkout', [KasirController::class, 'checkout'])->name('rental.checkout');
+    Route::post('/rental/{sessionId}/snap-token', [MidtransController::class, 'createSnapToken'])->name('rental.snap-token');
     Route::post('/rental/{tvId}/toggle-buzzer', [KasirController::class, 'toggleBuzzer'])->name('rental.toggle-buzzer');
 });
