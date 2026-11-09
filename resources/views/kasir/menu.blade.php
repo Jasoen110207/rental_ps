@@ -13,11 +13,11 @@
         <input name="search" value="{{ $search }}" placeholder="Cari mie, kopi, snack..." class="flex-1 px-4 py-2.5 border-2 border-on-surface text-sm font-bold">
         <button class="px-4 py-2 bg-primary text-white text-xs font-black uppercase border-2 border-on-surface neo-shadow btn-press">CARI</button>
       </form>
-      <div class="flex gap-2 mt-3 overflow-x-auto">
-        <a href="{{ route('kasir.menu', ['category' => 'all']) }}" class="px-4 py-1.5 text-xs font-bold border-2 border-on-surface {{ $category === 'all' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest hover:bg-surface-container' }}">Semua</a>
-        <a href="{{ route('kasir.menu', ['category' => 'food']) }}" class="px-4 py-1.5 text-xs font-bold border-2 border-on-surface {{ $category === 'food' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest hover:bg-surface-container' }}">Makanan</a>
-        <a href="{{ route('kasir.menu', ['category' => 'drink']) }}" class="px-4 py-1.5 text-xs font-bold border-2 border-on-surface {{ $category === 'drink' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest hover:bg-surface-container' }}">Minuman</a>
-        <a href="{{ route('kasir.menu', ['category' => 'snack']) }}" class="px-4 py-1.5 text-xs font-bold border-2 border-on-surface {{ $category === 'snack' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest hover:bg-surface-container' }}">Snack</a>
+      <div class="flex gap-2 mt-3 overflow-x-auto max-w-full pb-1">
+        <a href="{{ route('kasir.menu', ['category' => 'all']) }}" class="filter-chip px-3 py-1.5 text-xs {{ $category === 'all' ? 'is-active' : '' }}">Semua</a>
+        <a href="{{ route('kasir.menu', ['category' => 'food']) }}" class="filter-chip px-3 py-1.5 text-xs {{ $category === 'food' ? 'is-active' : '' }}">Makanan</a>
+        <a href="{{ route('kasir.menu', ['category' => 'drink']) }}" class="filter-chip px-3 py-1.5 text-xs {{ $category === 'drink' ? 'is-active' : '' }}">Minuman</a>
+        <a href="{{ route('kasir.menu', ['category' => 'snack']) }}" class="filter-chip px-3 py-1.5 text-xs {{ $category === 'snack' ? 'is-active' : '' }}">Snack</a>
       </div>
     </div>
 

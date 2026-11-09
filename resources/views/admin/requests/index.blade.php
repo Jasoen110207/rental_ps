@@ -14,17 +14,17 @@
     </div>
 
     <!-- Filter Tabs -->
-    <div class="flex items-center gap-1 bg-surface-container-high p-1 border-2 border-on-surface neo-shadow-sm">
-      <a href="{{ route('admin.requests.index', ['tab' => 'all']) }}" class="px-3 py-1.5 font-headline-sm text-xs font-bold uppercase transition {{ $filter === 'all' ? 'bg-primary text-on-primary neo-shadow-sm' : 'text-on-surface hover:bg-surface' }}">
+    <div class="flex items-center gap-1 bg-surface-container-high p-1 border-2 border-on-surface neo-shadow-sm overflow-x-auto max-w-full">
+      <a href="{{ route('admin.requests.index', ['tab' => 'all']) }}" class="filter-chip px-3 py-1.5 font-headline-sm text-xs font-bold uppercase {{ $filter === 'all' ? 'is-active' : '' }}">
         Semua ({{ $counts['all'] }})
       </a>
-      <a href="{{ route('admin.requests.index', ['tab' => 'pending']) }}" class="px-3 py-1.5 font-headline-sm text-xs font-bold uppercase transition {{ $filter === 'pending' ? 'bg-secondary-container text-on-secondary neo-shadow-sm' : 'text-on-surface hover:bg-surface' }}">
+      <a href="{{ route('admin.requests.index', ['tab' => 'pending']) }}" class="filter-chip px-3 py-1.5 font-headline-sm text-xs font-bold uppercase {{ $filter === 'pending' ? 'is-active' : '' }}">
         Pending ({{ $counts['pending'] }})
       </a>
-      <a href="{{ route('admin.requests.index', ['tab' => 'approved']) }}" class="px-3 py-1.5 font-headline-sm text-xs font-bold uppercase transition {{ $filter === 'approved' ? 'bg-emerald-600 text-white neo-shadow-sm' : 'text-on-surface hover:bg-surface' }}">
+      <a href="{{ route('admin.requests.index', ['tab' => 'approved']) }}" class="filter-chip px-3 py-1.5 font-headline-sm text-xs font-bold uppercase {{ $filter === 'approved' ? 'is-active' : '' }}">
         Disetujui ({{ $counts['approved'] }})
       </a>
-      <a href="{{ route('admin.requests.index', ['tab' => 'rejected']) }}" class="px-3 py-1.5 font-headline-sm text-xs font-bold uppercase transition {{ $filter === 'rejected' ? 'bg-error text-white neo-shadow-sm' : 'text-on-surface hover:bg-surface' }}">
+      <a href="{{ route('admin.requests.index', ['tab' => 'rejected']) }}" class="filter-chip px-3 py-1.5 font-headline-sm text-xs font-bold uppercase {{ $filter === 'rejected' ? 'is-active' : '' }}">
         Ditolak ({{ $counts['rejected'] }})
       </a>
     </div>

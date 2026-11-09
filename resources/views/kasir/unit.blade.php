@@ -5,15 +5,15 @@
 
 @section('content')
 <div class="flex flex-col gap-6">
-  <div class="flex items-center justify-between pb-4 border-b-2 border-on-surface">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b-2 border-on-surface">
     <div>
       <h2 class="text-xl font-black uppercase">Daftar Unit ({{ $units->count() }})</h2>
       <p class="text-xs text-on-surface-variant mt-0.5">{{ $units->where('status', 'available')->count() }} tersedia • {{ $units->where('status', 'playing')->count() }} dimainkan • {{ $units->where('status', 'maintenance')->count() }} maintenance</p>
     </div>
-    <div class="flex gap-2">
-      <a href="{{ route('kasir.unit') }}" class="px-3 py-1.5 text-xs font-bold border-2 border-on-surface {{ !request('filter') ? 'bg-on-surface text-white' : 'bg-surface-container-lowest' }}">Semua</a>
-      <a href="{{ route('kasir.unit', ['filter' => 'available']) }}" class="px-3 py-1.5 text-xs font-bold border-2 border-on-surface {{ request('filter') === 'available' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest' }}">Tersedia</a>
-      <a href="{{ route('kasir.unit', ['filter' => 'maintenance']) }}" class="px-3 py-1.5 text-xs font-bold border-2 border-on-surface {{ request('filter') === 'maintenance' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest' }}">Maintenance</a>
+    <div class="flex flex-wrap gap-2">
+      <a href="{{ route('kasir.unit') }}" class="filter-chip px-3 py-1.5 text-xs {{ !request('filter') ? 'is-active' : '' }}">Semua</a>
+      <a href="{{ route('kasir.unit', ['filter' => 'available']) }}" class="filter-chip px-3 py-1.5 text-xs {{ request('filter') === 'available' ? 'is-active' : '' }}">Tersedia</a>
+      <a href="{{ route('kasir.unit', ['filter' => 'maintenance']) }}" class="filter-chip px-3 py-1.5 text-xs {{ request('filter') === 'maintenance' ? 'is-active' : '' }}">Maintenance</a>
     </div>
   </div>
 

@@ -10,9 +10,9 @@
   <div class="lg:col-span-2 flex flex-col gap-5">
     
     <!-- Top Search & Category Filters -->
-    <div class="p-4 bg-surface-container-lowest border-2 border-on-surface neo-shadow flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="p-4 bg-surface-container-lowest border-2 border-on-surface neo-shadow flex flex-col lg:flex-row lg:items-center justify-between gap-3">
       <!-- Search Form -->
-      <form method="GET" action="{{ route('admin.pos.index') }}" class="flex-1 flex gap-2">
+      <form method="GET" action="{{ route('admin.pos.index') }}" class="flex-1 flex gap-2 min-w-0">
         <input type="hidden" name="category" value="{{ $category }}">
         <div class="relative flex-1">
           <input type="text" name="search" value="{{ $search }}" placeholder="Cari makanan / minuman..." class="w-full px-3.5 py-2 bg-surface border-2 border-on-surface font-body-md text-xs neo-shadow-sm focus:outline-none">
@@ -23,17 +23,17 @@
       </form>
 
       <!-- Category Filter Tabs -->
-      <div class="flex items-center gap-1 bg-surface-container-high p-1 border-2 border-on-surface neo-shadow-sm overflow-x-auto">
-        <a href="{{ route('admin.pos.index', ['category' => 'all', 'search' => $search]) }}" class="px-2.5 py-1 font-headline-sm text-xs font-bold uppercase {{ $category === 'all' ? 'bg-primary text-on-primary neo-shadow-sm' : 'hover:bg-surface' }}">
+      <div class="flex items-center gap-1 bg-surface-container-high p-1 border-2 border-on-surface neo-shadow-sm overflow-x-auto max-w-full">
+        <a href="{{ route('admin.pos.index', ['category' => 'all', 'search' => $search]) }}" class="filter-chip px-3 py-1.5 font-headline-sm text-xs font-bold uppercase {{ $category === 'all' ? 'is-active' : '' }}">
           Semua
         </a>
-        <a href="{{ route('admin.pos.index', ['category' => 'food', 'search' => $search]) }}" class="px-2.5 py-1 font-headline-sm text-xs font-bold uppercase {{ $category === 'food' ? 'bg-primary text-on-primary neo-shadow-sm' : 'hover:bg-surface' }}">
+        <a href="{{ route('admin.pos.index', ['category' => 'food', 'search' => $search]) }}" class="filter-chip px-3 py-1.5 font-headline-sm text-xs font-bold uppercase {{ $category === 'food' ? 'is-active' : '' }}">
           Makanan
         </a>
-        <a href="{{ route('admin.pos.index', ['category' => 'drink', 'search' => $search]) }}" class="px-2.5 py-1 font-headline-sm text-xs font-bold uppercase {{ $category === 'drink' ? 'bg-primary text-on-primary neo-shadow-sm' : 'hover:bg-surface' }}">
+        <a href="{{ route('admin.pos.index', ['category' => 'drink', 'search' => $search]) }}" class="filter-chip px-3 py-1.5 font-headline-sm text-xs font-bold uppercase {{ $category === 'drink' ? 'is-active' : '' }}">
           Minuman
         </a>
-        <a href="{{ route('admin.pos.index', ['category' => 'snack', 'search' => $search]) }}" class="px-2.5 py-1 font-headline-sm text-xs font-bold uppercase {{ $category === 'snack' ? 'bg-primary text-on-primary neo-shadow-sm' : 'hover:bg-surface' }}">
+        <a href="{{ route('admin.pos.index', ['category' => 'snack', 'search' => $search]) }}" class="filter-chip px-3 py-1.5 font-headline-sm text-xs font-bold uppercase {{ $category === 'snack' ? 'is-active' : '' }}">
           Snack
         </a>
       </div>

@@ -45,7 +45,7 @@
         <input name="search" value="{{ request('search') }}" placeholder="#ID atau nama unit..." class="w-full px-3 py-2 border-2 border-on-surface text-xs">
       </div>
       <div class="md:col-span-2">
-        <button class="w-full py-2 bg-primary text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press">FILTER</button>
+        <button type="submit" class="w-full py-2 bg-primary text-white text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press hover:bg-primary-container transition-colors">FILTER</button>
       </div>
     </form>
   </section>

@@ -64,9 +64,9 @@
       <span class="text-xs font-bold flex items-center gap-1 mr-1">
         <span class="material-symbols-outlined text-sm">filter_list</span> FILTER:
       </span>
-      <button data-filter="all" class="filter-btn px-3 py-1 bg-on-surface text-white font-label-md text-xs font-bold border-2 border-on-surface">Semua ({{ $totalUnits }})</button>
-      <button data-filter="playing" class="filter-btn px-3 py-1 bg-surface-container-lowest font-label-md text-xs font-bold border-2 border-on-surface hover:bg-surface-container neo-shadow-sm btn-press">Aktif ({{ $playingUnits }})</button>
-      <button data-filter="available" class="filter-btn px-3 py-1 bg-surface-container-lowest font-label-md text-xs font-bold border-2 border-on-surface hover:bg-surface-container neo-shadow-sm btn-press">Tersedia ({{ $availableUnits }})</button>
+      <button data-filter="all" class="filter-btn filter-chip is-active px-3 py-1.5 font-label-md text-xs font-bold">Semua ({{ $totalUnits }})</button>
+      <button data-filter="playing" class="filter-btn filter-chip px-3 py-1.5 font-label-md text-xs font-bold">Aktif ({{ $playingUnits }})</button>
+      <button data-filter="available" class="filter-btn filter-chip px-3 py-1.5 font-label-md text-xs font-bold">Tersedia ({{ $availableUnits }})</button>
     </div>
     <div class="flex items-center gap-2">
       <div class="relative">
@@ -516,25 +516,29 @@ function openCheckoutModal(sessionId, tvName, rentalAmt, fnbAmt, totalAmt){
 
   document.getElementById('modal-checkout').classList.remove('hidden');
 }
-// Filter lokal
+// Filter lokal (status + pencarian)
+let activeUnitFilter = 'all';
+
+function applyUnitFilter() {
+  const q = (document.getElementById('unit-search').value || '').toLowerCase();
+  document.querySelectorAll('.unit-card').forEach(card => {
+    const matchF = activeUnitFilter === 'all' || card.dataset.status === activeUnitFilter;
+    const matchQ = !q || card.dataset.name.includes(q);
+    card.style.display = (matchF && matchQ) ? '' : 'none';
+  });
+}
+
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-on-surface','text-white'));
-    btn.classList.add('bg-on-surface','text-white');
-    const f = btn.dataset.filter, q = (document.getElementById('unit-search').value || '').toLowerCase();
-    document.querySelectorAll('.unit-card').forEach(card => {
-      const matchF = f === 'all' || card.dataset.status === f;
-      const matchQ = !q || card.dataset.name.includes(q);
-      card.style.display = (matchF && matchQ) ? '' : 'none';
+    activeUnitFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('is-active', b === btn);
     });
+    applyUnitFilter();
   });
 });
-document.getElementById('unit-search').addEventListener('input', e => {
-  const q = e.target.value.toLowerCase();
-  document.querySelectorAll('.unit-card').forEach(card => {
-    card.style.display = card.dataset.name.includes(q) ? '' : 'none';
-  });
-});
+
+document.getElementById('unit-search').addEventListener('input', applyUnitFilter);
 // Timer lokal tiap detik
 function fmt(s){ s = Math.max(0, s); const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60; return [h,m,ss].map(v => String(v).padStart(2,'0')).join(':'); }
 setInterval(() => {

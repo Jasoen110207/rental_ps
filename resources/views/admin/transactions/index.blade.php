@@ -78,7 +78,7 @@
       </div>
 
       <!-- Submit & Reset -->
-      <div class="flex items-end gap-2">
+      <div class="flex flex-wrap items-end gap-2">
         <button type="submit" class="flex-1 py-2 bg-primary text-on-primary font-headline-sm text-xs uppercase font-black border-2 border-on-surface neo-shadow btn-press hover:bg-primary-container flex items-center justify-center gap-1">
           <span class="material-symbols-outlined text-sm">filter_alt</span>
           <span>Filter</span>

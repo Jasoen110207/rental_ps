@@ -5,14 +5,14 @@
 
 @section('content')
 <div class="flex flex-col gap-6">
-  <div class="flex items-center justify-between gap-4 bg-surface-container-lowest border-2 border-on-surface neo-shadow p-4">
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-container-lowest border-2 border-on-surface neo-shadow p-4">
     <div>
       <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant">Payroll</p>
       <h1 class="font-headline-lg text-2xl uppercase font-black">PAYROLL KASIR</h1>
     </div>
 
     <div class="flex items-center gap-3">
-      <form method="GET" action="{{ route('admin.payroll.index') }}" class="flex items-center gap-2">
+      <form method="GET" action="{{ route('admin.payroll.index') }}" class="flex flex-wrap items-center gap-2">
         <div>
           <label for="kasir-select" class="sr-only">Kasir</label>
           <select name="kasir_id" id="kasir-select" onchange="this.form.submit()" class="border-2 border-on-surface p-2 font-bold text-xs uppercase bg-surface-container-low">

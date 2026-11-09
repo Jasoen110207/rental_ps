@@ -5,11 +5,11 @@
 
 @section('content')
 <div class="flex flex-col gap-6">
-  <div class="flex items-center gap-2 overflow-x-auto pb-1">
-    <a href="{{ route('kasir.request', ['tab' => 'pending']) }}" class="px-4 py-2.5 text-xs font-bold border-2 border-on-surface whitespace-nowrap {{ $filter === 'pending' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest hover:bg-surface-container' }}">Menunggu ({{ $counts['pending'] }})</a>
-    <a href="{{ route('kasir.request', ['tab' => 'approved']) }}" class="px-4 py-2.5 text-xs font-bold border-2 border-on-surface whitespace-nowrap {{ $filter === 'approved' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest hover:bg-surface-container' }}">Disetujui ({{ $counts['approved'] }})</a>
-    <a href="{{ route('kasir.request', ['tab' => 'rejected']) }}" class="px-4 py-2.5 text-xs font-bold border-2 border-on-surface whitespace-nowrap {{ $filter === 'rejected' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest hover:bg-surface-container' }}">Ditolak ({{ $counts['rejected'] }})</a>
-    <a href="{{ route('kasir.request', ['tab' => 'all']) }}" class="px-4 py-2.5 text-xs font-bold border-2 border-on-surface whitespace-nowrap {{ $filter === 'all' ? 'bg-on-surface text-white' : 'bg-surface-container-lowest hover:bg-surface-container' }}">Semua ({{ $counts['all'] }})</a>
+  <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+    <a href="{{ route('kasir.request', ['tab' => 'pending']) }}" class="filter-chip px-3 py-1.5 text-xs {{ $filter === 'pending' ? 'is-active' : '' }}">Menunggu ({{ $counts['pending'] }})</a>
+    <a href="{{ route('kasir.request', ['tab' => 'approved']) }}" class="filter-chip px-3 py-1.5 text-xs {{ $filter === 'approved' ? 'is-active' : '' }}">Disetujui ({{ $counts['approved'] }})</a>
+    <a href="{{ route('kasir.request', ['tab' => 'rejected']) }}" class="filter-chip px-3 py-1.5 text-xs {{ $filter === 'rejected' ? 'is-active' : '' }}">Ditolak ({{ $counts['rejected'] }})</a>
+    <a href="{{ route('kasir.request', ['tab' => 'all']) }}" class="filter-chip px-3 py-1.5 text-xs {{ $filter === 'all' ? 'is-active' : '' }}">Semua ({{ $counts['all'] }})</a>
   </div>
 
   <div id="live-request-container">
