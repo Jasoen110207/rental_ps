@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Slip Gaji Kasir</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,13 +34,6 @@
             line-height: 1.7;
             text-align: right;
         }
-        .logo {
-            display: block;
-            width: 170px;
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 6px;
-        }
         .section {
             margin-top: 18px;
         }
@@ -67,7 +59,6 @@
     <div class="container">
         <div class="header">
             <div>
-                <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/logo.png'))) }}" alt="TambahBang Rental PS" class="logo">
                 <h1>Slip Gaji</h1>
                 <div>{{ $payroll['period'] }}</div>
             </div>

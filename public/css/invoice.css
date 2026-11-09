@@ -41,14 +41,6 @@ body {
   letter-spacing: 1px;
 }
 
-.receipt-logo {
-  display: block;
-  width: 190px;
-  max-width: 85%;
-  height: auto;
-  margin: 0 auto 8px;
-}
-
 .header p {
   font-size: 10px;
   margin-top: 2px;

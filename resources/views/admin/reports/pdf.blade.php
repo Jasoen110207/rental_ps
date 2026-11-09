@@ -10,7 +10,6 @@
     </style>
 </head>
 <body>
-    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/logo.png'))) }}" alt="TambahBang Rental PS" style="width: 160px; height: auto; margin-bottom: 12px;">
     <h2>Laporan Penjualan Mingguan</h2>
     <p>Tanggal: {{ now()->startOfWeek()->format('d M Y') }} - {{ now()->endOfWeek()->format('d M Y') }}</p>
     <table>

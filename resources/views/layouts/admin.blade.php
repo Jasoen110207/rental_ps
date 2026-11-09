@@ -5,7 +5,6 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'Dashboard') — TambahBang Smart POS & Rental PS</title>
-  <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
   <!-- Google Fonts: Space Grotesk, Space Mono, Chivo -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -47,8 +46,14 @@
     <aside class="w-64 h-full overflow-y-auto flex-shrink-0 flex flex-col justify-between p-4 z-40 bg-surface-container-lowest border-r-2 border-on-surface neo-shadow scrollbar-none">
       <div class="flex flex-col gap-4">
         <!-- Brand Emblem & Title -->
-        <a href="{{ route('admin.dashboard') }}" class="flex items-center pb-3 border-b-2 border-on-surface hover:opacity-90 transition">
-          <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="558" class="h-16 w-auto max-w-full object-contain">
+        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 pb-3 border-b-2 border-on-surface hover:opacity-90 transition">
+          <div class="w-10 h-10 bg-primary text-on-primary border-2 border-on-surface flex items-center justify-center neo-shadow-sm flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl">sports_esports</span>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-lg font-headline-md font-extrabold uppercase tracking-tight text-on-surface leading-none">TAMBAHBANG</h1>
+            <p class="text-[10px] font-label-sm text-secondary uppercase font-bold tracking-wider mt-1">PS Rental & POS Hub</p>
+          </div>
         </a>
 
         <!-- Navigation Menu -->
@@ -464,7 +469,7 @@
       if (Notification.permission === "granted") {
         new Notification("Request Baru: " + latest.tv_name, {
           body: latest.message,
-          icon: '{{ asset('images/logo.png') }}'
+          icon: '/favicon.ico'
         });
       } else if (Notification.permission !== "denied") {
         Notification.requestPermission().then(permission => {
