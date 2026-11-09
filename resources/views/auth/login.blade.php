@@ -67,7 +67,7 @@
           Email / Username
         </label>
         <div class="relative">
-          <input type="text" name="email" id="email" required autofocus value="{{ old('email', 'kasir@rental.com') }}" class="w-full px-3.5 py-2.5 bg-surface border-2 border-on-surface font-body-md text-sm text-on-surface neo-shadow focus:outline-none focus:ring-0 focus:bg-white" placeholder="kasir@rental.com">
+          <input type="text" name="email" id="email" required autofocus value="{{ old('email') }}" class="w-full px-3.5 py-2.5 bg-surface border-2 border-on-surface font-body-md text-sm text-on-surface neo-shadow focus:outline-none focus:ring-0 focus:bg-white" placeholder="Email / Username">
           <span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant">person</span>
         </div>
       </div>
@@ -77,7 +77,7 @@
           Password
         </label>
         <div class="relative">
-          <input type="password" name="password" id="password" required value="password" class="w-full px-3.5 py-2.5 bg-surface border-2 border-on-surface font-body-md text-sm text-on-surface neo-shadow focus:outline-none focus:ring-0 focus:bg-white" placeholder="••••••••">
+          <input type="password" name="password" id="password" required class="w-full px-3.5 py-2.5 bg-surface border-2 border-on-surface font-body-md text-sm text-on-surface neo-shadow focus:outline-none focus:ring-0 focus:bg-white" placeholder="••••••••">
           <button type="button" onclick="togglePassword()" class="absolute right-3 top-2.5 text-on-surface-variant hover:text-on-surface">
             <span class="material-symbols-outlined" id="eye-icon">visibility</span>
           </button>
@@ -89,7 +89,7 @@
           PIN Kasir
         </label>
         <div class="relative">
-          <input type="password" name="pin" id="pin" required value="123456" class="w-full px-3.5 py-2.5 bg-surface border-2 border-on-surface font-body-md text-sm text-on-surface neo-shadow focus:outline-none focus:ring-0 focus:bg-white" placeholder="••••••">
+          <input type="password" name="pin" id="pin" required class="w-full px-3.5 py-2.5 bg-surface border-2 border-on-surface font-body-md text-sm text-on-surface neo-shadow focus:outline-none focus:ring-0 focus:bg-white" placeholder="••••••">
           <button type="button" onclick="togglePin()" class="absolute right-3 top-2.5 text-on-surface-variant hover:text-on-surface">
             <span class="material-symbols-outlined" id="eye-icon-pin">visibility</span>
           </button>
@@ -109,19 +109,6 @@
         <span class="material-symbols-outlined text-lg">arrow_forward</span>
       </button>
     </form>
-
-    <!-- Quick Demo Logins -->
-    <div class="mt-6 pt-4 border-t-2 border-on-surface">
-      <p class="text-[10px] font-label-sm uppercase font-bold text-on-surface-variant mb-2 text-center">Akun Bawaan (Klik Cepat):</p>
-      <div class="grid grid-cols-2 gap-2">
-        <button type="button" onclick="setCredentials('kasir@rental.com', 'password')" class="px-2 py-1.5 bg-surface-container-high border-2 border-on-surface text-xs font-headline-sm font-bold neo-shadow-sm btn-press hover:bg-primary-fixed">
-          🔑 Kasir 1
-        </button>
-        <button type="button" onclick="setCredentials('admin@rental.com', 'password')" class="px-2 py-1.5 bg-surface-container-high border-2 border-on-surface text-xs font-headline-sm font-bold neo-shadow-sm btn-press hover:bg-primary-fixed">
-          🛡️ Admin
-        </button>
-      </div>
-    </div>
 
   </div>
 
@@ -148,11 +135,6 @@
         pin.type = 'password';
         icon.innerText = 'visibility';
       }
-    }
-
-    function setCredentials(email, pass) {
-      document.getElementById('email').value = email;
-      document.getElementById('password').value = pass;
     }
   </script>
 </body>
