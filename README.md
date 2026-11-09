@@ -24,10 +24,10 @@ Mengusung desain antarmuka **Neo-Brutalism** yang tegas, kontras tinggi, dan res
 ### 2. Smart Self-Service QR Code (Anti-Order Fiktif & Anti-History Browser)
 Terinspirasi dari sistem pemesanan QR restoran modern, setiap meja TV memiliki **QR Code khusus** yang dapat di-*scan* pelanggan menggunakan kamera HP tanpa perlu mengunduh aplikasi atau *login*:
 - **Fitur Pelanggan dari Meja:**
-  -  Pantau sisa waktu bermain & rincian tagihan berjalan secara *live*.
-  - **Request Tambah Waktu (Billing)** langsung dari HP.
-  - **Pesan F&B (Makanan & Minuman)** atau sewa *Add-On* tambahan.
-  - **Panggil Petugas (Service Call)** jika mengalami kendala teknis di meja.
+  - Pantau sisa waktu bermain & rincian tagihan berjalan secara *live*.
+  - ➕ **Request Tambah Waktu (Billing)** langsung dari HP.
+  - 🍜 **Pesan F&B (Makanan & Minuman)** atau sewa *Add-On* tambahan.
+  - 🔔 **Panggil Petugas (Service Call)** jika mengalami kendala teknis di meja.
 - **Keamanan Token Sesi Dinamis (*Anti-Fictitious Order*):**
   - Saat pelanggan memindai QR statis di meja (`/scan/{tv_token}`), sistem melakukan *session handshake* dan mengalihkan pelanggan ke URL sesi dinamis (`/customer/{session_token}`).
   - Begitu sesi *checkout*, token sesi tersebut **langsung hangus permanen**. Pelanggan nakal tidak dapat membuka ulang link dari *History Browser* di rumah untuk membuat pesanan fiktif pada pelanggan berikutnya.
