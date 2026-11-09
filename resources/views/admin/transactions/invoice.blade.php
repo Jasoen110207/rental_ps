@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Struk Pembayaran — #TB-{{ str_pad($session->id, 5, '0', STR_PAD_LEFT) }}</title>
-  <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+  <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
   
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
 

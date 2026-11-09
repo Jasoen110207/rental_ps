@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Login Kasir & Admin — TambahBang Rental PS</title>
-  <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+  <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">

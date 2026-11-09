@@ -6,7 +6,8 @@
     <meta name="description" content="Pilih konsol, cek tarif, dan rencanakan waktu mainmu di {{ $settings['store_name'] ?? 'TambahBang Rental PS' }}. Kelola sesi bermain langsung dari QR di meja.">
     <meta name="theme-color" content="#004ac6">
     <title>{{ $settings['store_name'] ?? 'TambahBang Rental PS' }} — Waktunya main bareng.</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700;900&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">

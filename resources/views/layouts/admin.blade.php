@@ -5,7 +5,8 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'Dashboard') — TambahBang Smart POS & Rental PS</title>
-  <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+  <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
 
   <!-- Google Fonts: Space Grotesk, Space Mono, Chivo -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
