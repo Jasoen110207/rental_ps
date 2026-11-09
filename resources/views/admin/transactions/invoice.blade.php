@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Struk Pembayaran — #TB-{{ str_pad($session->id, 5, '0', STR_PAD_LEFT) }}</title>
+  <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
   
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
 
@@ -14,7 +15,7 @@
 
   <div class="receipt">
     <div class="header">
-      <h1>{{ $storeName ?? 'TAMBAHBANG RENTAL PS' }}</h1>
+      <img src="{{ asset('images/logo.png') }}" alt="{{ $storeName ?? 'TambahBang Rental PS' }}" class="receipt-logo">
       <p>{{ $storeAddress ?? 'Jl. Game Arena No. 42' }}</p>
       <p>Telp: {{ $storePhone ?? '0812-3456-7890' }}</p>
     </div>

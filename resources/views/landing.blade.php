@@ -6,6 +6,7 @@
     <meta name="description" content="Pilih konsol, cek tarif, dan rencanakan waktu mainmu di {{ $settings['store_name'] ?? 'TambahBang Rental PS' }}. Kelola sesi bermain langsung dari QR di meja.">
     <meta name="theme-color" content="#004ac6">
     <title>{{ $settings['store_name'] ?? 'TambahBang Rental PS' }} — Waktunya main bareng.</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700;900&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -17,8 +18,7 @@
 <header class="site-header">
     <div class="container header-inner">
         <a class="brand" href="{{ route('home') }}" aria-label="{{ $settings['store_name'] ?? 'TambahBang' }} — beranda">
-            <span class="brand-mark" aria-hidden="true">✚</span>
-            <span>{{ $settings['store_name'] ?? 'TambahBang' }}<small>RENTAL & PLAY</small></span>
+            <img class="brand-logo" src="{{ asset('images/logo.png') }}" alt="{{ $settings['store_name'] ?? 'TambahBang Rental PS' }}" width="900" height="558">
         </a>
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation" hidden>Menu <span aria-hidden="true">☰</span></button>
         <nav id="navigation" class="navigation" aria-label="Navigasi utama">

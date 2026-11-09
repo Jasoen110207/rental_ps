@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR Code Meja — {{ $tv->name }}</title>
+  <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@700;900&family=Space+Grotesk:wght@700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
@@ -22,9 +23,8 @@
   <div class="w-[340px] bg-white border-4 border-black p-6 neo-shadow text-center flex flex-col items-center">
     
     <!-- Header -->
-    <div class="flex items-center gap-2 pb-3 border-b-2 border-black w-full justify-center">
-      <span class="material-symbols-outlined text-3xl text-blue-600">sports_esports</span>
-      <h1 class="text-xl font-black uppercase tracking-tight text-black font-['Space_Grotesk']">TAMBAHBANG</h1>
+    <div class="flex items-center pb-3 border-b-2 border-black w-full justify-center">
+      <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="558" class="w-[190px] h-auto object-contain">
     </div>
 
     <!-- Unit Title -->
