@@ -18,7 +18,7 @@
 <header class="site-header">
     <div class="container header-inner">
         <a class="brand" href="{{ route('home') }}" aria-label="{{ $settings['store_name'] ?? 'TambahBang' }} — beranda">
-            <img class="brand-logo" src="{{ asset('images/logo.png') }}" alt="{{ $settings['store_name'] ?? 'TambahBang Rental PS' }}" width="900" height="558">
+            <img class="brand-logo" src="{{ asset('images/logo.png') }}" alt="{{ $settings['store_name'] ?? 'TambahBang Rental PS' }}" width="900" height="438">
         </a>
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation" hidden>Menu <span aria-hidden="true">☰</span></button>
         <nav id="navigation" class="navigation" aria-label="Navigasi utama">

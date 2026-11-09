@@ -32,7 +32,7 @@
     <!-- Top Mobile Header (satu-satunya brand header) -->
     <header class="p-4 bg-surface-container-lowest border-b-2 border-on-surface flex items-center justify-between sticky top-0 z-30 neo-shadow-sm">
       <a href="{{ url('/') }}" class="flex items-center hover:opacity-90 transition" aria-label="TambahBang Rental PS — beranda">
-        <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="558" class="h-12 w-auto max-w-[150px] object-contain">
+        <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="438" class="block h-12 w-auto max-w-[150px] object-contain flex-shrink-0">
       </a>
 
       <div class="flex items-center gap-1.5 px-2 py-1 bg-surface-container border border-on-surface text-[10px] font-label-sm font-bold">

@@ -47,8 +47,8 @@
     <aside class="w-64 h-full overflow-y-auto flex-shrink-0 flex flex-col justify-between p-4 z-40 bg-surface-container-lowest border-r-2 border-on-surface neo-shadow scrollbar-none">
       <div class="flex flex-col gap-4">
         <!-- Brand Emblem & Title -->
-        <a href="{{ route('admin.dashboard') }}" class="flex items-center pb-3 border-b-2 border-on-surface hover:opacity-90 transition">
-          <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="558" class="h-16 w-auto max-w-full object-contain">
+        <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-center px-2 pb-4 border-b-2 border-on-surface hover:opacity-90 transition">
+          <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="438" class="block w-40 max-w-full h-auto object-contain flex-shrink-0">
         </a>
 
         <!-- Navigation Menu -->

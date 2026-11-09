@@ -30,8 +30,8 @@
     </div>
 
     <!-- Brand Header -->
-    <div class="flex items-center mb-6 pb-4 border-b-2 border-on-surface">
-      <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="558" class="h-20 w-auto max-w-full object-contain">
+    <div class="flex items-center justify-center mb-6 pb-5 border-b-2 border-on-surface">
+      <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="438" class="block w-44 max-w-full h-auto object-contain">
     </div>
 
     <div class="mb-6">

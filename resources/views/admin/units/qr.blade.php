@@ -24,7 +24,7 @@
     
     <!-- Header -->
     <div class="flex items-center pb-3 border-b-2 border-black w-full justify-center">
-      <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="558" class="w-[190px] h-auto object-contain">
+      <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="438" class="block w-[190px] h-auto object-contain">
     </div>
 
     <!-- Unit Title -->
