@@ -1,4 +1,4 @@
-# 🎮 TambahBang Rental PS — Smart POS, Real-Time Billing & Self-Service QR Portal
+# TambahBang Rental PS — Smart POS, Real-Time Billing & Self-Service QR Portal
 
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
@@ -12,53 +12,53 @@ Mengusung desain antarmuka **Neo-Brutalism** yang tegas, kontras tinggi, dan res
 
 ---
 
-## ✨ Fitur-Fitur Unggulan
+## Fitur-Fitur Unggulan
 
-### 1. 🖥️ Real-Time Unit Matrix & Smart Billing (Prepaid & Loss)
+### 1. Real-Time Unit Matrix & Smart Billing (Prepaid & Loss)
 - **Live Timer & Indikator Visual:** Kasir dapat memantau seluruh unit PS (PS3, PS4, PS5, Regular/VIP) dalam satu layar matriks dengan *countdown timer* (Prepaid) dan *stopwatch* (Postpaid/Loss) secara *real-time* tanpa perlu me-*refresh* halaman.
 - **2 Mode Sewa Fleksibel:**
   - **Prepaid (Paket Jam):** Pelanggan menentukan durasi di awal, dilengkapi alarm visual & suara saat sisa waktu kurang dari 5 menit atau habis.
   - **Postpaid / Loss (Open Billing):** Pelanggan bermain sepuasnya dan bayar di akhir. Tagihan dihitung otomatis secara presisi **per blok 5 menit** berdasarkan tarif per jam unit PS.
 - **Auto-Restore Stok Add-On:** Penyewaan perangkat tambahan (seperti Stik Ekstra / VR) otomatis mengembalikan stok saat sesi *checkout* selesai.
 
-### 2. 📱 Smart Self-Service QR Code (Anti-Order Fiktif & Anti-History Browser)
+### 2. Smart Self-Service QR Code (Anti-Order Fiktif & Anti-History Browser)
 Terinspirasi dari sistem pemesanan QR restoran modern, setiap meja TV memiliki **QR Code khusus** yang dapat di-*scan* pelanggan menggunakan kamera HP tanpa perlu mengunduh aplikasi atau *login*:
 - **Fitur Pelanggan dari Meja:**
-  - ⏱️ Pantau sisa waktu bermain & rincian tagihan berjalan secara *live*.
-  - ➕ **Request Tambah Waktu (Billing)** langsung dari HP.
-  - 🍜 **Pesan F&B (Makanan & Minuman)** atau sewa *Add-On* tambahan.
-  - 🔔 **Panggil Petugas (Service Call)** jika mengalami kendala teknis di meja.
+  - Pantau sisa waktu bermain & rincian tagihan berjalan secara *live*.
+  - **Request Tambah Waktu (Billing)** langsung dari HP.
+  - **Pesan F&B (Makanan & Minuman)** atau sewa *Add-On* tambahan.
+  - **Panggil Petugas (Service Call)** jika mengalami kendala teknis di meja.
 - **Keamanan Token Sesi Dinamis (*Anti-Fictitious Order*):**
   - Saat pelanggan memindai QR statis di meja (`/scan/{tv_token}`), sistem melakukan *session handshake* dan mengalihkan pelanggan ke URL sesi dinamis (`/customer/{session_token}`).
   - Begitu sesi *checkout*, token sesi tersebut **langsung hangus permanen**. Pelanggan nakal tidak dapat membuka ulang link dari *History Browser* di rumah untuk membuat pesanan fiktif pada pelanggan berikutnya.
 
-### 3. 💳 Payment Gateway Midtrans (QRIS Dinamis) & Multi-Payment
+### 3. Payment Gateway Midtrans (QRIS Dinamis) & Multi-Payment
 - **Integrasi Midtrans Snap:** Saat pelanggan memilih pembayaran **QRIS**, layar Kasir/Admin langsung memunculkan *popup* kode QRIS resmi dari Midtrans yang siap dipindai menggunakan *e-wallet* atau *mobile banking* pelanggan.
 - **Sinkronisasi Otomatis & Webhook SHA-512:** Status pembayaran terverifikasi otomatis secara aman (*idempotent* dengan `lockForUpdate`), membebaskan meja PS dan mencatat omzet ke shift kasir yang sedang bertugas.
 - **Metode Pembayaran Lengkap:** Mendukung pembayaran **Tunai (Cash)**, **QRIS (Midtrans)**, **Transfer Bank**, maupun metode lainnya.
 
-### 4. 🔔 Request Center & POS F&B Terintegrasi (dengan Audio Notifikasi)
+### 4. Request Center & POS F&B Terintegrasi (dengan Audio Notifikasi)
 - Setiap permintaan tambah jam, pesanan mie/minuman, atau panggilan bantuan dari QR meja pelanggan akan langsung muncul di panel **Pesan Masuk (Customer Requests)** di layar Kasir & Admin lengkap dengan **efek suara notifikasi otomatis**.
 - Kasir cukup menekan **Terima (Approve)** atau **Tolak (Reject)**—stok produk F&B dan total tagihan meja akan langsung diperbarui detik itu juga.
 - Mendukung juga transaksi **F&B Mandiri (Walk-in POS)** untuk pembeli yang hanya membeli makanan/minuman tanpa menyewa PS.
 
-### 5. 🔐 Keamanan Berlapis (Email + Password + 6-Digit PIN Kasir)
+### 5. Keamanan Berlapis (Email + Password + 6-Digit PIN Kasir)
 - Sistem autentikasi dilengkapi verifikasi **PIN 6-Digit** khusus untuk mencegah akses tanpa izin pada meja kasir.
 - Pemisahan hak akses (*Role-Based Access Control*) yang jelas antara **Admin (Owner)** dan **Kasir (Operator)**.
 
-### 6. 🕒 Manajemen Shift Otomatis & Auto-Payroll (Slip Gaji PDF)
+### 6. Manajemen Shift Otomatis & Auto-Payroll (Slip Gaji PDF)
 - **Auto-Shift Tracking:** Saat kasir *login*, sistem otomatis mendeteksi atau membuka sesi Shift kerja (Pagi / Sore), mencatat uang modal awal (*starting cash*), mengakumulasi seluruh omzet transaksi selama shift, serta mencatat uang sisa serah-terima saat *Tutup Shift*.
 - **Auto-Payroll & Slip Gaji:** Setiap shift yang diselesaikan kasir otomatis tercatat ke modul **Penggajian (Payroll)** milik Admin. Admin dapat mengatur gaji pokok per shift, menambahkan bonus/potongan, serta mencetak atau mengunduh **Slip Gaji berformat PDF**.
 
-### 7. 📅 Sistem Booking Jadwal Anti-Bentrok
+### 7. Sistem Booking Jadwal Anti-Bentrok
 - Pelanggan dapat memesan jadwal main di jam tertentu. Sistem secara cerdas memvalidasi ketersediaan unit agar tidak bentrok dengan sesi yang sedang berjalan maupun jadwal *booking* lainnya, lengkap dengan kalkulasi estimasi biaya otomatis.
 
-### 8. 📊 Laporan Keuangan Lengkap & Ekspor Dokumen (PDF / CSV)
+### 8. Laporan Keuangan Lengkap & Ekspor Dokumen (PDF / CSV)
 - Rekapitulasi pendapatan harian, bulanan, riwayat per meja, penjualan produk F&B, hingga cetak **Struk / Invoice Transaksi** serta ekspor laporan keuangan ke format **PDF** dan **CSV (Excel)**.
 
 ---
 
-## 🛠️ Spesifikasi Teknis (Tech Stack)
+## Spesifikasi Teknis (Tech Stack)
 
 | Komponen | Teknologi yang Digunakan |
 | :--- | :--- |
@@ -72,7 +72,7 @@ Terinspirasi dari sistem pemesanan QR restoran modern, setiap meja TV memiliki *
 
 ---
 
-## 🔄 Gambaran Alur Kerja Sistem (Workflow)
+## Gambaran Alur Kerja Sistem (Workflow)
 
 1. **Buka Sesi Rental:** Kasir memilih unit PS yang berstatus `AVAILABLE`, memasukkan nama pelanggan, dan memilih mode **Prepaid** (paket jam) atau **Postpaid** (Loss).
 2. **Self-Service di Meja:** Pelanggan memindai **QR Code** di meja TV menggunakan HP untuk memantau waktu, memesan F&B, atau menambah durasi main.
@@ -81,7 +81,7 @@ Terinspirasi dari sistem pemesanan QR restoran modern, setiap meja TV memiliki *
 
 ---
 
-## 🚀 Panduan Instalasi & Menjalankan Proyek
+## Panduan Instalasi & Menjalankan Proyek
 
 Pastikan perangkat Anda sudah terinstal **PHP >= 8.2** (disarankan menggunakan Laragon / XAMPP / Herd), **Composer**, **Node.js & NPM**, serta **MySQL**.
 
@@ -140,7 +140,7 @@ Atau jika Anda menggunakan **Laragon**, Anda dapat langsung mengaksesnya melalui
 
 ---
 
-## 🔑 Akun Demo Bawaan (Default Login)
+## Akun Demo Bawaan (Default Login)
 
 Setelah menjalankan `php artisan migrate --seed`, Anda dapat langsung masuk menggunakan akun berikut:
 
@@ -151,7 +151,7 @@ Setelah menjalankan `php artisan migrate --seed`, Anda dapat langsung masuk meng
 
 ---
 
-## 🧪 Menjalankan Pengujian Otomatis (Automated Tests)
+## Menjalankan Pengujian Otomatis (Automated Tests)
 
 Proyek ini telah dilengkapi dengan pengujian fitur (*Feature Tests*) untuk memastikan alur *login*, keamanan QR Code berbasis sesi, dan *checkout* Midtrans berjalan dengan baik:
 
