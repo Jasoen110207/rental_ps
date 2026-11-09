@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Login Kasir & Admin — TambahBang Rental PS</title>
-  <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -30,8 +29,14 @@
     </div>
 
     <!-- Brand Header -->
-    <div class="flex items-center mb-6 pb-4 border-b-2 border-on-surface">
-      <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="558" class="h-20 w-auto max-w-full object-contain">
+    <div class="flex items-center gap-3 mb-6 pb-4 border-b-2 border-on-surface">
+      <div class="w-12 h-12 bg-primary text-on-primary border-2 border-on-surface flex items-center justify-center neo-shadow">
+        <span class="material-symbols-outlined text-3xl">sports_esports</span>
+      </div>
+      <div>
+        <h1 class="text-2xl font-headline-lg font-black uppercase tracking-tight text-on-surface leading-none">TAMBAHBANG</h1>
+        <p class="text-xs font-label-sm text-secondary uppercase font-bold tracking-wider mt-1">Rental PlayStation & POS</p>
+      </div>
     </div>
 
     <div class="mb-6">

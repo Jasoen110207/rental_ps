@@ -5,7 +5,6 @@
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'Self-Service Portal') — TambahBang</title>
-  <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
   <!-- Google Fonts: Space Grotesk, Space Mono, Chivo -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -31,9 +30,15 @@
 
     <!-- Top Mobile Header (satu-satunya brand header) -->
     <header class="p-4 bg-surface-container-lowest border-b-2 border-on-surface flex items-center justify-between sticky top-0 z-30 neo-shadow-sm">
-      <a href="{{ url('/') }}" class="flex items-center hover:opacity-90 transition" aria-label="TambahBang Rental PS — beranda">
-        <img src="{{ asset('images/logo.png') }}" alt="TambahBang Rental PS" width="900" height="558" class="h-12 w-auto max-w-[150px] object-contain">
-      </a>
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 bg-primary text-on-primary border-2 border-on-surface flex items-center justify-center neo-shadow-sm">
+          <span class="material-symbols-outlined text-xl">sports_esports</span>
+        </div>
+        <div>
+          <h1 class="text-base font-headline-md font-extrabold uppercase tracking-tight text-on-surface leading-none">TAMBAHBANG</h1>
+          <p class="text-[9px] font-label-sm text-secondary uppercase font-bold tracking-wider mt-0.5">Self-Service QR Portal</p>
+        </div>
+      </div>
 
       <div class="flex items-center gap-1.5 px-2 py-1 bg-surface-container border border-on-surface text-[10px] font-label-sm font-bold">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
