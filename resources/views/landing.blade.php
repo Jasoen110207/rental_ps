@@ -88,7 +88,7 @@
         @else<p>Silakan temui kasir di lokasi untuk informasi unit, jadwal, dan pemesanan.</p><p class="contact-note">Kontak online belum tersedia.</p>@endif
     </div></div></section>
 </main>
-<footer class="container footer"><a class="footer-brand" href="{{ route('home') }}">{{ $settings['store_name'] ?? 'TambahBang' }}</a><p>© {{ date('Y') }} · Waktunya main bareng.</p><a href="{{ route('login') }}">Login staf <span aria-hidden="true">↗</span></a></footer>
+<footer class="container footer"><a class="footer-brand" href="{{ route('home') }}">{{ $settings['store_name'] ?? 'TambahBang' }}</a><p>© {{ date('Y') }}  BesokAja Team · Waktunya main bareng.</p></footer>
 <script src="{{ asset('js/landing.js') }}" defer></script>
 </body>
 </html>
