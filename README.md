@@ -83,7 +83,7 @@ Terinspirasi dari sistem pemesanan QR restoran modern, setiap meja TV memiliki *
 
 ## Panduan Instalasi & Menjalankan Proyek
 
-Pastikan perangkat Anda sudah terinstal **PHP >= 8.2** (disarankan menggunakan Laragon / XAMPP / Herd), **Composer**, **Node.js & NPM**, serta **MySQL**.
+Pastikan perangkat Anda sudah terinstal **PHP >= 8.3** (disarankan menggunakan Laragon / XAMPP / Herd), **Composer**, **Node.js & NPM**, serta **MySQL**.
 
 ### 1. Clone Repository & Instal Dependensi
 ```bash
