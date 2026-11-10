@@ -47,8 +47,7 @@ Banyak usaha rental PlayStation masih mengandalkan pencatatan manual, *timer* te
 - **Live Monitoring Tanpa Reload:** Kasir dan Admin dapat memantau seluruh status unit (`AVAILABLE`, `PLAYING`, `MAINTENANCE`) dalam satu layar matriks interaktif yang diperbarui secara *real-time* melalui AJAX *polling*.
 - **2 Mode Sewa Fleksibel:**
   - **Prepaid (Paket Jam):** Pelanggan menentukan durasi di awal (termasuk opsi durasi menit/jam fleksibel). Dilengkapi peringatan visual (*warning threshold*) dan alarm suara/buzzer ketika waktu hampir habis atau selesai.
-  - **Postpaid / Loss (Open Billing):** Pelanggan bermain sepuasnya dan membayar di akhir. Sistem menghitung tagihan secara otomatis dan presisi **per blok 5 menit**:
-    $$\text{Total Sewa} = \lceil \text{Durasi Menit} \div 5 \rceil \times \left(\frac{\text{Tarif per Jam}}{12}\right)$$
+  - **Postpaid / Loss (Open Billing):** Pelanggan bermain sepuasnya dan membayar di akhir. Sistem menghitung tagihan secara otomatis dan presisi **per blok 5 menit**
 - **Auto-Restore Stok Add-On:** Penyewaan perangkat tambahan (kategori `addon` seperti Stik Ekstra / VR) otomatis memotong stok saat dipesan dan **mengembalikan stok secara otomatis** begitu sesi *checkout*.
 
 ### 2. Smart Self-Service QR Code (`Anti-Order Fiktif` & `Anti-History Browser`)
@@ -132,7 +131,7 @@ sequenceDiagram
 
 | Kategori | Teknologi & Versi | Kegunaan dalam Proyek |
 | :--- | :--- | :--- |
-| **Backend Framework** | **Laravel 12.x** (PHP `^8.2` / `8.3+`) | Core MVC, Routing, Eloquent ORM, Session & Security |
+| **Backend Framework** | **Laravel 13.x** (PHP `8.3+`) | Core MVC, Routing, Eloquent ORM, Session & Security |
 | **Database** | **MySQL / MariaDB** (atau SQLite untuk Testing) | Penyimpanan relasional transaksi, sesi, shift, & payroll |
 | **Frontend & Styling** | **Laravel Blade**, **Tailwind CSS v4**, **Vite 8** | Antarmuka *Neo-Brutalism* responsif & *interactive UI* |
 | **Client-Side Scripting** | **Vanilla JavaScript (ES6+) & Fetch API** | Live countdown/stopwatch timer, AJAX polling, & audio alert |
@@ -146,7 +145,7 @@ sequenceDiagram
 ## Panduan Instalasi & Konfigurasi Lengkap
 
 Pastikan lingkungan perangkat Anda telah terinstal:
-- **PHP >= 8.2** (Direkomendasikan **PHP 8.3+** melalui **Laragon**, XAMPP, atau Laravel Herd) dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `curl`, dan `gd`/`dom`.
+- **PHP >= **PHP 8.3+** dengan **Laragon**, XAMPP, atau Laravel Herd) dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `curl`, dan `gd`/`dom`.
 - **Composer** (v2.x)
 - **Node.js** (v18+ / v20+) & **NPM**
 - **MySQL / MariaDB**
