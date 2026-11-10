@@ -18,6 +18,8 @@ class DashboardController extends Controller
             $query->where('status', 'active')->with('sessionOrders.product');
         }, 'customerRequests' => function ($query) {
             $query->where('status', 'pending');
+        }, 'bookings' => function ($query) {
+            $query->where('status', 'Pending')->orderBy('start_datetime');
         }])->orderBy('id')->get();
 
         if ($request->expectsJson() || $request->is('api/*')) {
@@ -71,6 +73,8 @@ class DashboardController extends Controller
             $query->where('status', 'active')->with('sessionOrders.product');
         }, 'customerRequests' => function ($query) {
             $query->where('status', 'pending');
+        }, 'bookings' => function ($query) {
+            $query->where('status', 'Pending')->orderBy('start_datetime');
         }])->orderBy('id')->get();
 
         $now = Carbon::now();
@@ -149,6 +153,8 @@ class DashboardController extends Controller
                 $playingCount++;
             }
 
+            $readyBooking = $tv->status === 'available' ? $tv->readyBooking() : null;
+
             $tvData[] = [
                 'id' => $tv->id,
                 'name' => $tv->name,
@@ -158,6 +164,14 @@ class DashboardController extends Controller
                 'is_buzzer_on' => (bool) $tv->is_buzzer_on,
                 'pending_requests' => $tv->customerRequests->count(),
                 'active_session' => $sessionInfo,
+                'ready_booking' => $readyBooking ? [
+                    'id' => $readyBooking->id,
+                    'code' => 'BK-'.str_pad((string) $readyBooking->id, 4, '0', STR_PAD_LEFT),
+                    'customer_name' => $readyBooking->customer_name,
+                    'start_time' => $readyBooking->start_datetime->format('H:i'),
+                    'duration_hours' => $readyBooking->duration_hours,
+                    'is_past_or_now' => $readyBooking->start_datetime->lte($now),
+                ] : null,
             ];
         }
 

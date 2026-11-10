@@ -122,6 +122,7 @@
               <th class="py-3 px-4">Waktu</th>
               <th class="py-3 px-4">Durasi</th>
               <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -151,10 +152,31 @@
                     {{ $booking->status }}
                   </span>
                 </td>
+                <td class="py-3 px-4">
+                  @if ($booking->status === 'Pending')
+                    <div class="flex items-center gap-1.5">
+                      <form method="POST" action="{{ route('booking.checkin', $booking->id) }}">
+                        @csrf
+                        <button type="submit" class="px-2.5 py-1 bg-emerald-600 text-white border-2 border-on-surface text-[10px] font-black uppercase neo-shadow-sm btn-press">
+                          Check-In
+                        </button>
+                      </form>
+                      <form method="POST" action="{{ route('booking.cancel', $booking->id) }}" onsubmit="return confirm('Batalkan booking ini?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="px-2 py-1 bg-surface text-error border-2 border-on-surface text-[10px] font-black uppercase neo-shadow-sm btn-press">
+                          Batal
+                        </button>
+                      </form>
+                    </div>
+                  @else
+                    <span class="text-xs text-on-surface-variant">—</span>
+                  @endif
+                </td>
               </tr>
             @empty
               <tr>
-                <td colspan="6" class="py-6 px-4 text-center text-on-surface-variant">Belum ada data booking.</td>
+                <td colspan="7" class="py-6 px-4 text-center text-on-surface-variant">Belum ada data booking.</td>
               </tr>
             @endforelse
           </tbody>

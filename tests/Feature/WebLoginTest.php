@@ -116,4 +116,25 @@ class WebLoginTest extends TestCase
         $response->assertSessionHasErrors('pin');
         $this->assertGuest();
     }
+
+    public function test_login_does_not_redirect_to_api_status_even_if_in_intended_url(): void
+    {
+        $kasir = User::create([
+            'name' => 'Kasir 1',
+            'email' => 'kasir@rental.com',
+            'role' => 'kasir',
+            'password' => Hash::make('password'),
+            'pin' => Hash::make('123456'),
+        ]);
+
+        $response = $this->withSession(['url.intended' => 'http://rental_ps.test/kasir/dashboard/api-status'])
+            ->post('/login', [
+                'email' => 'kasir@rental.com',
+                'password' => 'password',
+                'pin' => '123456',
+            ]);
+
+        $response->assertRedirect(route('kasir.dashboard'));
+        $this->assertAuthenticatedAs($kasir);
+    }
 }

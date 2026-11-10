@@ -38,6 +38,8 @@ Route::middleware(['auth'])->group(function () {
     // Rute Tampilan & Form Booking
     Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+    Route::post('/booking/{booking}/checkin', [BookingController::class, 'checkIn'])->name('booking.checkin');
+    Route::delete('/booking/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
 });
 
 // Public Customer Routes (Accessed via QR Code - No Login Required)
@@ -132,6 +134,8 @@ Route::middleware('auth')->prefix('kasir')->name('kasir.')->group(function () {
 
     Route::get('/booking', [KasirController::class, 'booking'])->name('booking');
     Route::post('/booking', [KasirController::class, 'storeBooking'])->name('booking.store');
+    Route::post('/booking/{booking}/checkin', [KasirController::class, 'checkInBooking'])->name('booking.checkin');
+    Route::delete('/booking/{booking}/cancel', [KasirController::class, 'cancelBooking'])->name('booking.cancel');
     Route::get('/pos', [KasirController::class, 'pos'])->name('pos');
     Route::get('/menu', [KasirController::class, 'menu'])->name('menu');
     Route::post('/pos/order', [KasirController::class, 'storeOrder'])->name('pos.order');

@@ -144,6 +144,24 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
+
+        $intended = $request->session()->get('url.intended');
+        if ($intended) {
+            $path = parse_url($intended, PHP_URL_PATH) ?? $intended;
+            $isInvalidForRole = ($user->role === 'kasir' && str_starts_with($path, '/admin'))
+                || ($user->role === 'admin' && str_starts_with($path, '/kasir'));
+
+            if (
+                $isInvalidForRole ||
+                str_contains($path, 'api-status') ||
+                str_contains($path, '/api') ||
+                str_contains($path, 'snap-token') ||
+                str_contains($path, 'unread-count')
+            ) {
+                $request->session()->forget('url.intended');
+            }
+        }
+
         if ($user->role === 'admin') {
             return redirect()->intended(route('admin.dashboard'));
         }

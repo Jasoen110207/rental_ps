@@ -7,6 +7,7 @@ use App\Models\PlaySession;
 use App\Models\Product;
 use App\Models\Tv;
 use App\Models\User;
+use App\Services\MidtransService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -182,6 +183,103 @@ class BookingValidationTest extends TestCase
         $response->assertRedirect('/kasir/pos')
             ->assertSessionHas('success', 'Buzzer '.$tv->name.' dimatikan');
         $this->assertFalse($tv->fresh()->is_buzzer_on);
+    }
+
+    #[DataProvider('bookingEndpoints')]
+    public function test_booking_checkin_creates_play_session_and_updates_status(string $endpoint): void
+    {
+        $user = User::factory()->create();
+        $tv = $this->createTv(['status' => 'available']);
+        $booking = $this->createBooking($tv, 'Pending', now(), 2);
+
+        $checkInUrl = $endpoint === '/kasir/booking'
+            ? route('kasir.booking.checkin', $booking->id)
+            : route('booking.checkin', $booking->id);
+
+        $response = $this->actingAs($user)->post($checkInUrl);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertEquals('Active', $booking->fresh()->status);
+        $this->assertEquals('playing', $tv->fresh()->status);
+
+        $this->assertDatabaseHas('play_sessions', [
+            'tv_id' => $tv->id,
+            'customer_name' => $booking->customer_name,
+            'status' => 'active',
+            'billing_type' => 'prepaid',
+        ]);
+    }
+
+    public function test_checkin_is_rejected_when_tv_is_not_available(): void
+    {
+        $user = User::factory()->create();
+        $tv = $this->createTv(['status' => 'playing']);
+        $booking = $this->createBooking($tv, 'Pending', now(), 1);
+
+        $response = $this->actingAs($user)->post(route('booking.checkin', $booking->id));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+        $this->assertEquals('Pending', $booking->fresh()->status);
+        $this->assertDatabaseCount('play_sessions', 0);
+    }
+
+    #[DataProvider('bookingEndpoints')]
+    public function test_booking_can_be_cancelled(string $endpoint): void
+    {
+        $user = User::factory()->create();
+        $tv = $this->createTv(['status' => 'available']);
+        $booking = $this->createBooking($tv, 'Pending', now()->addDay(), 2);
+
+        $cancelUrl = $endpoint === '/kasir/booking'
+            ? route('kasir.booking.cancel', $booking->id)
+            : route('booking.cancel', $booking->id);
+
+        $response = $this->actingAs($user)->delete($cancelUrl);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertDatabaseMissing('bookings', ['id' => $booking->id]);
+    }
+
+    public function test_checkout_completes_active_booking(): void
+    {
+        $user = User::factory()->create();
+        $tv = $this->createTv(['status' => 'playing']);
+        $booking = $this->createBooking($tv, 'Active', now()->subHours(2), 2);
+
+        $session = PlaySession::create([
+            'tv_id' => $tv->id,
+            'user_id' => $user->id,
+            'customer_name' => $booking->customer_name,
+            'billing_type' => 'prepaid',
+            'start_time' => now()->subHours(2),
+            'end_time' => now(),
+            'status' => 'active',
+            'rental_amount' => 30000,
+            'total_amount' => 30000,
+        ]);
+
+        $midtransService = app(MidtransService::class);
+        $midtransService->finalizeSessionCheckout($session, 'cash');
+
+        $this->assertEquals('Completed', $booking->fresh()->status);
+        $this->assertEquals('available', $tv->fresh()->status);
+    }
+
+    public function test_dashboard_api_status_includes_ready_booking(): void
+    {
+        $user = User::factory()->create();
+        $tv = $this->createTv(['status' => 'available']);
+        $booking = $this->createBooking($tv, 'Pending', now()->addMinutes(5), 2);
+
+        $response = $this->actingAs($user)->get(route('admin.dashboard.api-status'));
+
+        $response->assertOk()
+            ->assertJsonPath('tvs.0.ready_booking.id', $booking->id)
+            ->assertJsonPath('tvs.0.ready_booking.customer_name', $booking->customer_name);
     }
 
     /**

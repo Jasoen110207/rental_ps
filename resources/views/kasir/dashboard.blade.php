@@ -86,6 +86,7 @@
         $activeSession = $tv->playSessions->first();
         $isPrepaid = $activeSession && $activeSession->billing_type === 'prepaid';
         $isTimeUp = $activeSession && $isPrepaid && $activeSession->end_time && $activeSession->end_time->isPast();
+        $readyBooking = $tv->status === 'available' ? $tv->readyBooking() : null;
         $remaining = 0;
         $almost = false;
         if ($activeSession && $isPrepaid && $activeSession->end_time && !$isTimeUp) {
@@ -112,7 +113,11 @@
           </div>
           <div>
             @if ($tv->status === 'available')
-              <span class="px-2.5 py-1 bg-emerald-100 text-emerald-900 border-2 border-on-surface text-xs font-black uppercase neo-shadow-sm">TERSEDIA</span>
+              @if ($readyBooking)
+                <span class="px-2.5 py-1 bg-amber-100 text-amber-900 border-2 border-on-surface text-xs font-black uppercase neo-shadow-sm animate-pulse">BOOKING</span>
+              @else
+                <span class="px-2.5 py-1 bg-emerald-100 text-emerald-900 border-2 border-on-surface text-xs font-black uppercase neo-shadow-sm">TERSEDIA</span>
+              @endif
             @elseif ($isTimeUp)
               <span class="px-2.5 py-1 bg-error text-white border-2 border-on-surface text-xs font-black uppercase neo-shadow-sm animate-pulse">WAKTU HABIS</span>
             @elseif ($almost)
@@ -127,9 +132,31 @@
 
         <div class="py-3 my-auto">
           @if ($tv->status === 'available')
-            <div class="py-4 text-center">
-              <p class="font-bold text-sm uppercase text-on-surface-variant">Unit Kosong</p>
-              <p class="text-xs text-on-surface-variant mt-1">Siap untuk sesi baru</p>
+            <div id="available-body-{{ $tv->id }}">
+              @if ($readyBooking)
+                <div class="p-3 bg-amber-50 border-2 border-on-surface neo-shadow-sm flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <span class="px-1.5 py-0.5 bg-amber-200 text-amber-900 border border-on-surface text-[10px] font-black uppercase">Jadwal Booking</span>
+                    <span class="text-[11px] font-bold text-on-surface">{{ $readyBooking->start_datetime->format('H:i') }} ({{ $readyBooking->duration_hours }} Jam)</span>
+                  </div>
+                  <div class="text-xs">
+                    <p class="font-bold text-on-surface truncate">{{ $readyBooking->customer_name }}</p>
+                    <p class="text-[10px] text-on-surface-variant">{{ $readyBooking->phone }}</p>
+                  </div>
+                  <form method="POST" action="{{ route('kasir.booking.checkin', $readyBooking->id) }}" class="mt-1">
+                    @csrf
+                    <button type="submit" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-headline-sm text-xs font-black uppercase tracking-wider border-2 border-on-surface neo-shadow-sm btn-press flex items-center justify-center gap-1">
+                      <span class="material-symbols-outlined text-sm">login</span>
+                      <span>CHECK-IN BOOKING</span>
+                    </button>
+                  </form>
+                </div>
+              @else
+                <div class="py-4 text-center">
+                  <p class="font-bold text-sm uppercase text-on-surface-variant">Unit Kosong</p>
+                  <p class="text-xs text-on-surface-variant mt-1">Siap untuk sesi baru</p>
+                </div>
+              @endif
             </div>
           @elseif ($tv->status === 'playing' && $activeSession)
             <div class="text-center py-2 bg-surface-container-lowest border-2 border-on-surface neo-shadow-sm">
@@ -570,7 +597,13 @@ setInterval(() => {
 // Polling DB tiap 5 detik → sinkron KPI + badge + drawer
 async function pollKasirStatus(){
   try{
-    const res = await fetch('{{ route("kasir.dashboard.api-status") }}');
+    const res = await fetch('{{ route("kasir.dashboard.api-status") }}', {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.status === 401) {
+      window.location.href = '{{ route("login") }}';
+      return;
+    }
     if(!res.ok) return;
     const data = await res.json();
     if(!data.success) return;
@@ -610,6 +643,37 @@ async function pollKasirStatus(){
           buzzerIndicator.classList.remove('hidden');
         } else {
           buzzerIndicator.classList.add('hidden');
+        }
+      }
+      const availBody = document.getElementById('available-body-' + tv.id);
+      if (availBody && tv.status === 'available') {
+        if (tv.ready_booking) {
+          availBody.innerHTML = `
+            <div class="p-3 bg-amber-50 border-2 border-on-surface neo-shadow-sm flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="px-1.5 py-0.5 bg-amber-200 text-amber-900 border border-on-surface text-[10px] font-black uppercase">Jadwal Booking</span>
+                <span class="text-[11px] font-bold text-on-surface">${tv.ready_booking.start_time} (${tv.ready_booking.duration_hours} Jam)</span>
+              </div>
+              <div class="text-xs">
+                <p class="font-bold text-on-surface truncate">${tv.ready_booking.customer_name}</p>
+                <p class="text-[10px] text-on-surface-variant">${tv.ready_booking.code}</p>
+              </div>
+              <form method="POST" action="/kasir/booking/${tv.ready_booking.id}/checkin" class="mt-1">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <button type="submit" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-headline-sm text-xs font-black uppercase tracking-wider border-2 border-on-surface neo-shadow-sm btn-press flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-sm">login</span>
+                  <span>CHECK-IN BOOKING</span>
+                </button>
+              </form>
+            </div>
+          `;
+        } else {
+          availBody.innerHTML = `
+            <div class="py-4 text-center">
+              <p class="font-bold text-sm uppercase text-on-surface-variant">Unit Kosong</p>
+              <p class="text-xs text-on-surface-variant mt-1">Siap untuk sesi baru</p>
+            </div>
+          `;
         }
       }
     });

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Booking;
 use App\Models\PlaySession;
 use App\Models\Shift;
 use Carbon\Carbon;
@@ -182,6 +183,11 @@ class MidtransService
                 'status' => 'available',
                 'is_buzzer_on' => false,
             ]);
+
+            // Jika sesi ini berasal dari booking yang Active, tandai Completed
+            Booking::where('tv_id', $session->tv_id)
+                ->where('status', 'Active')
+                ->update(['status' => 'Completed']);
 
             // Update statistik shift aktif
             $activeShift = Shift::where('status', 'active')->latest()->first();

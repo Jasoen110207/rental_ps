@@ -88,6 +88,7 @@
         $activeSession = $tv->playSessions->first();
         $isPrepaid = $activeSession && $activeSession->billing_type === 'prepaid';
         $isPostpaid = $activeSession && $activeSession->billing_type === 'postpaid';
+        $readyBooking = $tv->status === 'available' ? $tv->readyBooking() : null;
 
         $isTimeUp = false;
         $isAlmostFinished = false;
@@ -145,9 +146,15 @@
           <!-- Status Badge -->
           <div>
             @if ($tv->status === 'available')
-              <span class="px-2.5 py-1 bg-emerald-100 text-emerald-900 border-2 border-on-surface font-headline-sm text-xs font-black uppercase tracking-wider neo-shadow-sm">
-                TERSEDIA
-              </span>
+              @if ($readyBooking)
+                <span class="px-2.5 py-1 bg-amber-100 text-amber-900 border-2 border-on-surface font-headline-sm text-xs font-black uppercase tracking-wider neo-shadow-sm animate-pulse">
+                  BOOKING
+                </span>
+              @else
+                <span class="px-2.5 py-1 bg-emerald-100 text-emerald-900 border-2 border-on-surface font-headline-sm text-xs font-black uppercase tracking-wider neo-shadow-sm">
+                  TERSEDIA
+                </span>
+              @endif
             @elseif ($isTimeUp)
               <span class="px-2.5 py-1 bg-error text-on-error border-2 border-on-surface font-headline-sm text-xs font-black uppercase tracking-wider neo-shadow-sm animate-pulse">
                 WAKTU HABIS
@@ -171,9 +178,31 @@
         <!-- Card Body / Live Timer Area -->
         <div class="py-4 my-auto">
           @if ($tv->status === 'available')
-            <div class="py-6 text-center">
-              <p class="font-headline-md text-sm text-on-surface-variant uppercase font-bold">Unit Kosong</p>
-              <p class="font-label-sm text-xs text-on-surface-variant mt-1">Siap untuk sesi bermain baru</p>
+            <div id="available-body-{{ $tv->id }}">
+              @if ($readyBooking)
+                <div class="p-3 bg-amber-50 border-2 border-on-surface neo-shadow-sm flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <span class="px-1.5 py-0.5 bg-amber-200 text-amber-900 border border-on-surface text-[10px] font-black uppercase">Jadwal Booking</span>
+                    <span class="text-[11px] font-bold text-on-surface">{{ $readyBooking->start_datetime->format('H:i') }} ({{ $readyBooking->duration_hours }} Jam)</span>
+                  </div>
+                  <div class="text-xs">
+                    <p class="font-bold text-on-surface truncate">{{ $readyBooking->customer_name }}</p>
+                    <p class="text-[10px] text-on-surface-variant">{{ $readyBooking->phone }}</p>
+                  </div>
+                  <form method="POST" action="{{ route('booking.checkin', $readyBooking->id) }}" class="mt-1">
+                    @csrf
+                    <button type="submit" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-headline-sm text-xs font-black uppercase tracking-wider border-2 border-on-surface neo-shadow-sm btn-press flex items-center justify-center gap-1">
+                      <span class="material-symbols-outlined text-sm">login</span>
+                      <span>CHECK-IN BOOKING</span>
+                    </button>
+                  </form>
+                </div>
+              @else
+                <div class="py-6 text-center">
+                  <p class="font-headline-md text-sm text-on-surface-variant uppercase font-bold">Unit Kosong</p>
+                  <p class="font-label-sm text-xs text-on-surface-variant mt-1">Siap untuk sesi bermain baru</p>
+                </div>
+              @endif
             </div>
 
           @elseif ($tv->status === 'playing' && $activeSession)
@@ -880,7 +909,13 @@
   // Background Database Poller every 3 seconds
   async function pollDashboardStatus() {
     try {
-      const res = await fetch('{{ route("admin.dashboard.api-status") }}');
+      const res = await fetch('{{ route("admin.dashboard.api-status") }}', {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.status === 401) {
+        window.location.href = '{{ route("login") }}';
+        return;
+      }
       if (!res.ok) return;
       const data = await res.json();
 
@@ -908,6 +943,37 @@
         data.tvs.forEach(tv => {
           if (tv.is_buzzer_on) {
             hasAlarm = true;
+          }
+          const availBody = document.getElementById('available-body-' + tv.id);
+          if (availBody && tv.status === 'available') {
+            if (tv.ready_booking) {
+              availBody.innerHTML = `
+                <div class="p-3 bg-amber-50 border-2 border-on-surface neo-shadow-sm flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <span class="px-1.5 py-0.5 bg-amber-200 text-amber-900 border border-on-surface text-[10px] font-black uppercase">Jadwal Booking</span>
+                    <span class="text-[11px] font-bold text-on-surface">${tv.ready_booking.start_time} (${tv.ready_booking.duration_hours} Jam)</span>
+                  </div>
+                  <div class="text-xs">
+                    <p class="font-bold text-on-surface truncate">${tv.ready_booking.customer_name}</p>
+                    <p class="text-[10px] text-on-surface-variant">${tv.ready_booking.code}</p>
+                  </div>
+                  <form method="POST" action="/booking/${tv.ready_booking.id}/checkin" class="mt-1">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-headline-sm text-xs font-black uppercase tracking-wider border-2 border-on-surface neo-shadow-sm btn-press flex items-center justify-center gap-1">
+                      <span class="material-symbols-outlined text-sm">login</span>
+                      <span>CHECK-IN BOOKING</span>
+                    </button>
+                  </form>
+                </div>
+              `;
+            } else {
+              availBody.innerHTML = `
+                <div class="py-6 text-center">
+                  <p class="font-headline-md text-sm text-on-surface-variant uppercase font-bold">Unit Kosong</p>
+                  <p class="font-label-sm text-xs text-on-surface-variant mt-1">Siap untuk sesi bermain baru</p>
+                </div>
+              `;
+            }
           }
         });
         if (hasAlarm) {

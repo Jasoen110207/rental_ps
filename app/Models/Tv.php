@@ -120,4 +120,29 @@ class Tv extends Model
 
         return false;
     }
+
+    /**
+     * Ambil booking Pending yang siap di-check-in saat ini
+     * (jadwal mulai <= 15 menit dari sekarang, dan waktu selesai > sekarang).
+     */
+    public function readyBooking(): ?Booking
+    {
+        $now = Carbon::now();
+
+        $pendingBookings = $this->relationLoaded('bookings')
+            ? $this->bookings->where('status', 'Pending')
+            : $this->bookings()->where('status', 'Pending')->orderBy('start_datetime')->get();
+
+        foreach ($pendingBookings as $booking) {
+            $start = Carbon::parse($booking->start_datetime);
+            $end = $start->copy()->addHours(max(1, (int) $booking->duration_hours));
+
+            // Munculkan sejak H-15 menit sebelum jadwal mulai sampai jadwal berakhir
+            if ($now->gte($start->copy()->subMinutes(15)) && $now->lt($end)) {
+                return $booking;
+            }
+        }
+
+        return null;
+    }
 }
