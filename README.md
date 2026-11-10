@@ -93,40 +93,6 @@ Setiap meja TV memiliki **QR Code unik** yang dapat dicetak dari dashboard Admin
 
 ---
 
-## Arsitektur & Alur Kerja Sistem
-
-Berikut adalah diagram alur kerja terintegrasi antara **Pelanggan (Meja PS)**, **Kasir / Admin (Dashboard POS)**, **Sistem Backend**, dan **Midtrans Payment Gateway**:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor C as Pelanggan (Di Meja PS)
-    actor K as Kasir / Admin
-    participant S as TambahBang Backend
-    participant M as Midtrans Gateway (QRIS)
-
-    K->>S: Buka Sesi Rental (Prepaid / Postpaid) atau Check-In Booking
-    S-->>K: Status TV -> PLAYING & Generate Dynamic Session Token
-    C->>S: Scan QR Code Meja (/scan/{tv_token})
-    S-->>C: Validasi Sesi Aktif & Redirect ke /customer/{session_token}
-    C->>S: Kirim Request (Tambah Jam / Pesan F&B / Panggil Kasir)
-    S-->>K: Bunyikan Audio Alert & Tampilkan di Request Center
-    K->>S: Klik Approve Request
-    S-->>C: Update Sisa Waktu, Stok F&B & Total Tagihan Real-Time
-    K->>S: Klik Checkout Selesai Main (Pilih Tunai / QRIS)
-    alt Pembayaran QRIS Midtrans
-        S->>M: Request Snap Token (Gross Amount + Item Details)
-        M-->>K: Tampilkan Popup QRIS Dinamis
-        C->>M: Scan & Bayar via Mobile Banking / E-Wallet
-        M->>S: Kirim Webhook Notification (SHA-512 Verified)
-    else Pembayaran Tunai (Cash)
-        K->>S: Input Nominal Tunai & Konfirmasi Lunas
-    end
-    S-->>K: Finalisasi Sesi (LockForUpdate), Hanguskan Token QR, Restore Stok Add-on, Catat Omzet Shift
-```
-
----
-
 ## Spesifikasi Teknis (Tech Stack)
 
 | Kategori | Teknologi & Versi | Kegunaan dalam Proyek |
