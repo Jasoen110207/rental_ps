@@ -1,7 +1,7 @@
 # TambahBang Rental PS — Smart POS, Real-Time Billing & Self-Service QR Portal
 
-![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-Neo--Brutalism-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Midtrans](https://img.shields.io/badge/Midtrans-QRIS_Payment-002855?style=for-the-badge)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
@@ -62,7 +62,7 @@ Terinspirasi dari sistem pemesanan QR restoran modern, setiap meja TV memiliki *
 
 | Komponen | Teknologi yang Digunakan |
 | :--- | :--- |
-| **Backend Framework** | Laravel 12.x (PHP 8.2+) |
+| **Backend Framework** | Laravel 13.x (PHP 8.3+) |
 | **Database** | MySQL / MariaDB |
 | **Frontend & UI** | Laravel Blade, Tailwind CSS (Desain *Neo-Brutalism*), Vanilla JS |
 | **Payment Gateway** | Midtrans PHP SDK (`midtrans/midtrans-php` - Snap & Notification Webhook) |
@@ -83,7 +83,7 @@ Terinspirasi dari sistem pemesanan QR restoran modern, setiap meja TV memiliki *
 
 ## Panduan Instalasi & Menjalankan Proyek
 
-Pastikan perangkat Anda sudah terinstal **PHP >= 8.2** (disarankan menggunakan Laragon / XAMPP / Herd), **Composer**, **Node.js & NPM**, serta **MySQL**.
+Pastikan perangkat Anda sudah terinstal **PHP >= 8.3** (disarankan menggunakan Laragon / XAMPP / Herd), **Composer**, **Node.js & NPM**, serta **MySQL**.
 
 ### 1. Clone Repository & Instal Dependensi
 ```bash
