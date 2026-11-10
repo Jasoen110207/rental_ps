@@ -156,13 +156,13 @@
 </div>
 
 <script>
-  const defaultRates = @json($defaultRates ?? [
-    'ps3' => 8000,
-    'ps4' => 15000,
-    'ps5' => 25000,
-    'sim_racing' => 35000,
-    'nintendo_switch' => 15000,
-  ]);
+  const defaultRates = Object.assign({
+    ps3: 8000,
+    ps4: 15000,
+    ps5: 25000,
+    sim_racing: 35000,
+    nintendo_switch: 15000,
+  }, @json($defaultRates ?? []));
 
   let isEditMode = false;
 

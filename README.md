@@ -15,17 +15,19 @@ Mengusung identitas visual **Neo-Brutalism** yang tegas, kontras tinggi, dan res
 
 ## Daftar Isi
 
-1. [Latar Belakang Masalah & Solusi Inovatif](#-latar-belakang-masalah--solusi-inovatif)
-2. [Fitur-Fitur Unggulan](#-fitur-fitur-unggulan)
-3. [Arsitektur & Alur Kerja Sistem](#-arsitektur--alur-kerja-sistem)
-4. [Spesifikasi Teknis (Tech Stack)](#-spesifikasi-teknis-tech-stack)
-5. [Panduan Instalasi & Konfigurasi Lengkap](#-panduan-instalasi--konfigurasi-lengkap)
-6. [Panduan Akses Modul (Admin, Kasir, QR Pelanggan & Publik)](#-panduan-akses-modul-admin-kasir-qr-pelanggan--publik)
-7. [Struktur Database & Direktori Proyek](#-struktur-database--direktori-proyek)
-8. [Pengujian Otomatis (Automated Testing)](#-pengujian-otomatis-automated-testing)
+1. [Latar Belakang Masalah & Solusi Inovatif](#latar-belakang-masalah-solusi-inovatif)
+2. [Fitur-Fitur Unggulan](#fitur-fitur-unggulan)
+3. [Spesifikasi Teknis (Tech Stack)](#spesifikasi-teknis-tech-stack)
+4. [Panduan Instalasi & Konfigurasi Lengkap](#panduan-instalasi-konfigurasi-lengkap)
+5. [Panduan Akses Modul (Admin, Kasir, QR Pelanggan & Publik)](#panduan-akses-modul-admin-kasir-qr-pelanggan-publik)
+6. [Struktur Database & Direktori Proyek](#struktur-database-direktori-proyek)
+7. [Pengujian Otomatis (Automated Testing)](#pengujian-otomatis-automated-testing)
+8. [Panduan Sinkronisasi untuk Tim Pengembang](#panduan-sinkronisasi-untuk-tim-pengembang)
 
 ---
 
+<a id="latar-belakang-masalah-solusi-inovatif"></a>
+<a id="latar-belakang-masalah--solusi-inovatif"></a>
 ## Latar Belakang Masalah & Solusi Inovatif
 
 Banyak usaha rental PlayStation masih mengandalkan pencatatan manual, *timer* terpisah, dan pemesanan makanan secara lisan yang rawan kebocoran omzet. **TambahBang Rental PS** hadir memberikan solusi menyeluruh:
@@ -41,6 +43,7 @@ Banyak usaha rental PlayStation masih mengandalkan pencatatan manual, *timer* te
 
 ---
 
+<a id="fitur-fitur-unggulan"></a>
 ## Fitur-Fitur Unggulan
 
 ### 1. Real-Time Unit Matrix & Smart Billing Engine (Prepaid & Postpaid/Loss)
@@ -93,6 +96,7 @@ Setiap meja TV memiliki **QR Code unik** yang dapat dicetak dari dashboard Admin
 
 ---
 
+<a id="spesifikasi-teknis-tech-stack"></a>
 ## Spesifikasi Teknis (Tech Stack)
 
 | Kategori | Teknologi & Versi | Kegunaan dalam Proyek |
@@ -108,10 +112,12 @@ Setiap meja TV memiliki **QR Code unik** yang dapat dicetak dari dashboard Admin
 
 ---
 
+<a id="panduan-instalasi-konfigurasi-lengkap"></a>
+<a id="panduan-instalasi--konfigurasi-lengkap"></a>
 ## Panduan Instalasi & Konfigurasi Lengkap
 
 Pastikan lingkungan perangkat Anda telah terinstal:
-- **PHP >= **PHP 8.3+** dengan **Laragon**, XAMPP, atau Laravel Herd) dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `curl`, dan `gd`/`dom`.
+- **PHP >= 8.3** (Direkomendasikan menggunakan **Laragon**, XAMPP, atau Laravel Herd) dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `curl`, dan `gd`/`dom`.
 - **Composer** (v2.x)
 - **Node.js** (v18+ / v20+) & **NPM**
 - **MySQL / MariaDB**
@@ -199,6 +205,8 @@ Aplikasi kini dapat diakses melalui browser di alamat: **`http://localhost:8000`
 
 ---
 
+<a id="panduan-akses-modul-admin-kasir-qr-pelanggan-publik"></a>
+<a id="panduan-akses-modul-admin-kasir-qr-pelanggan--publik"></a>
 ## Panduan Akses Modul (Admin, Kasir, QR Pelanggan & Publik)
 
 Bagian ini menjelaskan secara rinci cara mengakses dan menguji setiap peran (*role*) serta fitur di dalam aplikasi untuk keperluan demonstrasi maupun penilaian.
@@ -292,6 +300,8 @@ Untuk menguji fitur unggulan **Scan QR Code Meja Pelanggan** langsung di kompute
 
 ---
 
+<a id="struktur-database-direktori-proyek"></a>
+<a id="struktur-database--direktori-proyek"></a>
 ## Struktur Database & Direktori Proyek
 
 ### Skema Tabel Utama Database
@@ -342,6 +352,7 @@ rental_ps/
 
 ---
 
+<a id="pengujian-otomatis-automated-testing"></a>
 ## Pengujian Otomatis (Automated Testing)
 
 Proyek ini telah dilengkapi dengan **Feature & Integration Tests** menggunakan **PHPUnit** untuk menjamin keandalan logika bisnis dan keamanan sistem, meliputi:
@@ -358,6 +369,8 @@ php artisan test --compact
 
 ---
 
+<a id="panduan-sinkronisasi-untuk-tim-pengembang"></a>
+<a id="panduan-sinkronisasi-untuk-tim-pengembang-setelah-git-pull"></a>
 ## Panduan Sinkronisasi untuk Tim Pengembang (Setelah `git pull`)
 
 Apabila Anda menarik pembaruan kode terbaru dari repositori (`git pull origin main`), jalankan perintah berikut agar seluruh dependensi, skema tabel baru, dan konfigurasi tersinkronisasi:
