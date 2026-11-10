@@ -2,7 +2,7 @@
 
 ![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-C_8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS_v4-Neo--Brutalism-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-Neo--Brutalism-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Midtrans](https://img.shields.io/badge/Midtrans-QRIS_Snap_%26_Webhook-002855?style=for-the-badge)
 ![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![PHPUnit](https://img.shields.io/badge/PHPUnit-Automated_Tests-366680?style=for-the-badge&logo=php&logoColor=white)
