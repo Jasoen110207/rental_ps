@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use App\Models\Tv;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -14,7 +15,23 @@ class UnitController extends Controller
             $q->where('status', 'active');
         }])->latest()->get();
 
-        return view('admin.units.index', compact('units'));
+        $settings = Setting::whereIn('key', [
+            'rate_ps3',
+            'rate_ps4',
+            'rate_ps5',
+            'rate_sim_racing',
+            'rate_nintendo_switch',
+        ])->pluck('value', 'key');
+
+        $defaultRates = [
+            'ps3' => (int) ($settings['rate_ps3'] ?? 8000),
+            'ps4' => (int) ($settings['rate_ps4'] ?? 15000),
+            'ps5' => (int) ($settings['rate_ps5'] ?? 25000),
+            'sim_racing' => (int) ($settings['rate_sim_racing'] ?? 35000),
+            'nintendo_switch' => (int) ($settings['rate_nintendo_switch'] ?? 15000),
+        ];
+
+        return view('admin.units.index', compact('units', 'defaultRates'));
     }
 
     public function store(Request $request)

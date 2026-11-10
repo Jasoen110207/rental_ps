@@ -282,6 +282,39 @@ class BookingValidationTest extends TestCase
             ->assertJsonPath('tvs.0.ready_booking.customer_name', $booking->customer_name);
     }
 
+    public function test_updating_default_rates_in_settings_syncs_tv_price_per_hour(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $simRacingTv = $this->createTv([
+            'name' => 'PS 05 - Sim Racing Cockpit',
+            'type' => 'sim_racing',
+            'price_per_hour' => 35000,
+        ]);
+        $ps5Tv = $this->createTv([
+            'name' => 'PS 04 - PS5 Next-Gen',
+            'type' => 'ps5',
+            'price_per_hour' => 25000,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->from(route('admin.settings.index'))
+            ->post(route('admin.settings.update'), [
+                'store_name' => 'TambahBang Rental PS',
+                'rate_sim_racing' => '25000',
+                'rate_ps5' => '30000',
+            ]);
+
+        $response->assertRedirect(route('admin.settings.index'))
+            ->assertSessionHas('success');
+
+        $this->assertEquals(25000, $simRacingTv->fresh()->price_per_hour);
+        $this->assertEquals(30000, $ps5Tv->fresh()->price_per_hour);
+        $this->assertDatabaseHas('settings', [
+            'key' => 'rate_sim_racing',
+            'value' => '25000',
+        ]);
+    }
+
     /**
      * @param  array<string, mixed>  $attributes
      */

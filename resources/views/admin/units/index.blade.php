@@ -156,19 +156,31 @@
 </div>
 
 <script>
+  const defaultRates = @json($defaultRates ?? [
+    'ps3' => 8000,
+    'ps4' => 15000,
+    'ps5' => 25000,
+    'sim_racing' => 35000,
+    'nintendo_switch' => 15000,
+  ]);
+
+  let isEditMode = false;
+
   function openUnitModal() {
+    isEditMode = false;
     document.getElementById('unit-form').action = '{{ route("admin.units.store") }}';
     document.getElementById('unit-form-method').value = 'POST';
     document.getElementById('unit-name').value = '';
     document.getElementById('unit-type').value = 'ps5';
     document.getElementById('unit-status').value = 'available';
-    document.getElementById('unit-price').value = 25000;
+    document.getElementById('unit-price').value = defaultRates['ps5'] || 25000;
     document.getElementById('unit-modal-title').innerText = 'Tambah Unit Konsol';
     document.getElementById('delete-btn').classList.add('hidden');
     document.getElementById('modal-unit').classList.remove('hidden');
   }
 
   function editUnit(id, name, type, price, status) {
+    isEditMode = true;
     document.getElementById('unit-form').action = '/admin/units/' + id;
     document.getElementById('unit-form-method').value = 'PUT';
     document.getElementById('unit-name').value = name;
@@ -180,6 +192,13 @@
     document.getElementById('delete-form').action = '/admin/units/' + id;
     document.getElementById('modal-unit').classList.remove('hidden');
   }
+
+  document.getElementById('unit-type')?.addEventListener('change', function (e) {
+    const selectedType = e.target.value;
+    if (!isEditMode && defaultRates[selectedType]) {
+      document.getElementById('unit-price').value = defaultRates[selectedType];
+    }
+  });
 
   function submitDelete() {
     if(confirm('Yakin ingin menghapus unit ini?')) {
